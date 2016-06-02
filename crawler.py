@@ -4,17 +4,14 @@
 
 import requests
 from bs4 import BeautifulSoup
+import settings
 
-# For development, API access is localhost:8000 by default and HTTP access is localhost:5000
-base_urls = ['https://osf.io/', 'https://api.osf.io/v2/']
-# base_urls = ['http://localhost:5000/', 'http://localhost:8000/v2/']
-
-
-#TODO: Command line interface
 #TODO: Change user agent to RosieBot
 #TODO: AJAX
 #TODO: Directories
-#TODO: Static content
+
+# Configure for testing
+base_urls = settings.base_urls
 
 class Crawler():
     '''
@@ -35,11 +32,6 @@ class Crawler():
     '''
     def __init__(self):
         global base_urls
-        self.url_list = []
-        self.headers = {
-            'User-Agent' : 'LinkedInBot/1.0 (compatible; Mozilla/5.0; Jakarta Commons-HttpClient/3.1 +http://www.linkedin.com)'
-            # 'User-Agent' : 'ROSIEBot/1.0 (+http://github.com/zamattiac/ROSIEBot)'
-        }
         self.node_list = []
         self.http_base = base_urls[0]
         self.api_base = base_urls[1]
@@ -129,8 +121,4 @@ class Crawler():
         self.crawl_nodes(limit)
         self.crawl_users(limit)
         self.crawl_institutions(limit)
-
-c = Crawler()
-c.crawl(limit=5)
-
-print(c.node_list)
+        return self.node_list

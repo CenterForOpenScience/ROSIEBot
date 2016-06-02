@@ -3,12 +3,6 @@
   [OSF Home](osf.io)<br>
   [Center for Open Science Home](cos.io) | [COS Github](https://github.com/CenterForOpenScience/)
 
-## Dependencies
-## requirements.txt should take care of all of this, but just in case:
-- Python 3.5 required (use `mkvirtualenv --python=python3.5 rosie` for a virtual environment)
-- BeautifulSoup4
-- Requests library
-
 ## Prerender
 
 ### Configuring a Local Prerender Server for Development
@@ -214,13 +208,12 @@ To test that Prerender works for these user agent strings, install the Chrome pl
 
 	LinkedInBot/1.0 (compatible; Mozilla/5.0; Jakarta Commons-HttpClient/3.1 +http://www.linkedin.com)
 
-	###### In development: ROSIEBot, whose user string is 'ROSIEBot/1.0 (+http://github.com/zamattiac/ROSIEBot)'
-
 to create a new user agent. Switch to the newly created user agent and then visit any public project pages of `localhost` and you will get a static page in your browser if Nginx is configured correctly. You may also use the Chrome developer tools to see that the sources included are all static.
-
+Note: ROSIEBot, whose user string is 'ROSIEBot/1.0 (+http://github.com/zamattiac/ROSIEBot)', may replace LinkedInBot
 ## Crawling and Scraping
 
-- Run crawl.py to produce a mirror directory
+- Crawler.py produces a list of pages on the domain to visit
+- Run scraper.py to produce a mirror directory
 
 ## Hosting
 
