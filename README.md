@@ -210,14 +210,16 @@ To test that Prerender works for these user agent strings, install the Chrome pl
 
 to create a new user agent. Switch to the newly created user agent and then visit any public project pages of `localhost` and you will get a static page in your browser if Nginx is configured correctly. You may also use the Chrome developer tools to see that the sources included are all static.
 Note: ROSIEBot, whose user string is 'ROSIEBot/1.0 (+http://github.com/zamattiac/ROSIEBot)', may replace LinkedInBot
+
 ## Crawling and Scraping
 
 - Crawler.py produces a list of pages on the domain to visit
-- Run scraper.py to produce a mirror directory
+- Run scraper.py to produce a mirror directory in website/
 
 ## Hosting
 
-### On your localhost: 
+### On your localhost:
+
 - MAMP recommended (or WAMP)
-- Include the static content and .htaccess
+- Include the static content in website/
 - Set the mirror directory as the document root 

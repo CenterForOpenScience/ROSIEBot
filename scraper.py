@@ -7,7 +7,7 @@ import sys
 base_urls = settings.base_urls
 
 rosie = crawler.Crawler()
-itinerary = rosie.crawl(limit=10)
+chore_list = rosie.crawl()
 
 class Scraper():
     '''
@@ -19,6 +19,8 @@ class Scraper():
             # 'User-Agent' : 'ROSIEBot/1.0 (+http://github.com/zamattiac/ROSIEBot)'
         }
         self.http_base = base_urls[0]
+        if not os.path.isdir('website'):
+            os.mkdir('website')
 
     def write_HTML(self, page):
         with requests.Session() as s:
@@ -49,3 +51,6 @@ class Scraper():
                     self.write_HTML(path)
             #cd home
             os.chdir(sys.path[0])
+
+rosies_vaccuum = Scraper()
+rosies_vaccuum.directory_nest(chore_list)
