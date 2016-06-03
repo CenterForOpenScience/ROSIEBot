@@ -8,14 +8,15 @@ import settings
 
 #TODO: Change user agent to RosieBot
 #TODO: AJAX
-#TODO: Directories
+#TODO: Headless browsing
 
-# Configure for testing
+# Configure for testing in settings
 base_urls = settings.base_urls
+limit = settings.limit
 
 class Crawler():
     '''
-    Crawlers keep one node_list of all of the URL tails and GUIDs they encounter, which the scraper will go through to save pages.
+    Crawlers keep one page_list of all of the URL tails and GUIDs they encounter, which the scraper will go through to save pages.
     For API searches, a limit parameter is necessary for testing.
 
     URL tails:
@@ -32,11 +33,16 @@ class Crawler():
     '''
     def __init__(self):
         global base_urls
+        self.page_list = []
         self.node_list = []
         self.http_base = base_urls[0]
         self.api_base = base_urls[1]
+        self.headers = {
+            'User-Agent': 'LinkedInBot/1.0 (compatible; Mozilla/5.0; Jakarta Commons-HttpClient/3.1 +http://www.linkedin.com)'
+            # 'User-Agent' : 'ROSIEBot/1.0 (+http://github.com/zamattiac/ROSIEBot)'
+        }
 
-    # Accesses complete list of nodes from API and appends list of GUIds
+    # Accesses complete list of nodes from API and appends list of GUIDs, appends a node-only list for file and wiki seraching
     def crawl_nodes(self, limit=0):
         print("Crawling Nodes API")
         with requests.Session() as s:
@@ -49,6 +55,10 @@ class Crawler():
                 for x in range(0, len(parsed_json['data'])):
                     if parsed_json['data'][x]['attributes']['public']:
                         self.node_list.append(str(parsed_json['data'][x]['id']))
+                        self.page_list.append(str(parsed_json['data'][x]['id']))
+                        self.page_list.append(str(parsed_json['data'][x]['id']) + '/registrations')
+                        self.page_list.append(str(parsed_json['data'][x]['id']) + '/forks')
+                        self.page_list.append(str(parsed_json['data'][x]['id']) + '/analytics')
 
                 cur_url = parsed_json['links']['next']
 
@@ -69,7 +79,7 @@ class Crawler():
                 current_page = s.get(cur_url)
                 parsed_json = current_page.json()
                 for x in range(0, len(parsed_json['data'])):
-                    self.node_list.append(str(parsed_json['data'][x]['id']))
+                    self.page_list.append(str(parsed_json['data'][x]['id']))
 
                 cur_url = parsed_json['links']['next']
 
@@ -90,8 +100,7 @@ class Crawler():
                 current_page = s.get(cur_url)
                 parsed_json = current_page.json()
                 for x in range(0, len(parsed_json['data'])):
-                    self.node_list.append('institutions/' + str(parsed_json['data'][x]['id']))
-
+                    self.page_list.append('institutions/' + str(parsed_json['data'][x]['id']))
                 cur_url = parsed_json['links']['next']
 
                 if parsed_json['links']['next'] == parsed_json['links']['last']:
@@ -113,12 +122,26 @@ class Crawler():
             for a in links:
                 link = a['href']
                 url_tail = link.replace((self.http_base), '').lstrip('//')
-                if url_tail not in self.node_list and not 'www' in url_tail and not url_tail.startswith('http'):
-                    self.node_list.append(url_tail)
+                if url_tail not in self.page_list and not 'www' in url_tail and not url_tail.startswith('http'):
+                    self.page_list.append(url_tail)
+
+    # Access node pages and snoop around for children
+    # Works, but way too slow for actual use
+    def crawl_wiki(self, nodes):
+        print("Crawling Nodes for Wiki")
+        for node in nodes:
+            node_url = self.http_base + node + '/wiki/'
+            with requests.Session() as s:
+                r = s.get(node_url)
+                new_r = s.get(r.url, headers=self.headers)
+                soup = BeautifulSoup(new_r.text, 'html.parser')
+                for link in soup.find_all(class_ = 'fg-file-links'):
+                    self.page_list.append(link)
 
     def crawl(self, limit=0):
         self.crawl_root()
         self.crawl_nodes(limit)
         self.crawl_users(limit)
         self.crawl_institutions(limit)
-        return self.node_list
+        # self.crawl_wiki(self.node_list)
+        return self.page_list
