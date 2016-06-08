@@ -13,6 +13,7 @@ import settings
 # Configure for testing in settings
 base_urls = settings.base_urls
 limit = settings.limit
+verbose = settings.verbose
 
 class Crawler():
     '''
@@ -44,7 +45,7 @@ class Crawler():
 
     # Accesses complete list of nodes from API and appends list of GUIDs, appends a node-only list for file and wiki seraching
     def crawl_nodes(self, limit=0):
-        print("Crawling Nodes API")
+        if verbose: print("Crawling API for Nodes")
         with requests.Session() as s:
             cur_url = self.api_base + 'nodes/'
             ctr = 1
@@ -70,7 +71,7 @@ class Crawler():
 
     # Accesses complete list of users from API and appends list of GUIDs
     def crawl_users(self, limit=0):
-        print("Crawling Users API")
+        if verbose: print("Crawling API for Users")
         with requests.Session() as s:
             cur_url = self.api_base + 'users/'
             ctr = 1
@@ -91,7 +92,7 @@ class Crawler():
 
     # Accesses complete list of institutions from API and appends list of URL tails
     def crawl_institutions(self, limit=0):
-        print("Crawling Institutions API")
+        if verbose: print("Crawling API for Institutions")
         with requests.Session() as s:
             cur_url = self.api_base + 'institutions/'
             ctr = 1
@@ -111,7 +112,7 @@ class Crawler():
 
     # Accesses general site pages and appends the URL tails
     def crawl_root(self):
-        print('Crawling Homepage')
+        if verbose: print('Crawling Homepage for General Content')
         with requests.Session() as s:
             cur_link = self.http_base
             g = s.get(cur_link)
@@ -125,23 +126,28 @@ class Crawler():
                 if url_tail not in self.page_list and not 'www' in url_tail and not url_tail.startswith('http'):
                     self.page_list.append(url_tail)
 
-    # Access node pages and snoop around for children
-    # Works, but way too slow for actual use
+    # Access node pages and snoop around for wiki pages
+    # Works, but kind of slow
     def crawl_wiki(self, nodes):
-        print("Crawling Nodes for Wiki")
+        if verbose: print("Crawling Nodes for Wiki")
         for node in nodes:
-            node_url = self.http_base + node + '/wiki/'
+            node_url = self.http_base + node + '/wiki/home/'
             with requests.Session() as s:
-                r = s.get(node_url)
-                new_r = s.get(r.url, headers=self.headers)
-                soup = BeautifulSoup(new_r.text, 'html.parser')
+                r = s.get(node_url, headers=self.headers)
+                soup = BeautifulSoup(r.text, 'html.parser')
                 for link in soup.find_all(class_ = 'fg-file-links'):
-                    self.page_list.append(link)
+                    if verbose: print(link['href'])
+                    self.page_list.append(link['href'])
 
     def crawl(self, limit=0):
         self.crawl_root()
         self.crawl_nodes(limit)
         self.crawl_users(limit)
         self.crawl_institutions(limit)
-        # self.crawl_wiki(self.node_list)
+        self.crawl_wiki(self.node_list)
+        if verbose: print(self.page_list)
         return self.page_list
+
+# Testing
+# rosie = Crawler()
+# rosie.crawl()
