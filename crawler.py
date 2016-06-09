@@ -2,12 +2,16 @@
 
 ## End variable URLS with trailing slash
 
+import asyncio
+import aiohttp
+import json
+import datetime
 import requests
-from bs4 import BeautifulSoup
+
 
 # For development, API access is localhost:8000 by default and HTTP access is localhost:5000
 base_urls = ['https://osf.io/', 'https://api.osf.io/v2/']
-# base_urls = ['http://localhost:5000/', 'http://localhost:8000/v2/']
+#base_urls = ['http://localhost:5000/', 'http://localhost:8000/v2/']
 
 
 #TODO: Command line interface
@@ -40,97 +44,59 @@ class Crawler():
             'User-Agent' : 'LinkedInBot/1.0 (compatible; Mozilla/5.0; Jakarta Commons-HttpClient/3.1 +http://www.linkedin.com)'
             # 'User-Agent' : 'ROSIEBot/1.0 (+http://github.com/zamattiac/ROSIEBot)'
         }
-        self.node_list = []
+        self.node_url_list = []
+        self.user_url_list = []
+        self.institution_url_list = []
         self.http_base = base_urls[0]
         self.api_base = base_urls[1]
 
-    # Accesses complete list of nodes from API and appends list of GUIds
-    def crawl_nodes(self, limit=0):
-        print("Crawling Nodes API")
-        with requests.Session() as s:
-            cur_url = self.api_base + 'nodes/'
-            ctr = 1
+    def call_node_api_pages(self, pages=0):
+        tasks = []
+        for i in range(1, pages + 1):
+            tasks.append(asyncio.ensure_future(self.call_and_parse_api_page(self.api_base + 'nodes/?page=' + str(i))))
 
-            while True:
-                current_page = s.get(cur_url)
-                parsed_json = current_page.json()
-                for x in range(0, len(parsed_json['data'])):
-                    if parsed_json['data'][x]['attributes']['public']:
-                        self.node_list.append(str(parsed_json['data'][x]['id']))
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(asyncio.wait(tasks))
 
-                cur_url = parsed_json['links']['next']
+    async def call_and_parse_api_page(self, url):
+        async with aiohttp.ClientSession() as s:
+            print('API request sent')
+            response = await s.get(url)
+            body = await response.read()
+            response.close()
+            json_body = json.loads(body.decode('utf-8'))
+            data = json_body['data']
+            for element in data:
+                if element['attributes']['public'] is True:
+                    self.node_url_list.append('http://localhost/' + element['id'] + '/')
 
-                if parsed_json['links']['next'] == parsed_json['links']['last']:
-                    break
-                if limit == ctr:
-                    break
-                ctr += 1
+    def crawl_all_nodes(self):
+        tasks = []
+        print(self.node_url_list)
+        for url in self.node_url_list:
+            tasks.append(asyncio.ensure_future(self.crawl_node_page(url)))
 
-    # Accesses complete list of users from API and appends list of GUIDs
-    def crawl_users(self, limit=0):
-        print("Crawling Users API")
-        with requests.Session() as s:
-            cur_url = self.api_base + 'users/'
-            ctr = 1
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(asyncio.wait(tasks))
+        loop.close()
 
-            while True:
-                current_page = s.get(cur_url)
-                parsed_json = current_page.json()
-                for x in range(0, len(parsed_json['data'])):
-                    self.node_list.append(str(parsed_json['data'][x]['id']))
+    async def crawl_node_page(self, url):
+        print(url)
+        async with aiohttp.ClientSession() as s:
+            response = await s.get(url, headers=self.headers)
+            body = await response.read()
+            response.close()
+            if response.status is 200:
+                string = url.split('//')
+                filename = string[1].split('/')
+                file = open(filename[1] + '.html', 'wb+')
+                file.write(body)
+                file.close()
+                print("finished crawling " + url)
 
-                cur_url = parsed_json['links']['next']
-
-                if parsed_json['links']['next'] == parsed_json['links']['last']:
-                    break
-                if limit == ctr:
-                    break
-                ctr += 1
-
-    # Accesses complete list of institutions from API and appends list of URL tails
-    def crawl_institutions(self, limit=0):
-        print("Crawling Institutions API")
-        with requests.Session() as s:
-            cur_url = self.api_base + 'institutions/'
-            ctr = 1
-
-            while True:
-                current_page = s.get(cur_url)
-                parsed_json = current_page.json()
-                for x in range(0, len(parsed_json['data'])):
-                    self.node_list.append('institutions/' + str(parsed_json['data'][x]['id']))
-
-                cur_url = parsed_json['links']['next']
-
-                if parsed_json['links']['next'] == parsed_json['links']['last']:
-                    break
-                if limit == ctr:
-                    break
-                ctr += 1
-
-    # Accesses general site pages and appends the URL tails
-    def crawl_root(self):
-        print('Crawling Homepage')
-        with requests.Session() as s:
-            cur_link = self.http_base
-            g = s.get(cur_link)
-
-            c = g.content
-            soup = BeautifulSoup(c, "html.parser")
-            links = soup.find_all("a", href=True)
-            for a in links:
-                link = a['href']
-                url_tail = link.replace((self.http_base), '').lstrip('//')
-                if url_tail not in self.node_list and not 'www' in url_tail and not url_tail.startswith('http'):
-                    self.node_list.append(url_tail)
-
-    def crawl(self, limit=0):
-        self.crawl_root()
-        self.crawl_nodes(limit)
-        self.crawl_users(limit)
-        self.crawl_institutions(limit)
-
+a = datetime.datetime.now()
 c = Crawler()
-c.crawl(limit=5)
-
-print(c.node_list)
+c.call_node_api_pages(pages=1)
+c.crawl_all_nodes()
+b = datetime.datetime.now()
+print(b - a)
