@@ -173,13 +173,14 @@ class Crawler:
 def save_html(html, page):
     print(page)
     page = page.split('//', 1)[1]
-    self.make_dirs(page)
+    make_dirs(page)
     f = open(page + 'index.html', 'wb')
     f.write(html)
     f.close()
     os.chdir(sys.path[0])
 
-def make_dirs(sfilename):
+
+def make_dirs(filename):
     folder = os.path.dirname(filename)
     if not os.path.exists(folder):
         os.makedirs(folder)
