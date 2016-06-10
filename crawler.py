@@ -16,29 +16,8 @@ base_urls = settings.base_urls
 limit = settings.limit
 verbose = settings.verbose
 
-class Saver():
-    '''
-    Scrapers save render and save page content in proper directory organization.
-    '''
-    def __init__(self):
-        pass
 
-    def save_html(self, html, page):
-        print(page)
-        page = page.split('//', 1)[1]
-        self.make_dirs(page)
-        f = open(page + 'index.html', 'wb')
-        f.write(html)
-        f.close()
-        os.chdir(sys.path[0])
-
-    def make_dirs(self, filename):
-        folder = os.path.dirname(filename)
-        if not os.path.exists(folder):
-            os.makedirs(folder)
-
-
-class Crawler():
+class Crawler:
     '''
     Crawlers keep one page_list of all of the URL tails and GUIDs they encounter, which the scraper will go through to save pages.
     For API searches, a limit parameter is necessary for testing.
@@ -67,7 +46,6 @@ class Crawler():
         self.institution_url_list = []
         self.http_base = base_urls[0]
         self.api_base = base_urls[1]
-        self.saver = Saver()
 
     def call_node_api_pages(self, pages=0):
         tasks = []
@@ -183,13 +161,28 @@ class Crawler():
                 body = await response.read()
                 response.close()
                 if response.status is 200:
-                    self.saver.save_html(body, url)
+                    save_html(body, url)
                     # string = url.split('//')
                     # filename = string[1].split('/')
                     # file = open('archive/' + filename[1] + '.html', 'wb+')
                     # file.write(body)
                     # file.close()
                     print("finished crawling " + url)
+
+
+def save_html(html, page):
+    print(page)
+    page = page.split('//', 1)[1]
+    self.make_dirs(page)
+    f = open(page + 'index.html', 'wb')
+    f.write(html)
+    f.close()
+    os.chdir(sys.path[0])
+
+def make_dirs(sfilename):
+    folder = os.path.dirname(filename)
+    if not os.path.exists(folder):
+        os.makedirs(folder)
 
 
 a = datetime.datetime.now()
