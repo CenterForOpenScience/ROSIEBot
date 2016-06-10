@@ -144,18 +144,39 @@ class Crawler():
                 for element in data:
                     self.institution_url_list.append(self.http_base + 'institutions' + element['id'] + '/')
 
-    def crawl_all_nodes(self):
+    def scrape_all_nodes(self):
         sem = asyncio.BoundedSemaphore(value=4)
         tasks = []
         print(self.node_url_list)
         for url in self.node_url_list:
-            tasks.append(asyncio.ensure_future(self.crawl_node_page(url, sem)))
+            tasks.append(asyncio.ensure_future(self.scrape_url(url, sem)))
+
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(asyncio.wait(tasks))
+
+    def scrape_all_users(self):
+        sem = asyncio.BoundedSemaphore(value=4)
+        tasks = []
+        print(self.user_url_list)
+        for url in self.user_url_list:
+            tasks.append(asyncio.ensure_future(self.scrape_url(url, sem)))
 
         loop = asyncio.get_event_loop()
         loop.run_until_complete(asyncio.wait(tasks))
         loop.close()
 
-    async def crawl_node_page(self, url, sem):
+    def scrape_all_institutions(self):
+        sem = asyncio.BoundedSemaphore(value=4)
+        tasks = []
+        print(self.institution_url_list)
+        for url in self.institution_url_list:
+            tasks.append(asyncio.ensure_future(self.scrape_url(url, sem)))
+
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(asyncio.wait(tasks))
+        loop.close()
+
+    async def scrape_url(self, url, sem):
         async with sem:
             async with aiohttp.ClientSession() as s:
                 print(url)
@@ -171,11 +192,14 @@ class Crawler():
                     # file.close()
                     print("finished crawling " + url)
 
+
 a = datetime.datetime.now()
 c = Crawler()
-c.call_node_api_pages(pages=10)
+c.call_node_api_pages(pages=1)
+c.call_user_api_pages(pages=1)
 # c.call_user_api_pages(pages=10)
 #c.call_institution_api_pages(pages=1)
-c.crawl_all_nodes()
+c.scrape_all_nodes()
+c.scrape_all_users()
 b = datetime.datetime.now()
 print(b - a)
