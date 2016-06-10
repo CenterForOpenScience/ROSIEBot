@@ -10,5 +10,6 @@ limit = 1
 # limit = 0
 
 # Configure print statements
-# verbose = True
-verbose = False
+verbose = True
+# verbose = False
+
