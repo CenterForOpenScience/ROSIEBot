@@ -1,7 +1,8 @@
-## Python 3.5 required for requests library
-
-## End variable URLS with trailing slash
-
+import asyncio
+import aiohttp
+import json
+import datetime
+import os, sys
 import requests
 from bs4 import BeautifulSoup
 import settings
@@ -14,6 +15,28 @@ import settings
 base_urls = settings.base_urls
 limit = settings.limit
 verbose = settings.verbose
+
+class Saver():
+    '''
+    Scrapers save render and save page content in proper directory organization.
+    '''
+    def __init__(self):
+        pass
+
+    def save_html(self, html, page):
+        print(page)
+        page = page.split('//', 1)[1]
+        self.make_dirs(page)
+        f = open(page + 'index.html', 'wb')
+        f.write(html)
+        f.close()
+        os.chdir(sys.path[0])
+
+    def make_dirs(self, filename):
+        folder = os.path.dirname(filename)
+        if not os.path.exists(folder):
+            os.makedirs(folder)
+
 
 class Crawler():
     '''
@@ -34,120 +57,148 @@ class Crawler():
     '''
     def __init__(self):
         global base_urls
-        self.page_list = []
-        self.node_list = []
-        self.http_base = base_urls[0]
-        self.api_base = base_urls[1]
+        self.url_list = []
         self.headers = {
-            'User-Agent': 'LinkedInBot/1.0 (compatible; Mozilla/5.0; Jakarta Commons-HttpClient/3.1 +http://www.linkedin.com)'
+            'User-Agent' : 'LinkedInBot/1.0 (compatible; Mozilla/5.0; Jakarta Commons-HttpClient/3.1 +http://www.linkedin.com)'
             # 'User-Agent' : 'ROSIEBot/1.0 (+http://github.com/zamattiac/ROSIEBot)'
         }
+        self.node_url_list = []
+        self.user_url_list = []
+        self.institution_url_list = []
+        self.http_base = base_urls[0]
+        self.api_base = base_urls[1]
+        self.saver = Saver()
 
-    # Accesses complete list of nodes from API and appends list of GUIDs, appends a node-only list for file and wiki seraching
-    def crawl_nodes(self, limit=0):
-        if verbose: print("Crawling API for Nodes")
-        with requests.Session() as s:
-            cur_url = self.api_base + 'nodes/'
-            ctr = 1
+    def call_node_api_pages(self, pages=0):
+        tasks = []
+        for i in range(1, pages + 1):
+            tasks.append(asyncio.ensure_future(self.call_and_parse_api_page(
+                self.api_base + 'nodes/?page=' + str(i),
+                node=True
+            )))
 
-            while True:
-                current_page = s.get(cur_url)
-                parsed_json = current_page.json()
-                for x in range(0, len(parsed_json['data'])):
-                    if parsed_json['data'][x]['attributes']['public']:
-                        self.node_list.append(str(parsed_json['data'][x]['id']))
-                        self.page_list.append(str(parsed_json['data'][x]['id']))
-                        self.page_list.append(str(parsed_json['data'][x]['id']) + '/registrations')
-                        self.page_list.append(str(parsed_json['data'][x]['id']) + '/forks')
-                        self.page_list.append(str(parsed_json['data'][x]['id']) + '/analytics')
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(asyncio.wait(tasks))
 
-                cur_url = parsed_json['links']['next']
+    def call_user_api_pages(self, pages=0):
+        tasks = []
+        for i in range(1, pages + 1):
+            tasks.append(asyncio.ensure_future(self.call_and_parse_api_page(
+                self.api_base + 'users/?page=' + str(i),
+                user=True
+            )))
 
-                if parsed_json['links']['next'] == parsed_json['links']['last']:
-                    break
-                if limit == ctr:
-                    break
-                ctr += 1
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(asyncio.wait(tasks))
 
-    # Accesses complete list of users from API and appends list of GUIDs
-    def crawl_users(self, limit=0):
-        if verbose: print("Crawling API for Users")
-        with requests.Session() as s:
-            cur_url = self.api_base + 'users/'
-            ctr = 1
+    def call_institution_api_pages(self, pages=0):
+        tasks = []
+        for i in range(1, pages + 1):
+            tasks.append(asyncio.ensure_future(self.call_and_parse_api_page(
+                self.api_base + 'institutions/?page=' + str(i),
+                institution=True
+            )))
 
-            while True:
-                current_page = s.get(cur_url)
-                parsed_json = current_page.json()
-                for x in range(0, len(parsed_json['data'])):
-                    self.page_list.append(str(parsed_json['data'][x]['id']))
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(asyncio.wait(tasks))
 
-                cur_url = parsed_json['links']['next']
+    async def call_and_parse_api_page(self, url, node=False, user=False, institution=False):
 
-                if parsed_json['links']['next'] == parsed_json['links']['last']:
-                    break
-                if limit == ctr:
-                    break
-                ctr += 1
+        if node is True:
+            async with aiohttp.ClientSession() as s:
+                print('Nodes API request sent')
+                response = await s.get(url)
+                body = await response.read()
+                response.close()
+                json_body = json.loads(body.decode('utf-8'))
+                data = json_body['data']
+                for element in data:
+                    if element['attributes']['public'] is True:
+                        self.node_url_list.append(self.http_base + element['id'] + '/')
+                        self.node_url_list.append(self.http_base + element['id'] + '/files/')
+                        self.node_url_list.append(self.http_base + element['id'] + '/registrations/')
+                        self.node_url_list.append(self.http_base + element['id'] + '/forks/')
+                        self.node_url_list.append(self.http_base + element['id'] + '/analytics/')
+                        self.node_url_list.append(self.http_base + element['id'] + '/wiki/home/')
 
-    # Accesses complete list of institutions from API and appends list of URL tails
-    def crawl_institutions(self, limit=0):
-        if verbose: print("Crawling API for Institutions")
-        with requests.Session() as s:
-            cur_url = self.api_base + 'institutions/'
-            ctr = 1
+        if user is True:
+            async with aiohttp.ClientSession() as s:
+                print('Users API request sent')
+                response = await s.get(url)
+                body = await response.read()
+                response.close()
+                json_body = json.loads(body.decode('utf-8'))
+                data = json_body['data']
+                for element in data:
+                    self.user_url_list.append(self.http_base + element['id'] + '/')
 
-            while True:
-                current_page = s.get(cur_url)
-                parsed_json = current_page.json()
-                for x in range(0, len(parsed_json['data'])):
-                    self.page_list.append('institutions/' + str(parsed_json['data'][x]['id']))
-                cur_url = parsed_json['links']['next']
+        if institution is True:
+            async with aiohttp.ClientSession() as s:
+                print('Users API request sent')
+                response = await s.get(url)
+                body = await response.read()
+                response.close()
+                json_body = json.loads(body.decode('utf-8'))
+                data = json_body['data']
+                for element in data:
+                    self.institution_url_list.append(self.http_base + 'institutions' + element['id'] + '/')
 
-                if parsed_json['links']['next'] == parsed_json['links']['last']:
-                    break
-                if limit == ctr:
-                    break
-                ctr += 1
+    def scrape_all_nodes(self):
+        sem = asyncio.BoundedSemaphore(value=4)
+        tasks = []
+        print(self.node_url_list)
+        for url in self.node_url_list:
+            tasks.append(asyncio.ensure_future(self.scrape_url(url, sem)))
 
-    # Accesses general site pages and appends the URL tails
-    def crawl_root(self):
-        if verbose: print('Crawling Homepage for General Content')
-        with requests.Session() as s:
-            cur_link = self.http_base
-            g = s.get(cur_link)
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(asyncio.wait(tasks))
 
-            c = g.content
-            soup = BeautifulSoup(c, "html.parser")
-            links = soup.find_all("a", href=True)
-            for a in links:
-                link = a['href']
-                url_tail = link.replace((self.http_base), '').lstrip('//')
-                if url_tail not in self.page_list and not 'www' in url_tail and not url_tail.startswith('http'):
-                    self.page_list.append(url_tail)
+    def scrape_all_users(self):
+        sem = asyncio.BoundedSemaphore(value=4)
+        tasks = []
+        print(self.user_url_list)
+        for url in self.user_url_list:
+            tasks.append(asyncio.ensure_future(self.scrape_url(url, sem)))
 
-    # Access node pages and snoop around for wiki pages
-    # Works, but kind of slow
-    def crawl_wiki(self, nodes):
-        if verbose: print("Crawling Nodes for Wiki")
-        for node in nodes:
-            node_url = self.http_base + node + '/wiki/home/'
-            with requests.Session() as s:
-                r = s.get(node_url, headers=self.headers)
-                soup = BeautifulSoup(r.text, 'html.parser')
-                for link in soup.find_all(class_ = 'fg-file-links'):
-                    if verbose: print(link['href'])
-                    self.page_list.append(link['href'])
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(asyncio.wait(tasks))
+        loop.close()
 
-    def crawl(self, limit=0):
-        self.crawl_root()
-        self.crawl_nodes(limit)
-        self.crawl_users(limit)
-        self.crawl_institutions(limit)
-        self.crawl_wiki(self.node_list)
-        if verbose: print(self.page_list)
-        return self.page_list
+    def scrape_all_institutions(self):
+        sem = asyncio.BoundedSemaphore(value=4)
+        tasks = []
+        print(self.institution_url_list)
+        for url in self.institution_url_list:
+            tasks.append(asyncio.ensure_future(self.scrape_url(url, sem)))
 
-# Testing
-# rosie = Crawler()
-# rosie.crawl()
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(asyncio.wait(tasks))
+        loop.close()
+
+    async def scrape_url(self, url, sem):
+        async with sem:
+            async with aiohttp.ClientSession() as s:
+                print(url)
+                response = await s.get(url, headers=self.headers)
+                body = await response.read()
+                response.close()
+                if response.status is 200:
+                    self.saver.save_html(body, url)
+                    # string = url.split('//')
+                    # filename = string[1].split('/')
+                    # file = open('archive/' + filename[1] + '.html', 'wb+')
+                    # file.write(body)
+                    # file.close()
+                    print("finished crawling " + url)
+
+
+a = datetime.datetime.now()
+c = Crawler()
+c.call_node_api_pages(pages=1)
+c.call_user_api_pages(pages=1)
+# c.call_user_api_pages(pages=10)
+#c.call_institution_api_pages(pages=1)
+c.scrape_all_nodes()
+c.scrape_all_users()
+b = datetime.datetime.now()
+print(b - a)
