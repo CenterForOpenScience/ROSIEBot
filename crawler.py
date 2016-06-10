@@ -4,44 +4,22 @@ import json
 import datetime
 import os, sys
 import requests
+from bs4 import BeautifulSoup
+import settings
 
-
-# For development, API access is localhost:8000 by default and HTTP access is localhost:5000
-#base_urls = ['https://osf.io/', 'https://api.osf.io/v2/']
-base_urls = ['http://localhost/', 'http://localhost:8000/v2/']
-
-
-#TODO: Command line interface
 #TODO: Change user agent to RosieBot
 #TODO: AJAX
-#TODO: Directories
-#TODO: Static content
+#TODO: Headless browsing
 
-class Saver():
+# Configure for testing in settings
+base_urls = settings.base_urls
+limit = settings.limit
+verbose = settings.verbose
+
+
+class Crawler:
     '''
-    Scrapers save render and save page content in proper directory organization.
-    '''
-    def __init__(self):
-        pass
-
-    def save_html(self, html, page):
-        print(page)
-        page = page.split('//', 1)[1]
-        self.make_dirs(page)
-        f = open(page + 'index.html', 'wb')
-        f.write(html)
-        f.close()
-        os.chdir(sys.path[0])
-
-    def make_dirs(self, filename):
-        folder = os.path.dirname(filename)
-        if not os.path.exists(folder):
-            os.makedirs(folder)
-
-
-class Crawler():
-    '''
-    Crawlers keep one node_list of all of the URL tails and GUIDs they encounter, which the scraper will go through to save pages.
+    Crawlers keep one page_list of all of the URL tails and GUIDs they encounter, which the scraper will go through to save pages.
     For API searches, a limit parameter is necessary for testing.
 
     URL tails:
@@ -68,7 +46,6 @@ class Crawler():
         self.institution_url_list = []
         self.http_base = base_urls[0]
         self.api_base = base_urls[1]
-        self.saver = Saver()
 
     def call_node_api_pages(self, pages=0):
         tasks = []
@@ -184,13 +161,29 @@ class Crawler():
                 body = await response.read()
                 response.close()
                 if response.status is 200:
-                    self.saver.save_html(body, url)
+                    save_html(body, url)
                     # string = url.split('//')
                     # filename = string[1].split('/')
                     # file = open('archive/' + filename[1] + '.html', 'wb+')
                     # file.write(body)
                     # file.close()
                     print("finished crawling " + url)
+
+
+def save_html(html, page):
+    print(page)
+    page = page.split('//', 1)[1]
+    make_dirs(page)
+    f = open(page + 'index.html', 'wb')
+    f.write(html)
+    f.close()
+    os.chdir(sys.path[0])
+
+
+def make_dirs(filename):
+    folder = os.path.dirname(filename)
+    if not os.path.exists(folder):
+        os.makedirs(folder)
 
 
 a = datetime.datetime.now()
