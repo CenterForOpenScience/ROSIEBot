@@ -120,7 +120,9 @@ rosie = Crawler()
 # Get URLs from API and add them to the async tasks
 rosie.call_api_pages('nodes', pages=2)
 rosie.call_api_pages('users', pages=2)
-rosie.call_api_pages('institutions', pages=1)
+
+# Don't call this in localhost:
+# rosie.call_api_pages('institutions', pages=1)
 
 # Get content from URLs using async methods
 rosie.scrape_pages(rosie.node_url_list)
