@@ -53,15 +53,6 @@ class Crawler:
 
     async def call_and_parse_api_page(self, api_url, api_aspect):
         print('API request sent')
-        is_node = False
-
-        if api_aspect == 'nodes':
-            url_list = self.node_url_list
-            is_node = True
-        elif api_aspect == 'users':
-            url_list = self.user_url_list
-        elif api_aspect == 'institutions':
-            url_list = self.institution_url_list
 
         async with aiohttp.ClientSession() as s:
             response = await s.get(api_url)
@@ -71,16 +62,22 @@ class Crawler:
             print(api_url)
             data = json_body['data']
             for element in data:
-                url_list.append(self.http_base + element['id'] + '/')
-                if is_node:
-                    url_list.append(self.http_base + element['id'] + '/files/')
-                    url_list.append(self.http_base + element['id'] + '/registrations/')
-                    url_list.append(self.http_base + element['id'] + '/forks/')
-                    url_list.append(self.http_base + element['id'] + '/analytics/')
+                if api_aspect == 'nodes':
+                    self.node_url_list.append(self.http_base + element['id'] + '/')
+                    self.node_url_list.append(self.http_base + element['id'] + '/files/')
+                    self.node_url_list.append(self.http_base + element['id'] + '/registrations/')
+                    self.node_url_list.append(self.http_base + element['id'] + '/forks/')
+                    self.node_url_list.append(self.http_base + element['id'] + '/analytics/')
 
-                    # TODO: Call to wiki crawl instead of this:
-                    url_list.append(self.http_base + element['id'] + '/wiki/')
-                    url_list.append(self.http_base + element['id'] + '/wiki/home/')
+                    # TODO: Call to crawl wiki
+                    self.node_url_list.append(self.http_base + element['id'] + '/wiki/')
+                    self.node_url_list.append(self.http_base + element['id'] + '/wiki/home/')
+
+                elif api_aspect == 'users':
+                    self.user_url_list.append(self.http_base + element['id'] + '/')
+
+                elif api_aspect == 'institutions':
+                    self.institution_url_list.append(self.http_base + element['id'] + '/')
 
     def scrape_pages(self, aspect_list):
         sem = asyncio.BoundedSemaphore(value=4)
