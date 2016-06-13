@@ -102,14 +102,26 @@ class Crawler:
                 response.close()
                 if response.status is 200:
                     save_html(body, url)
-                    print("Finished crawling " + url)
+                    print("Finished crawling", url)
+                else:
+                    print(response.status)
 
 
 def save_html(html, page):
-    print(page)
+
+    warning = """
+            <div style="position:fixed;    bottom:0;left:0;    border-top-right-radius: 8px;    color:  white;
+            background-color: red;  padding: .5em;">
+                This is a read-only mirror of the OSF.
+            </div>
+            """
+    sliding_footer = """<div id="footerSlideIn" style="display: block;">"""
+    no_sliding_footer = """<div id="footerSlideIn" style="display: none;">"""
+
+    html = html.decode('utf-8').replace('</body>', warning + '</body>').replace(sliding_footer, no_sliding_footer)
     page = page.split('//', 1)[1]
     make_dirs(page)
-    f = open(page + 'index.html', 'wb')
+    f = open(page + 'index.html', 'w')
     f.write(html)
     f.close()
     os.chdir(sys.path[0])
@@ -127,11 +139,11 @@ start = datetime.datetime.now()
 rosie = Crawler()
 
 # Get URLs from API and add them to the async tasks
-rosie.call_api_pages('nodes', pages=1)
-rosie.call_api_pages('users', pages=1)
+rosie.call_api_pages('nodes', pages=limit)
+rosie.call_api_pages('users', pages=limit)
 
 # Don't call this in localhost:
-# rosie.call_api_pages('institutions', pages=1)
+rosie.call_api_pages('institutions', pages=limit)
 
 # Get content from URLs using async methods
 rosie.scrape_pages(rosie.node_url_list)
