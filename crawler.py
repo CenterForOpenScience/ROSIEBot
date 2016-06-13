@@ -39,23 +39,30 @@ class Crawler:
         # Shoehorns index in to list of pages to scrape:
         self.institution_url_list = [self.http_base]
 
+# API Crawling
+
     def call_api_pages(self, api_aspect, pages=5):
         tasks = []
-        if api_aspect == 'nodes':
-            aspect_is_nodes = True
-        else:
-            aspect_is_nodes = False
         for i in range(1, pages + 1):
             tasks.append(asyncio.ensure_future(self.call_and_parse_api_page(
-                self.api_base + api_aspect + '/?page=' + str(i), node=aspect_is_nodes
+                self.api_base + api_aspect + '/?page=' + str(i), api_aspect
             )))
 
         loop = asyncio.get_event_loop()
         loop.run_until_complete(asyncio.wait(tasks))
 
-    # Node boolean
-    async def call_and_parse_api_page(self, api_url, node=False):
+    async def call_and_parse_api_page(self, api_url, api_aspect):
         print('API request sent')
+        is_node = False
+
+        if api_aspect == 'nodes':
+            url_list = self.node_url_list
+            is_node = True
+        elif api_aspect == 'users':
+            url_list = self.user_url_list
+        elif api_aspect == 'institutions':
+            url_list = self.institution_url_list
+
         async with aiohttp.ClientSession() as s:
             response = await s.get(api_url)
             body = await response.read()
@@ -64,16 +71,16 @@ class Crawler:
             print(api_url)
             data = json_body['data']
             for element in data:
-                self.node_url_list.append(self.http_base + element['id'] + '/')
-                if node:
-                    self.node_url_list.append(self.http_base + element['id'] + '/files/')
-                    self.node_url_list.append(self.http_base + element['id'] + '/registrations/')
-                    self.node_url_list.append(self.http_base + element['id'] + '/forks/')
-                    self.node_url_list.append(self.http_base + element['id'] + '/analytics/')
+                url_list.append(self.http_base + element['id'] + '/')
+                if is_node:
+                    url_list.append(self.http_base + element['id'] + '/files/')
+                    url_list.append(self.http_base + element['id'] + '/registrations/')
+                    url_list.append(self.http_base + element['id'] + '/forks/')
+                    url_list.append(self.http_base + element['id'] + '/analytics/')
 
                     # TODO: Call to wiki crawl instead of this:
-                    self.node_url_list.append(self.http_base + element['id'] + '/wiki/')
-                    self.node_url_list.append(self.http_base + element['id'] + '/wiki/home/')
+                    url_list.append(self.http_base + element['id'] + '/wiki/')
+                    url_list.append(self.http_base + element['id'] + '/wiki/home/')
 
     def scrape_pages(self, aspect_list):
         sem = asyncio.BoundedSemaphore(value=4)
@@ -83,6 +90,8 @@ class Crawler:
 
         loop = asyncio.get_event_loop()
         loop.run_until_complete(asyncio.wait(tasks))
+
+# Page scraping (through execution)
 
     async def scrape_url(self, url, sem):
         async with sem:
@@ -118,8 +127,8 @@ start = datetime.datetime.now()
 rosie = Crawler()
 
 # Get URLs from API and add them to the async tasks
-rosie.call_api_pages('nodes', pages=2)
-rosie.call_api_pages('users', pages=2)
+rosie.call_api_pages('nodes', pages=1)
+rosie.call_api_pages('users', pages=1)
 
 # Don't call this in localhost:
 # rosie.call_api_pages('institutions', pages=1)
