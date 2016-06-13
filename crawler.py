@@ -102,7 +102,7 @@ class Crawler:
                 response.close()
                 if response.status is 200:
                     save_html(body, url)
-                    print("Finished crawling", url)
+                    print("Finished crawling ", url)
                 else:
                     print(response.status)
 
