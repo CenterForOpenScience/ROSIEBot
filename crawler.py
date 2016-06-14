@@ -224,7 +224,7 @@ class Crawler:
         loop = asyncio.get_event_loop()
         loop.run_until_complete(asyncio.wait(tasks))
 
-# Page scraping (through execution)
+# Page scraping (through to execution)
 
     async def scrape_url(self, url, sem):
         async with sem:
@@ -238,20 +238,19 @@ class Crawler:
                     print("Finished crawling " + url)
                 elif response.status == 504:
                     sem_2 = asyncio.BoundedSemaphore(value=5)
-                    await self.scrape(self, url, sem_2)
+                    await self.scrape_url(url, sem_2)
+
 
 def save_html(html, page):
 
     warning = """
             <div style="position:fixed;    bottom:0;left:0;    border-top-right-radius: 8px;    color:  white;
             background-color: red;  padding: .5em;">
-                This is a read-only mirror of the OSF.
+                This is a read-only mirror of the OSF. Some features may not be available.
             </div>
             """
-    sliding_footer = """<div id="footerSlideIn" style="display: block;">"""
-    no_sliding_footer = """<div id="footerSlideIn" style="display: none;">"""
 
-    html = html.decode('utf-8').replace('</body>', warning + '</body>').replace(sliding_footer, no_sliding_footer)
+    html = html.decode('utf-8') + warning
     page = page.split('//', 1)[1]
     make_dirs(page)
     f = open(page + 'index.html', 'w')
