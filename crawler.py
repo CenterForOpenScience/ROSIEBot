@@ -100,6 +100,9 @@ class Crawler:
                 if response.status is 200:
                     save_html(body, url)
                     print("Finished crawling " + url)
+                else:
+                    sem2 = asyncio.BoundedSemaphore(value=4)
+                    await self.scrape_url(url, sem2)
 
 
 def save_html(html, page):
