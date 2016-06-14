@@ -4,6 +4,8 @@ import json
 import datetime
 import os, sys
 import settings
+import requests
+import math
 
 # Configure for testing in settings.py
 base_urls = settings.base_urls
@@ -24,6 +26,7 @@ class Crawler:
     - Institutions
 
     """
+
     def __init__(self):
         global base_urls
         self.url_list = []
@@ -34,53 +37,186 @@ class Crawler:
         self.http_base = base_urls[0]
         self.api_base = base_urls[1]
 
-        self.node_url_list = []
-        self.user_url_list = []
-        # Shoehorns index in to list of pages to scrape:
-        self.institution_url_list = [self.http_base]
+        # List of node and node-related pages:
+        self.node_dashboard_page_list = [] # Node overview page ("osf.io/node/mst3k/")
+        self.node_files_page_list = []
+        self.node_wiki_page_list = []
+        self.node_analytics_page_list = []
+        self.node_registrations_page_list = [] # Page on node that links to registrations
+        self.node_forks_page_list = []
+        # TODO: Add wiki list
+
+        self.registration_dashboard_page_list = []
+        self.registration_files_page_list = []
+        self.registration_wiki_page_list = []
+        self.registration_analytics_page_list = []
+        self.registration_forks_page_list = []
+
+        self.user_profile_page_list = [] # User profile page ("osf.io/profile/mst3k/")
+        # Shoehorn index in to list of pages to scrape:
+        self.institution_url_list = [self.http_base] # Institution page ("osf.io/institution/cos")
 
 # API Crawling
 
-    def call_api_pages(self, api_aspect, pages=5):
-        tasks = []
-        for i in range(1, pages + 1):
-            tasks.append(asyncio.ensure_future(self.call_and_parse_api_page(
-                self.api_base + api_aspect + '/?page=' + str(i), api_aspect
-            )))
+    # TODO: Investigate making semaphore an instance object
 
+    def crawl_nodes_api(self, page_limit=0):
+        sem = asyncio.BoundedSemaphore(value=10)
+        # Request number of pages in nodes API
+        with requests.Session() as s:
+            response = s.get(self.api_base + 'nodes/')
+            j = response.json()
+            num_pages = math.ceil(j['links']['meta']['total'] / j['links']['meta']['per_page'])
+            if num_pages < page_limit or page_limit == 0:
+                page_limit = num_pages
+        tasks = []
+        for i in range(1, page_limit + 1):
+            tasks.append(asyncio.ensure_future(self.parse_nodes_api(
+                self.api_base + 'nodes/?page=' + str(i),
+                sem
+            )))
         loop = asyncio.get_event_loop()
         loop.run_until_complete(asyncio.wait(tasks))
 
-    async def call_and_parse_api_page(self, api_url, api_aspect):
+    # Wiki api call requires special code from Cameron's branch (feature/wiki)
+
+    def crawl_registrations_api(self, page_limit=0):
+        sem = asyncio.BoundedSemaphore(value=10)
+
+        # Request number of pages in nodes API
+        with requests.Session() as s:
+            response = s.get(self.api_base + 'registrations/')
+            j = response.json()
+            num_pages = math.ceil(j['links']['meta']['total'] / j['links']['meta']['per_page'])
+            if j['links']['meta']['total'] == 0:
+                print("No registrations.")
+                return
+            if num_pages < page_limit or page_limit == 0:
+                page_limit = num_pages
+        tasks = []
+        for i in range(1, page_limit + 1):
+            tasks.append(asyncio.ensure_future(self.parse_registrations_api(
+                self.api_base + 'registrations/?page=' + str(i),
+                sem
+            )))
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(asyncio.wait(tasks))
+
+    def crawl_users_api(self, page_limit=0):
+        sem = asyncio.BoundedSemaphore(value=10)
+
+        # Request number of pages in nodes API
+        with requests.Session() as s:
+            response = s.get(self.api_base + 'users/')
+            j = response.json()
+            num_pages = math.ceil(j['links']['meta']['total'] / j['links']['meta']['per_page'])
+            if num_pages < page_limit or page_limit == 0:
+                page_limit = num_pages
+        tasks = []
+        for i in range(1, page_limit + 1):
+            tasks.append(asyncio.ensure_future(self.parse_users_api(
+                self.api_base + 'users/?page=' + str(i),
+                sem
+            )))
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(asyncio.wait(tasks))
+
+    def crawl_institutions_api(self, page_limit=0):
+        sem = asyncio.BoundedSemaphore(value=10)
+
+        # Request number of pages in nodes API
+        with requests.Session() as s:
+            response = s.get(self.api_base + 'institutions/')
+            j = response.json()
+            num_pages = math.ceil(j['links']['meta']['total'] / j['links']['meta']['per_page'])
+            if j['links']['meta']['total'] == 0:
+                print("No institutions.")
+                return
+            if num_pages < page_limit or page_limit == 0:
+                page_limit = num_pages
+        tasks = []
+        for i in range(1, page_limit + 1):
+            tasks.append(asyncio.ensure_future(self.parse_institutions_api(
+                self.api_base + 'institutions/?page=' + str(i),
+                sem
+            )))
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(asyncio.wait(tasks))
+
+    # Go through pages for each API endpoint
+
+    async def parse_nodes_api(self, api_url, sem):
+        print('API request sent')
+        async with sem:
+            async with aiohttp.ClientSession() as s:
+                response = await s.get(api_url)
+                body = await response.read()
+                response.close()
+                json_body = json.loads(body.decode('utf-8'))
+                print(api_url)
+                data = json_body['data']
+                for element in data:
+                    self.node_dashboard_page_list.append(self.http_base + 'project/' + element['id'] + '/')
+                    self.node_files_page_list.append(self.http_base + 'project/' + element['id'] + '/files/')
+                    self.node_analytics_page_list.append(self.http_base + 'project/' + element['id'] + '/analytics/')
+                    self.node_registrations_page_list.append(self.http_base + 'project/' + element['id'] + '/registrations/')
+                    self.node_forks_page_list.append(self.http_base + 'project/' + element['id'] + '/forks/')
+
+    async def parse_registrations_api(self, api_url, sem):
+        print('API request sent')
+        async with sem:
+            async with aiohttp.ClientSession() as s:
+                response = await s.get(api_url)
+                body = await response.read()
+                response.close()
+                json_body = json.loads(body.decode('utf-8'))
+                print(api_url)
+                data = json_body['data']
+                for element in data:
+                    self.registration_dashboard_page_list.append(self.http_base + element['id'] + '/')
+                    self.registration_files_page_list.append(self.http_base + element['id'] + '/files/')
+                    self.registration_analytics_page_list.append(self.http_base + element['id'] + '/analytics/')
+                    self.registration_forks_page_list.append(self.http_base + element['id'] + '/forks/')
+
+    async def parse_users_api(self, api_url, sem):
         print('API request sent')
 
-        async with aiohttp.ClientSession() as s:
-            response = await s.get(api_url)
-            body = await response.read()
-            response.close()
-            json_body = json.loads(body.decode('utf-8'))
-            print(api_url)
-            data = json_body['data']
-            for element in data:
-                if api_aspect == 'nodes':
-                    self.node_url_list.append(self.http_base + element['id'] + '/')
-                    self.node_url_list.append(self.http_base + element['id'] + '/files/')
-                    self.node_url_list.append(self.http_base + element['id'] + '/registrations/')
-                    self.node_url_list.append(self.http_base + element['id'] + '/forks/')
-                    self.node_url_list.append(self.http_base + element['id'] + '/analytics/')
+        async with sem:
+            async with aiohttp.ClientSession() as s:
+                response = await s.get(api_url)
+                body = await response.read()
+                response.close()
+                json_body = json.loads(body.decode('utf-8'))
+                print(api_url)
+                data = json_body['data']
+                for element in data:
+                    self.node_dashboard_page_list.append(self.http_base + 'profile/' + element['id'] + '/')
+                    self.node_files_page_list.append(self.http_base + 'profile/' + element['id'] + '/files/')
+                    self.node_analytics_page_list.append(self.http_base + 'profile/' + element['id'] + '/analytics/')
+                    self.node_registrations_page_list.append(self.http_base + 'profile/' + element['id'] + '/registrations/')
+                    self.node_forks_page_list.append(self.http_base + 'profile/' + element['id'] + '/forks/')
 
-                    # TODO: Call to crawl wiki
-                    self.node_url_list.append(self.http_base + element['id'] + '/wiki/')
-                    self.node_url_list.append(self.http_base + element['id'] + '/wiki/home/')
+    async def parse_institutions_api(self, api_url, sem):
+        print('API request sent')
 
-                elif api_aspect == 'users':
-                    self.user_url_list.append(self.http_base + element['id'] + '/')
+        async with sem:
+            async with aiohttp.ClientSession() as s:
+                response = await s.get(api_url)
+                body = await response.read()
+                response.close()
+                json_body = json.loads(body.decode('utf-8'))
+                print(api_url)
+                data = json_body['data']
+                for element in data:
+                    self.node_dashboard_page_list.append(self.http_base + 'institution/' + element['id'] + '/')
+                    self.node_files_page_list.append(self.http_base + 'institution/' + element['id'] + '/files/')
+                    self.node_analytics_page_list.append(self.http_base + 'institution/' + element['id'] + '/analytics/')
+                    self.node_registrations_page_list.append(self.http_base + 'institution/' + element['id'] + '/registrations/')
+                    self.node_forks_page_list.append(self.http_base + 'institution/' + element['id'] + '/forks/')
 
-                elif api_aspect == 'institutions':
-                    self.institution_url_list.append(self.http_base + element['id'] + '/')
-
+    # Get page content
     def scrape_pages(self, aspect_list):
-        sem = asyncio.BoundedSemaphore(value=4)
+        sem = asyncio.BoundedSemaphore(value=5)
         tasks = []
         for url in aspect_list:
             tasks.append(asyncio.ensure_future(self.scrape_url(url, sem)))
@@ -97,10 +233,12 @@ class Crawler:
                 response = await s.get(url, headers=self.headers)
                 body = await response.read()
                 response.close()
-                if response.status is 200:
+                if response.status == 200:
                     save_html(body, url)
                     print("Finished crawling " + url)
-
+                elif response.status == 504:
+                    sem_2 = asyncio.BoundedSemaphore(value=5)
+                    await self.scrape(self, url, sem_2)
 
 def save_html(html, page):
     print(page)
@@ -124,16 +262,29 @@ start = datetime.datetime.now()
 rosie = Crawler()
 
 # Get URLs from API and add them to the async tasks
-rosie.call_api_pages('nodes', pages=1)
-rosie.call_api_pages('users', pages=1)
+rosie.crawl_nodes_api()
+rosie.crawl_registrations_api()
+rosie.crawl_users_api()
+rosie.crawl_institutions_api()
 
-# Don't call this in localhost:
-# rosie.call_api_pages('institutions', pages=1)
+# List of node and node-related pages:
+rosie.scrape_pages(rosie.node_dashboard_page_list)  # Node overview page ("osf.io/node/mst3k/")
+rosie.scrape_pages(rosie.node_files_page_list)
+rosie.scrape_pages(rosie.node_wiki_page_list)
+rosie.scrape_pages(rosie.node_analytics_page_list)
+rosie.scrape_pages(rosie.node_registrations_page_list)  # Page on node that links to registrations
+rosie.scrape_pages(rosie.node_forks_page_list)
+# TODO: Add wiki list
 
-# Get content from URLs using async methods
-rosie.scrape_pages(rosie.node_url_list)
-rosie.scrape_pages(rosie.user_url_list)
-rosie.scrape_pages(rosie.institution_url_list)
+rosie.scrape_pages(rosie.registration_dashboard_page_list)
+rosie.scrape_pages(rosie.registration_files_page_list)
+rosie.scrape_pages(rosie.registration_wiki_page_list)
+rosie.scrape_pages(rosie.registration_analytics_page_list)
+rosie.scrape_pages(rosie.registration_forks_page_list)
+
+rosie.scrape_pages(rosie.user_profile_page_list)  # User profile page ("osf.io/profile/mst3k/")
+rosie.scrape_pages(rosie.institution_url_list)  # Institution page ("osf.io/institution/cos")
+
 
 end = datetime.datetime.now()
 print(end - start)
