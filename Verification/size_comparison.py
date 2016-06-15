@@ -206,3 +206,6 @@ class NodeDashboard:
 #
 # node_dashboard = NodeDashboard()
 # node_dashboard.get_pages_of_type()
+
+success_log.close()
+failure_log.close()

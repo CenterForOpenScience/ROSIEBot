@@ -5,7 +5,12 @@ from bs4 import BeautifulSoup
 import os, sys
 import Verification.size_comparison as size_comp
 
-# CONSTRUCTION DETOUR
+# CONSTRUCTION DETOUR - get_files is in size_comparison bc it will be the first step eventually.
+# Let's pretend it's in here.
+get_files = size_comp.get_files
+
+success_log = open('Logs/success.log', 'a')
+failure_log = open('Logs/failure.log', 'a')
 
 
 class ElementValueIdentifier:
@@ -15,13 +20,20 @@ class ElementValueIdentifier:
 
     def identify_values(self):
         for file in self.files:
-            content = BeautifulSoup(file, 'html.parser')
+            print(file)
+            name = file.split('/')[-3] + '\t' + file.split('/')[-2]
+            content = BeautifulSoup(open(file), 'html.parser')
+            print(content)
             for element in self.elements:
                 result = content.find_all(element)
-                if result == '':
-                    print(file, element, ' not found.')
-                else:
-                    print(file, element, ' FOUND.')
+                print(result)
+                # if result == '':
+                #     message = ['SPOT_CHECK', name, element, 'EMPTY.', '\n']
+                #     failure_log.write('\t'.join(message))
+                # else:
+                #     message = ['SPOT_CHECK', name, element, 'found.', result, '\n']
+                #     success_log.write('\t'.join(message))
+    print('Spot checked.')
 
 
 class ProjectDashboard(ElementValueIdentifier):
@@ -35,3 +47,10 @@ class ProjectDashboard(ElementValueIdentifier):
             '.list-group m-md sortable ui-sortable',        # Component list
             '.logs'                                         # Log
         ]
+        self.files = get_files('project/')
+
+dashboard = ProjectDashboard()
+dashboard.identify_values()
+
+success_log.close()
+failure_log.close()
