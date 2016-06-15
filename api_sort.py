@@ -7,6 +7,7 @@ import settings
 import requests
 import math
 from random import shuffle
+import collections
 
 # Configure for testing in settings.py
 base_urls = settings.base_urls
@@ -40,6 +41,8 @@ class Crawler:
         self.api_base = base_urls[1]
 
         self.node_urls = []
+
+        self.wikis_by_parent_guid = collections.defaultdict(list)
 
         # List of node and node-related pages:
         self.node_dashboard_page_list = [] # Node overview page ("osf.io/node/mst3k/")
@@ -261,7 +264,8 @@ class Crawler:
             if all_pages or files:
                 self.node_urls.append(base_url + 'files/')
             if all_pages or wiki:
-                self.node_urls += self.crawl_wiki(base_url)
+                self.node_urls += self.wikis_by_parent_guid[base_url.strip("/").split("/")[-1]]
+                # the strip split -1 bit returns the last section of the base_url, which is the GUId
             if all_pages or analytics:
                 self.node_urls.append(base_url + 'analytics/')
             if all_pages or registrations:
@@ -269,7 +273,35 @@ class Crawler:
             if all_pages or forks:
                 self.node_urls.append(base_url + 'forks/')
 
-       
+    # call this method after tuple list truncation and before generate_node_urls
+    def crawl_wiki(self):
+        tasks = []
+        for node in [x[0] for x in self.node_url_tuples]:
+            tasks.append(asyncio.ensure_future(self.get_wiki_names(node)))
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(asyncio.wait(tasks))
+        print(self.wikis_by_parent_guid)
+
+    async def get_wiki_names(self, parent_node):
+        async with aiohttp.ClientSession() as s:
+            response = await s.get(self.api_base + 'nodes/' + parent_node + '/wikis/')
+            print("GET'd " + self.api_base + 'nodes/' + parent_node + '/wikis/')
+            body = await response.read()
+            response.close()
+            if response.status <= 200:
+                json_body = json.loads(body.decode('utf-8'))
+                data = json_body['data']
+                for datum in data:
+                    self.wikis_by_parent_guid[parent_node].append(datum['attributes']['name'])
+            else:
+                print('Status Code: ', response.status)
+
+    # async def get_wiki_real_link(self, parent_node, name):
+    #     async with aiohttp.ClientSession() as s:
+    #         response = await s.request('get', self.http_base + 'project/' + parent_node + '/wiki/' + name)
+    #         self.wiki_url_list.append(self.http_base + 'project/' + parent_node + '/wiki/' + name)
+    #         print(response.url)
+    #         response.close()
 
 
     # Get page content
