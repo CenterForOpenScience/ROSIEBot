@@ -191,10 +191,6 @@ class Crawler:
                 data = json_body['data']
                 for element in data:
                     self.node_dashboard_page_list.append(self.http_base + 'profile/' + element['id'] + '/')
-                    self.node_files_page_list.append(self.http_base + 'profile/' + element['id'] + '/files/')
-                    self.node_analytics_page_list.append(self.http_base + 'profile/' + element['id'] + '/analytics/')
-                    self.node_registrations_page_list.append(self.http_base + 'profile/' + element['id'] + '/registrations/')
-                    self.node_forks_page_list.append(self.http_base + 'profile/' + element['id'] + '/forks/')
 
     async def parse_institutions_api(self, api_url, sem):
         print('API request sent')
@@ -208,11 +204,7 @@ class Crawler:
                 print(api_url)
                 data = json_body['data']
                 for element in data:
-                    self.node_dashboard_page_list.append(self.http_base + 'institution/' + element['id'] + '/')
-                    self.node_files_page_list.append(self.http_base + 'institution/' + element['id'] + '/files/')
-                    self.node_analytics_page_list.append(self.http_base + 'institution/' + element['id'] + '/analytics/')
-                    self.node_registrations_page_list.append(self.http_base + 'institution/' + element['id'] + '/registrations/')
-                    self.node_forks_page_list.append(self.http_base + 'institution/' + element['id'] + '/forks/')
+                    self.node_dashboard_page_list.append(self.http_base + 'institutions/' + element['id'] + '/')
 
     # Get page content
     def scrape_pages(self, aspect_list):
