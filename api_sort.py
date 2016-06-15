@@ -39,6 +39,8 @@ class Crawler:
         self.http_base = base_urls[0]
         self.api_base = base_urls[1]
 
+        self.node_urls = []
+
         # List of node and node-related pages:
         self.node_dashboard_page_list = [] # Node overview page ("osf.io/node/mst3k/")
         self.node_files_page_list = []
@@ -250,58 +252,24 @@ class Crawler:
                     self.node_registrations_page_list.append(self.http_base + 'institution/' + element['id'] + '/registrations/')
                     self.node_forks_page_list.append(self.http_base + 'institution/' + element['id'] + '/forks/')
 
-    def scrape_nodes(self, date_modified=None, all=True, dashboard=False, files=False, analytics=False, registrations=False, forks=False):
+    def generate_node_urls(self, all_pages=True, dashboard=False, files=False, wiki=False, analytics=False, registrations=False, forks=False):
+        url_list = [x[0] for x in self.node_url_tuples]
 
-        # resets the contents of the log
-        # self.crawled_url_log.close()
-        self.crawled_url_log = open("crawled_url_log.txt", "w+")
+        for base_url in url_list:
+            if all_pages or dashboard:
+                self.node_urls.append(base_url)
+            if all_pages or files:
+                self.node_urls.append(base_url + 'files/')
+            if all_pages or wiki:
+                self.node_urls += self.crawl_wiki(base_url)
+            if all_pages or analytics:
+                self.node_urls.append(base_url + 'analytics/')
+            if all_pages or registrations:
+                self.node_urls.append(base_url + 'registrations/')
+            if all_pages or forks:
+                self.node_urls.append(base_url + 'forks/')
 
-        if date_modified is not None and isinstance(date_modified, datetime):
-            node_url_bases = [x[0] for x in self.node_url_tuples if x[1] > date_modified]
-        else:
-            node_url_bases = [x[0] for x in self.node_url_tuples]
-        self.goal_urls = open("goal_urls.txt", "w+")
-        if all:
-            cur_goal_urls = []
-            for base_url in node_url_bases:
-                urls = []
-                urls.append(base_url)
-                urls.append(base_url + 'files/')
-                urls.append(base_url + 'analytics/')
-                urls.append(base_url + 'registrations/')
-                urls.append(base_url + 'forks/')
-                cur_goal_urls = cur_goal_urls + urls
-                self._scrape_pages(urls)
-            for elem in cur_goal_urls:
-                self.goal_urls.write(elem + "\n")
-
-        else:  # not all
-            dashboard_urls = []
-            files_urls = []
-            analytics_urls = []
-            registrations_urls = []
-            forks_urls = []
-            for base_url in node_url_bases:
-                if dashboard:
-                    dashboard_urls.append(base_url)
-                    pass
-                if files:
-                    files_urls.append(base_url + 'files/')
-                    pass
-                if analytics:
-                    analytics_urls.append(base_url + 'analytics/')
-                    pass
-                if registrations:
-                    registrations_urls.append(base_url + 'registrations/')
-                if forks:
-                    forks_urls.append(base_url + 'forks/')
-                    pass
-
-            pass
-
-
-        # solution for leaving files unscraped after a crash
-        #   keeping a list of every file we've look at that gets written to persistent storage every so often
+       
 
 
     # Get page content
