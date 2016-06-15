@@ -60,11 +60,31 @@ class Crawler:
 
         # for sorting
         self.node_url_tuples = []
-        self.log = open("error_log.txt")
+        self.log = open("error_log.txt", "w+")
+        self.crawled_url_log = None
+        self.goal_urls = None
+
+        # if os.path.isfile('goal_urls.txt') and os.path.isfile('crawled_url_log.txt'):
+        #     self.scrape_diff()
 
     def __del__(self):
-        self.log.close()
+        if self.log is not None:
+            self.log.close()
+        if self.crawled_url_log is not None:
+            self.crawled_url_log.close()
+        if self.goal_urls is not None:
+            self.goal_urls.close()
 
+    def scrape_diff(self):
+        s1 = set(open("goal_urls.txt").readlines())
+        s2 = set(open("crawled_url_log.txt").readlines())
+        d = list(s1.difference(s2))
+        for x in d:
+            print(x)
+        if len(d) > 0:
+            self._scrape_pages(d)
+        else:
+            print("no diff :)")
 
 
 # API Crawling
@@ -230,89 +250,59 @@ class Crawler:
                     self.node_registrations_page_list.append(self.http_base + 'institution/' + element['id'] + '/registrations/')
                     self.node_forks_page_list.append(self.http_base + 'institution/' + element['id'] + '/forks/')
 
-    def scrape_nodes(self, date_modified=None, all=True, dashboard=False, files=False, analytics=False, forks=False):
+    def scrape_nodes(self, date_modified=None, all=True, dashboard=False, files=False, analytics=False, registrations=False, forks=False):
+
+        # resets the contents of the log
+        # self.crawled_url_log.close()
+        self.crawled_url_log = open("crawled_url_log.txt", "w+")
 
         if date_modified is not None and isinstance(date_modified, datetime):
             node_url_bases = [x[0] for x in self.node_url_tuples if x[1] > date_modified]
         else:
             node_url_bases = [x[0] for x in self.node_url_tuples]
-
-        for base_url in node_url_bases:
-            urls = []
-            if dashboard or all:
+        self.goal_urls = open("goal_urls.txt", "w+")
+        if all:
+            cur_goal_urls = []
+            for base_url in node_url_bases:
+                urls = []
                 urls.append(base_url)
-            if files or all:
                 urls.append(base_url + 'files/')
-            if analytics or all:
                 urls.append(base_url + 'analytics/')
-            if forks or all:
+                urls.append(base_url + 'registrations/')
                 urls.append(base_url + 'forks/')
-            self._scrape_pages(urls)
+                cur_goal_urls = cur_goal_urls + urls
+                self._scrape_pages(urls)
+            for elem in cur_goal_urls:
+                self.goal_urls.write(elem + "\n")
 
-        # self.scrape_node_dashboard_pages(date_modified)
-        # self.scrape_node_files_pages(date_modified)
-        # # self.scrape_node_wiki_pages([x + 'wikis/' for x in node_url_bases])
-        # self.scrape_node_analytics_pages(date_modified)
-        # self.scrape_node_registrations_pages(date_modified)
-        # self.scrape_node_forks_pages(date_modified)
+        else:  # not all
+            dashboard_urls = []
+            files_urls = []
+            analytics_urls = []
+            registrations_urls = []
+            forks_urls = []
+            for base_url in node_url_bases:
+                if dashboard:
+                    dashboard_urls.append(base_url)
+                    pass
+                if files:
+                    files_urls.append(base_url + 'files/')
+                    pass
+                if analytics:
+                    analytics_urls.append(base_url + 'analytics/')
+                    pass
+                if registrations:
+                    registrations_urls.append(base_url + 'registrations/')
+                if forks:
+                    forks_urls.append(base_url + 'forks/')
+                    pass
 
-        # for each project in node_url_bases:
-        #   - if dashboard or all:
-        #       - scrape dashboard
-        #   - if analytics
-        #       -etc
-        pass
+            pass
 
-    # scrape_nodes(self, all=False, analytics=True)
 
-    # DELETE if not used for a while:
-    # def scrape_node_dashboard_pages(self, date_modified=None):
-    #     # use the self.node_url_tuples list, copy this list but add <nothing>
-    #     if date_modified is not None and isinstance(date_modified, datetime):
-    #         node_url_bases = [x[0] for x in self.node_url_tuples if x[1] > date_modified]
-    #     else:
-    #         node_url_bases = [x[0] for x in self.node_url_tuples]
-    #     self._scrape_pages(node_url_bases)
-    #     pass
-    #
-    # def scrape_node_files_pages(self, date_modified=None):
-    #     if date_modified is not None and isinstance(date_modified, datetime):
-    #         node_url_bases = [x[0] + 'files/' for x in self.node_url_tuples if x[1] > date_modified]
-    #     else:
-    #         node_url_bases = [x[0] + 'files/' for x in self.node_url_tuples]
-    #     self._scrape_pages(node_url_bases)
-    #
-    #     pass
-    #
-    # def scrape_node_wiki_pages(self, date_modified=None):
-    #     if date_modified is not None and isinstance(date_modified, datetime):
-    #         node_url_bases = [x[0] + 'wikis/' for x in self.node_url_tuples if x[1] > date_modified]
-    #     else:
-    #         node_url_bases = [x[0] + 'wikis/' for x in self.node_url_tuples]
-    #
-    #     self._scrape_pages(node_url_bases)
-    #     pass
-    #
-    # def scrape_node_analytics_pages(self, date_modified=None):
-    #     if date_modified is not None and isinstance(date_modified, datetime):
-    #         node_url_bases = [x[0] + 'analytics/' for x in self.node_url_tuples if x[1] > date_modified]
-    #     else:
-    #         node_url_bases = [x[0] + 'analytics/' for x in self.node_url_tuples]
-    #     pass
-    #
-    # def scrape_node_registrations_pages(self, date_modified=None):
-    #     if date_modified is not None and isinstance(date_modified, datetime):
-    #         node_url_bases = [x[0] + 'registrations/' for x in self.node_url_tuples if x[1] > date_modified]
-    #     else:
-    #         node_url_bases = [x[0] + 'registrations/' for x in self.node_url_tuples]
-    #     pass
-    #
-    # def scrape_node_forks_pages(self, date_modified=None):
-    #     if date_modified is not None and isinstance(date_modified, datetime):
-    #         node_url_bases = [x[0] + 'forks/' for x in self.node_url_tuples if x[1] > date_modified]
-    #     else:
-    #         node_url_bases = [x[0] + 'forks/' for x in self.node_url_tuples]
-    #     pass
+        # solution for leaving files unscraped after a crash
+        #   keeping a list of every file we've look at that gets written to persistent storage every so often
+
 
     # Get page content
     def _scrape_pages(self, aspect_list):
@@ -340,10 +330,14 @@ class Crawler:
                 if response.status == 200:
                     save_html(body, url)
                     print("Finished crawling " + url)
+                    self.crawled_url_log.write(url+"\n")
                 elif response.status == 504:
                     # output url to log
-                    self.log.write("504 TIMEOUT: " + url)
+                    print("504")
+                    self.log.write("504 TIMEOUT: " + url + "\n")
                     pass
+                else:
+                    print(str(response.status))
 
 
 def save_html(html, page):
@@ -367,7 +361,9 @@ def make_dirs(filename):
 rosie = Crawler()
 #
 # # Get URLs from API and add them to the async tasks
-rosie.crawl_nodes_api(page_limit=100)
+# rosie.scrape_diff()
+rosie.crawl_nodes_api(page_limit=10)
+rosie.scrape_nodes()
 # rosie.crawl_registrations_api()
 # rosie.crawl_users_api()
 # rosie.crawl_institutions_api()

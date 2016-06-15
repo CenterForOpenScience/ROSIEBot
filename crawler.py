@@ -159,7 +159,9 @@ class Crawler:
                     self.node_dashboard_page_list.append(self.http_base + 'project/' + element['id'] + '/')
                     self.node_files_page_list.append(self.http_base + 'project/' + element['id'] + '/files/')
                     self.node_analytics_page_list.append(self.http_base + 'project/' + element['id'] + '/analytics/')
-                    self.node_registrations_page_list.append(self.http_base + 'project/' + element['id'] + '/registrations/')
+                    self.node_registrations_page_list.append(
+                        self.http_base + 'project/' + element['id'] + '/registrations/'
+                    )
                     self.node_forks_page_list.append(self.http_base + 'project/' + element['id'] + '/forks/')
 
     async def parse_registrations_api(self, api_url, sem):
@@ -193,7 +195,9 @@ class Crawler:
                     self.node_dashboard_page_list.append(self.http_base + 'profile/' + element['id'] + '/')
                     self.node_files_page_list.append(self.http_base + 'profile/' + element['id'] + '/files/')
                     self.node_analytics_page_list.append(self.http_base + 'profile/' + element['id'] + '/analytics/')
-                    self.node_registrations_page_list.append(self.http_base + 'profile/' + element['id'] + '/registrations/')
+                    self.node_registrations_page_list.append(
+                        self.http_base + 'profile/' + element['id'] + '/registrations/'
+                    )
                     self.node_forks_page_list.append(self.http_base + 'profile/' + element['id'] + '/forks/')
 
     async def parse_institutions_api(self, api_url, sem):
@@ -211,7 +215,9 @@ class Crawler:
                     self.node_dashboard_page_list.append(self.http_base + 'institution/' + element['id'] + '/')
                     self.node_files_page_list.append(self.http_base + 'institution/' + element['id'] + '/files/')
                     self.node_analytics_page_list.append(self.http_base + 'institution/' + element['id'] + '/analytics/')
-                    self.node_registrations_page_list.append(self.http_base + 'institution/' + element['id'] + '/registrations/')
+                    self.node_registrations_page_list.append(
+                        self.http_base + 'institution/' + element['id'] + '/registrations/'
+                    )
                     self.node_forks_page_list.append(self.http_base + 'institution/' + element['id'] + '/forks/')
 
     # Get page content
@@ -239,6 +245,7 @@ class Crawler:
                 elif response.status == 504:
                     sem_2 = asyncio.BoundedSemaphore(value=5)
                     await self.scrape(self, url, sem_2)
+
 
 def save_html(html, page):
     print(page)
