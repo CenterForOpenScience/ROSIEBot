@@ -13,7 +13,12 @@ success_log = open('Logs/success.log', 'a')
 failure_log = open('Logs/failure.log', 'a')
 
 
+# Introduces relevant spot checking functions.
 class ElementValueIdentifier:
+    """
+    self.elements is for HTML IDs of things to look for (not classes)
+    self.files is the list of absolute paths to relevant pages.
+    """
     def __init__(self):
         self.elements = []
         self.files = []
@@ -22,30 +27,30 @@ class ElementValueIdentifier:
         for file in self.files:
             print(file)
             name = file.split('/')[-3] + '\t' + file.split('/')[-2]
-            content = BeautifulSoup(open(file), 'html.parser')
-            print(content)
+            soup = BeautifulSoup(open(file), 'html.parser')
             for element in self.elements:
-                result = content.find_all(element)
-                print(result)
-                # if result == '':
-                #     message = ['SPOT_CHECK', name, element, 'EMPTY.', '\n']
-                #     failure_log.write('\t'.join(message))
-                # else:
-                #     message = ['SPOT_CHECK', name, element, 'found.', result, '\n']
-                #     success_log.write('\t'.join(message))
-    print('Spot checked.')
+                result = soup.find(id=element)
+                if result is None:
+                        message = ['SPOT_CHECK', name, element, 'NOT FOUND', '\n']
+                        failure_log.write('\t'.join(message))
+                elif len(result.contents) == 0:
+                    message = ['SPOT_CHECK', name, element, 'EMPTY', '\n']
+                    failure_log.write('\t'.join(message))
+                else:
+                    message = ['SPOT_CHECK', name, element, 'OK', '\n']
+                    success_log.write('\t'.join(message))
+        print('Spot checked.')
 
 
 class ProjectDashboard(ElementValueIdentifier):
     def __init__(self):
         ElementValueIdentifier.__init__(self)
-        self.elements = [
-            '#nodeTitleEditable',                           # Title
-            '#contributors',                                # Contributors, description, dates modified and created
-            '#markdownRender',                              # Wiki list
-            '#tb-tbody',                                    # File list
-            '.list-group m-md sortable ui-sortable',        # Component list
-            '.logs'                                         # Log
+        self.elements = [                                  # IDs ONLY
+            'projectSubnav',                               # Navbar
+            'nodeTitleEditable',                           # Title
+            'contributors',                                # Contributors, description, dates modified and created
+            'contributorsList',                            # Contributor list
+            'tb-tbody',                                    # File list
         ]
         self.files = get_files('project/')
 

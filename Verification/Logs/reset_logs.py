@@ -1,6 +1,8 @@
-log = 'success.log'
-# log = 'failure.log'
+header = 'PROCESS_NAME\tTYPE\tINSTANCE\tSPOT\tSTATUS\n'
 
-file = open(log, 'w')
-file.write('PROCESS NAME\tTYPE\tINSTANCE\tSTATUS\n')
-file.close()
+logs = ['success.log', 'failure.log']
+
+for log in logs:
+    file = open(log, 'w')
+    file.write(header)
+    file.close()
