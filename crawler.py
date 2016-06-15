@@ -190,7 +190,7 @@ class Crawler:
                 print(api_url)
                 data = json_body['data']
                 for element in data:
-                    self.user_profile.page_list.append(self.http_base + 'profile/' + element['id'] + '/')
+                    self.user_profile_page_list.append(self.http_base + 'profile/' + element['id'] + '/')
 
     async def parse_institutions_api(self, api_url, sem):
         print('API request sent')
