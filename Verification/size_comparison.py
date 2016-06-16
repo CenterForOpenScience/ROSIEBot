@@ -18,24 +18,37 @@ failure_log = open('Logs/failure.log', 'a')
 # Get absolute paths to the specific page for a type of resource.
 def get_files(osf_type, page=''):
     """
-    OSF_type should be `project/`, `profile/`, `institution/` or `/` for registrations.
+    OSF_type should be `project/`, `profile/`, `institution/` or `` for registrations.
     Page should be `` for dashboard or the name of folder within a osf_type instance,
         ex. 'files/' for the file page of a node.
 
     get_files('project/', 'files/') gets every node's files page.
     """
     file_paths = []
-    type_folder = mirror_path + osf_type                # `localhost:70/project`
-    type_instances = os.listdir(type_folder)            # GUID folders within the project folder
-    for instance in type_instances:                     # A folder for a specific project, user, etc.
-        instance_path = type_folder + instance + '/' + page # `localhost:70/project/GUID/files`
-        if not os.path.isdir(instance_path):            # Leave the homepage alone.
+    type_folder = mirror_path + osf_type                        # `localhost:70/project`
+
+    if not os.path.exists(type_folder):                         # No /project folder
+        message = ['FIND_TYPE', osf_type, 'NOT FOUND', '\n']
+        failure_log.write('\t'.join(message))
+        return file_paths
+
+    type_instances = os.listdir(type_folder)                    # GUID folders within the project folder
+
+    for instance in type_instances:                             # A folder for a specific project, user, etc.
+        instance_path = type_folder + instance + '/' + page     # `localhost:70/project/GUID/files`
+
+        if not os.path.isdir(type_folder + instance):           # Leave non-folders alone.
             continue
-        fname = instance_path + 'index.html'            # Finally! The path to the file we want.
+        if not os.path.isdir(instance_path):                    # This folder doesn't have the files folder (may not be project)
+            message = ['FIND_FOLDER', osf_type + instance + '/' + page, 'NOT FOUND', '\n']
+            failure_log.write('\t'.join(message))
+            continue
+
+        fname = instance_path + 'index.html'                    # Finally! The path to the file we want.
         if os.path.exists(fname):
             file_paths.append(fname)
         else:
-            message = ['FILE_EXISTS', osf_type + instance + page, 'NOT FOUND', '\n']
+            message = ['FIND_FILE', osf_type + instance + '/' + page, 'NOT FOUND', '\n']
             failure_log.write('\t'.join(message))
     return file_paths
 
