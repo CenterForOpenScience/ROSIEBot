@@ -29,28 +29,30 @@ class ElementValueIdentifier:
             name = file.split('/')[-3] + '\t' + file.split('/')[-2]
             soup = BeautifulSoup(open(file), 'html.parser')
             for element in self.elements:
-                result = soup.find(id=element)
-                if result is None:
-                        message = ['SPOT_CHECK', name, element, 'NOT FOUND', '\n']
-                        failure_log.write('\t'.join(message))
-                elif len(result.contents) == 0:
+                # if element != '#contributors span.date.node-last-modified-date':
+                #     continue
+                result = soup.select(element)
+                if len(result) == 0:
+                    message = ['SPOT_CHECK', name, element, 'NOT FOUND', '\n']
+                    failure_log.write('\t'.join(message))
+                elif len(result[0].contents) == 0:
                     message = ['SPOT_CHECK', name, element, 'EMPTY', '\n']
                     failure_log.write('\t'.join(message))
                 else:
                     message = ['SPOT_CHECK', name, element, 'OK', '\n']
                     success_log.write('\t'.join(message))
         print('Spot checked.')
+        success_log.write('\n'), failure_log.write('\n')
 
 
 class ProjectDashboard(ElementValueIdentifier):
     def __init__(self):
         ElementValueIdentifier.__init__(self)
-        self.elements = [                                  # IDs ONLY
-            'projectSubnav',                               # Navbar
-            'nodeTitleEditable',                           # Title
-            'contributors',                                # Contributors, description, dates modified and created
-            'contributorsList',                            # Contributor list
-            'tb-tbody',                                    # File list
+        self.elements = [                                   # IDs ONLY
+            '#nodeTitleEditable',                           # Title
+            '#contributors span.date.node-last-modified-date',  # Last modified
+            '#contributorsList > ol',                       # Contributor list
+            '#tb-tbody',                                    # File list
         ]
         self.files = get_files('project/')
 

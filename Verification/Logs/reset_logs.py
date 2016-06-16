@@ -6,3 +6,4 @@ for log in logs:
     file = open(log, 'w')
     file.write(header)
     file.close()
+    print(log, 'cleared.')

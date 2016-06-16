@@ -28,8 +28,10 @@ def get_files(type, page=''):
     type_folder = mirror_path + type
     type_instances = os.listdir(type_folder)
     for instance in type_instances:
-        fname = type_folder + instance + '/' + page + 'index.html'        # Finally! The name of the folder we want.
-        files.append(fname)
+        instance_path = type_folder + instance + '/' + page
+        fname = instance_path + 'index.html'        # Finally! The name of the folder we want.
+        if os.path.isdir(instance_path):
+            files.append(fname)
     return files
 
 
