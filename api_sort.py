@@ -6,13 +6,13 @@ import os, sys
 import settings
 import requests
 import math
-from random import shuffle
 import collections
+import logging
 
 # Configure for testing in settings.py
 base_urls = settings.base_urls
-limit = settings.limit
-verbose = settings.verbose
+# limit = settings.limit
+# verbose = settings.verbose
 
 
 class Crawler:
@@ -40,26 +40,36 @@ class Crawler:
         if date_modified is not None:
             self.date_modified_marker = date_modified
 
-        self.node_urls = []
+        self.node_urls = [] # urls for the node-related pages, in time order from oldest to newest, grouped by node
 
-        self.wikis_by_parent_guid = collections.defaultdict(list)
+        self._wikis_by_parent_guid = collections.defaultdict(list) # private instance variable for wiki utils
 
         # for sorting
         self.node_url_tuples = []
-        self.log = open("error_log.txt", "w+")
-        self.crawled_url_log = None
-        self.goal_urls = None
+
+        # logging utils
+        logging.basicConfig(level=logging.DEBUG)
+        # logger for all debug infos
+        self.debug_logger = logging.getLogger('debug')
+        self.debug_logger.propagate = 0
+        #   console handler for debug logger
+        self.console_log_handler = logging.StreamHandler()
+        self.console_log_handler.setLevel(logging.DEBUG)
+        #   debug file handler for debug logger
+        self.debug_log_handler = logging.FileHandler(settings.DEBUG_LOG_FILENAME, mode='w')
+        self.debug_log_handler.setLevel(logging.DEBUG)
+        #   error file handler for debug logger
+        self.error_log_handler = logging.FileHandler(settings.ERROR_LOG_FILENAME, mode='w')
+        self.error_log_handler.setLevel(logging.ERROR)
+        #   adding handlers to debug logger
+        self.debug_logger.addHandler(self.console_log_handler)
+        self.debug_logger.addHandler(self.debug_log_handler)
+        self.debug_logger.addHandler(self.error_log_handler)
+
+
 
         # if os.path.isfile('goal_urls.txt') and os.path.isfile('crawled_url_log.txt'):
         #     self.scrape_diff()
-
-    def __del__(self):
-        if self.log is not None:
-            self.log.close()
-        if self.crawled_url_log is not None:
-            self.crawled_url_log.close()
-        if self.goal_urls is not None:
-            self.goal_urls.close()
 
     def scrape_diff(self):
         s1 = set(open("goal_urls.txt").readlines())
@@ -75,11 +85,15 @@ class Crawler:
     def truncate_node_url_tuples(self):
         if self.date_modified_marker is not None:
             self.node_url_tuples = [x for x in self.node_url_tuples if x[1] > self.date_modified_marker]
+            self.debug_logger.info("node_url_tuples truncated according to date_modified_marker: " +
+                                   str(self.date_modified_marker))
+
 # API Crawling
 
     # TODO: Investigate making semaphore an instance object
 
     def crawl_nodes_api(self, page_limit=0):
+        self.debug_logger.info("Start crawling nodes API pages")
         sem = asyncio.BoundedSemaphore(value=10)
         # Request number of pages in nodes API
         with requests.Session() as s:
@@ -168,11 +182,11 @@ class Crawler:
         # print('API request sent')
         async with sem:
             async with aiohttp.ClientSession() as s:
+                self.debug_logger.info("Crawling nodes api, url = " + api_url)
                 response = await s.get(api_url)
                 body = await response.read()
                 response.close()
                 json_body = json.loads(body.decode('utf-8'))
-                print(api_url)
                 data = json_body['data']
                 for element in data:
                     date_str = element['attributes']['date_modified']
@@ -240,8 +254,19 @@ class Crawler:
                                                              element['id'] + '/registrations/')
                     self.node_forks_page_list.append(self.http_base + 'institution/' + element['id'] + '/forks/')
 
-    def generate_node_urls(self, all_pages=True, dashboard=False, files=False, wiki=False, analytics=False,
-                           registrations=False, forks=False):
+
+    def generate_node_urls(self, all_pages=True, dashboard=False, files=False,
+                           wiki=False, analytics=False, registrations=False, forks=False):
+        self.debug_logger.info("Generating node urls")
+        self.debug_logger.info(" all_pages = " + str(all_pages) +
+                               " dashboard = " + str(dashboard) +
+                               " files = " + str(files) +
+                               " wiki = " + str(wiki) +
+                               "analytics = " + str(analytics) +
+                               " registrations = " + str(registrations) +
+                               " forks = " + str(forks)
+                               )
+
         url_list = [x[0] for x in self.node_url_tuples]
 
         print("Generating Node URLs...")
@@ -251,13 +276,11 @@ class Crawler:
             if all_pages or files:
                 self.node_urls.append(base_url + 'files/')
             if all_pages or wiki:
-                # print("wikis for " + base_url + ": ")
-                # for url in self.wikis_by_parent_guid[base_url.strip("/").split("/")[-1]]:
-                    # print("\t " + url)
-                wiki_name_list = self.wikis_by_parent_guid[base_url.strip("/").split("/")[-1]]
+                wiki_name_list = self._wikis_by_parent_guid[base_url.strip("/").split("/")[-1]]
                 wiki_url_list = [base_url + 'wiki/' + x.replace(" ", "%20") for x in wiki_name_list]
                 print("adding " + str(wiki_url_list) + " to to_scrape list")
                 self.node_urls += wiki_url_list
+
                 # the strip split -1 bit returns the last section of the base_url, which is the GUId
             if all_pages or analytics:
                 self.node_urls.append(base_url + 'analytics/')
@@ -273,7 +296,7 @@ class Crawler:
             tasks.append(asyncio.ensure_future(self.get_wiki_names(node_url.strip('/').split('/')[-1])))
         loop = asyncio.get_event_loop()
         loop.run_until_complete(asyncio.wait(tasks))
-        print(self.wikis_by_parent_guid)
+        # self.debug_logger.debug(self._wikis_by_parent_guid)
 
     async def get_wiki_names(self, parent_node):
         async with aiohttp.ClientSession() as s:
@@ -286,9 +309,10 @@ class Crawler:
                 json_body = json.loads(body.decode('utf-8'))
                 data = json_body['data']
                 for datum in data:
-                    self.wikis_by_parent_guid[parent_node].append(datum['attributes']['name'])
+                    self._wikis_by_parent_guid[parent_node].append(datum['attributes']['name'])
                     # print("\t wiki: " + datum['attributes']['name'])
             print(u + ': ', response.status)
+
 
     # async def get_wiki_real_link(self, parent_node, name):
     #     async with aiohttp.ClientSession() as s:
@@ -298,6 +322,7 @@ class Crawler:
     #         response.close()
 
     def scrape_nodes(self, async=True):
+        self.debug_logger.info("Scraping nodes, async = " + str(async))
         if async:
             self._scrape_pages(self.node_urls)
         else:
@@ -326,17 +351,19 @@ class Crawler:
     async def scrape_url(self, url, sem):
         async with sem:
             async with aiohttp.ClientSession() as s:
-                # print(url)
+
+                self.debug_logger.debug("Scraping : " + url)
                 response = await s.get(url, headers=self.headers)
                 body = await response.read()
                 response.close()
                 if response.status == 200:
                     save_html(body, url)
-                    # self.crawled_url_log.write(url+"\n")
+
                 print(str(response.status) + ": " + url)
-                # if response.status == 504:
-                    # sem_2 = asyncio.BoundedSemaphore(value=1)
-                    # self.scrape_url(url, sem_2)
+
+                if response.status == 504:
+                    self.debug_logger.debug("504 on : " + url)
+                    self.debug_logger.error("504 on : " + url)
 
 
 def save_html(html, page):
