@@ -2,18 +2,6 @@
 Step 2: Check important elements on each page to ensure they aren't empty.
 
 Classes organized by type ('projects', 'users', etc.)
-
-Pages:
-
-- Dashboard (project and registration)
-- Files (project and registration)
-- Wiki (project and registration)
-- FORGONE: Analytics (project and registration) (These pages often look a mess anyway and rarely prerender)
-- Forks (project and registration)
-- Registrations
-
-- Profile (user and institution)
-
 """
 from bs4 import BeautifulSoup
 import os, sys
@@ -37,7 +25,6 @@ class ElementValueIdentifier:
     def __init__(self):
         self.elements = []
         self.files = []
-        self.type = ''
 
     def identify_values(self):
         for file in self.files:
@@ -60,6 +47,7 @@ class ElementValueIdentifier:
 
 # Project verification classes
 
+
 class ProjectDashboard(ElementValueIdentifier):
     def __init__(self):
         ElementValueIdentifier.__init__(self)
@@ -67,6 +55,7 @@ class ProjectDashboard(ElementValueIdentifier):
             '#nodeTitleEditable',                                # Title
             '#contributors span.date.node-last-modified-date',   # Last modified
             '#contributorsList > ol',                            # Contributor list
+            '#nodeDescriptionEditable',                          # Description
             '#tb-tbody',                                         # File list
             '#logScope > div > div > div.panel-body > span > dl' # Activity
         ]
@@ -139,6 +128,7 @@ class RegistrationDashboard(ElementValueIdentifier):
             '#nodeTitleEditable',                                # Title
             '#contributors span.date.node-last-modified-date',   # Last modified
             '#contributorsList > ol',                            # Contributor list
+            '#nodeDescriptionEditable',                          # Description
             '#tb-tbody',                                         # File list
             '#logScope > div > div > div.panel-body > span > dl' # Activity
         ]
@@ -186,7 +176,7 @@ class RegistrationForks(ElementValueIdentifier):
         self.elements = [
             'body > div.watermarked > div > div.row > div.col-xs-9.col-sm-8' # List
         ]
-        self.files = get_files('', 'forks/')
+        self.files = get_files('', 'registrations/')
         self.identify_values()
 
 # User Verification Class
