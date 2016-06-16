@@ -29,10 +29,7 @@ class Crawler:
 
     """
 
-    def __init__(self):
-        global base_urls
-        self.counter = 0
-        self.url_list = []
+    def __init__(self, date_modified=None):
         self.headers = {
             'User-Agent':
                 'LinkedInBot/1.0 (compatible; Mozilla/5.0; Jakarta Commons-HttpClient/3.1 +http://www.linkedin.com)'
@@ -40,28 +37,12 @@ class Crawler:
         self.http_base = base_urls[0]
         self.api_base = base_urls[1]
 
+        if date_modified is not None:
+            self.date_modified_marker = date_modified
+
         self.node_urls = []
 
         self.wikis_by_parent_guid = collections.defaultdict(list)
-
-        # List of node and node-related pages:
-        self.node_dashboard_page_list = [] # Node overview page ("osf.io/node/mst3k/")
-        self.node_files_page_list = []
-        self.node_wiki_page_list = []
-        self.node_analytics_page_list = []
-        self.node_registrations_page_list = [] # Page on node that links to registrations
-        self.node_forks_page_list = []
-        # TODO: Add wiki list
-
-        self.registration_dashboard_page_list = []
-        self.registration_files_page_list = []
-        self.registration_wiki_page_list = []
-        self.registration_analytics_page_list = []
-        self.registration_forks_page_list = []
-
-        self.user_profile_page_list = [] # User profile page ("osf.io/profile/mst3k/")
-        # Shoehorn index in to list of pages to scrape:
-        self.institution_url_list = [self.http_base] # Institution page ("osf.io/institution/cos")
 
         # for sorting
         self.node_url_tuples = []
@@ -91,7 +72,9 @@ class Crawler:
         else:
             print("no diff :)")
 
-
+    def truncate_node_url_tuples(self):
+        if self.date_modified_marker is not None:
+            self.node_url_tuples = [x for x in self.node_url_tuples if x[1] > self.date_modified_marker]
 # API Crawling
 
     # TODO: Investigate making semaphore an instance object
@@ -303,16 +286,21 @@ class Crawler:
     #         print(response.url)
     #         response.close()
 
+    def scrape_nodes(self, async=True):
+        if async:
+            self._scrape_pages(self.node_urls)
+        else:
+            for elem in self.node_url_tuples:
+                list = []
+                while len(self.node_urls) > 0 and elem[0] in self.node_urls[0]:
+                    list.append(self.node_urls.pop(0))
+                self._scrape_pages(list)
 
     # Get page content
     def _scrape_pages(self, aspect_list):
         sem = asyncio.BoundedSemaphore(value=5)
         tasks = []
         for url in aspect_list: # TODO: change to "if weekday mod % 7 == 1"
-            self.counter += 1
-            if self.counter % 100 == 0:
-                pass
-                # TODO: update json file with new date_modified
             tasks.append(asyncio.ensure_future(self.scrape_url(url, sem)))
 
         loop = asyncio.get_event_loop()
@@ -330,11 +318,11 @@ class Crawler:
                 if response.status == 200:
                     save_html(body, url)
                     print("Finished crawling " + url)
-                    self.crawled_url_log.write(url+"\n")
+                    # self.crawled_url_log.write(url+"\n")
                 elif response.status == 504:
                     # output url to log
                     print("504")
-                    self.log.write("504 TIMEOUT: " + url + "\n")
+                    # self.log.write("504 TIMEOUT: " + url + "\n")
                     pass
                 else:
                     print(str(response.status))
@@ -362,8 +350,9 @@ rosie = Crawler()
 #
 # # Get URLs from API and add them to the async tasks
 # rosie.scrape_diff()
-rosie.crawl_nodes_api(page_limit=10)
-rosie.scrape_nodes()
+rosie.crawl_nodes_api(page_limit=1)
+rosie.generate_node_urls(all_pages=True)
+rosie.scrape_nodes(async=False)
 # rosie.crawl_registrations_api()
 # rosie.crawl_users_api()
 # rosie.crawl_institutions_api()
