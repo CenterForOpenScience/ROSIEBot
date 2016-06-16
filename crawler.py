@@ -66,22 +66,6 @@ class Crawler:
         self.debug_logger.addHandler(self.debug_log_handler)
         self.debug_logger.addHandler(self.error_log_handler)
 
-
-
-        # if os.path.isfile('goal_urls.txt') and os.path.isfile('crawled_url_log.txt'):
-        #     self.scrape_diff()
-
-    def scrape_diff(self):
-        s1 = set(open("goal_urls.txt").readlines())
-        s2 = set(open("crawled_url_log.txt").readlines())
-        d = list(s1.difference(s2))
-        for x in d:
-            print(x)
-        if len(d) > 0:
-            self._scrape_pages(d)
-        else:
-            print("no diff :)")
-
     def truncate_node_url_tuples(self):
         if self.date_modified_marker is not None:
             self.node_url_tuples = [x for x in self.node_url_tuples if x[1] > self.date_modified_marker]
@@ -230,7 +214,6 @@ class Crawler:
                 for element in data:
                     self.user_profile_page_list.append(self.http_base + 'profile/' + element['id'] + '/')
 
-
     async def parse_institutions_api(self, api_url, sem):
         print('API request sent')
 
@@ -244,8 +227,6 @@ class Crawler:
                 data = json_body['data']
                 for element in data:
                     self.institution_url_list.append(self.http_base + 'institutions/' + element['id'] + '/')
-
-
 
     def generate_node_urls(self, all_pages=True, dashboard=False, files=False,
                            wiki=False, analytics=False, registrations=False, forks=False):
