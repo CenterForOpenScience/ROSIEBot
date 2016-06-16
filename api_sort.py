@@ -178,13 +178,13 @@ class Crawler:
                     date_str = element['attributes']['date_modified']
                     # print(date_str)
                     if '.' in date_str:
-                        date = datetime.datetime.strptime(element['attributes']['date_modified'], "%Y-%m-%dT%H:%M:%S.%f")
+                        date = datetime.datetime.strptime(element['attributes']['date_modified'],
+                                                          "%Y-%m-%dT%H:%M:%S.%f")
                     else:
                         date = datetime.datetime.strptime(element['attributes']['date_modified'], "%Y-%m-%dT%H:%M:%S")
                     # >> .%f
                     self.node_url_tuples.append((self.http_base + 'project/' + element['id'] + '/', date))
-
-                    rosie.node_url_tuples.sort(key=lambda x: x[1])
+                    self.node_url_tuples.sort(key=lambda x: x[1])
 
     async def parse_registrations_api(self, api_url, sem):
         print('API request sent')
@@ -217,7 +217,8 @@ class Crawler:
                     self.node_dashboard_page_list.append(self.http_base + 'profile/' + element['id'] + '/')
                     self.node_files_page_list.append(self.http_base + 'profile/' + element['id'] + '/files/')
                     self.node_analytics_page_list.append(self.http_base + 'profile/' + element['id'] + '/analytics/')
-                    self.node_registrations_page_list.append(self.http_base + 'profile/' + element['id'] + '/registrations/')
+                    self.node_registrations_page_list.append(self.http_base + 'profile/' +
+                                                             element['id'] + '/registrations/')
                     self.node_forks_page_list.append(self.http_base + 'profile/' + element['id'] + '/forks/')
 
     async def parse_institutions_api(self, api_url, sem):
@@ -235,19 +236,28 @@ class Crawler:
                     self.node_dashboard_page_list.append(self.http_base + 'institution/' + element['id'] + '/')
                     self.node_files_page_list.append(self.http_base + 'institution/' + element['id'] + '/files/')
                     self.node_analytics_page_list.append(self.http_base + 'institution/' + element['id'] + '/analytics/')
-                    self.node_registrations_page_list.append(self.http_base + 'institution/' + element['id'] + '/registrations/')
+                    self.node_registrations_page_list.append(self.http_base + 'institution/' +
+                                                             element['id'] + '/registrations/')
                     self.node_forks_page_list.append(self.http_base + 'institution/' + element['id'] + '/forks/')
 
-    def generate_node_urls(self, all_pages=True, dashboard=False, files=False, wiki=False, analytics=False, registrations=False, forks=False):
+    def generate_node_urls(self, all_pages=True, dashboard=False, files=False, wiki=False, analytics=False,
+                           registrations=False, forks=False):
         url_list = [x[0] for x in self.node_url_tuples]
 
+        print("Generating Node URLs...")
         for base_url in url_list:
             if all_pages or dashboard:
                 self.node_urls.append(base_url)
             if all_pages or files:
                 self.node_urls.append(base_url + 'files/')
             if all_pages or wiki:
-                self.node_urls += self.wikis_by_parent_guid[base_url.strip("/").split("/")[-1]]
+                # print("wikis for " + base_url + ": ")
+                # for url in self.wikis_by_parent_guid[base_url.strip("/").split("/")[-1]]:
+                    # print("\t " + url)
+                wiki_name_list = self.wikis_by_parent_guid[base_url.strip("/").split("/")[-1]]
+                wiki_url_list = [base_url + 'wiki/' + x.replace(" ", "%20") for x in wiki_name_list]
+                print("adding " + str(wiki_url_list) + " to to_scrape list")
+                self.node_urls += wiki_url_list
                 # the strip split -1 bit returns the last section of the base_url, which is the GUId
             if all_pages or analytics:
                 self.node_urls.append(base_url + 'analytics/')
@@ -259,16 +269,17 @@ class Crawler:
     # call this method after tuple list truncation and before generate_node_urls
     def crawl_wiki(self):
         tasks = []
-        for node in [x[0] for x in self.node_url_tuples]:
-            tasks.append(asyncio.ensure_future(self.get_wiki_names(node)))
+        for node_url in [x[0] for x in self.node_url_tuples]:
+            tasks.append(asyncio.ensure_future(self.get_wiki_names(node_url.strip('/').split('/')[-1])))
         loop = asyncio.get_event_loop()
         loop.run_until_complete(asyncio.wait(tasks))
         print(self.wikis_by_parent_guid)
 
     async def get_wiki_names(self, parent_node):
         async with aiohttp.ClientSession() as s:
-            response = await s.get(self.api_base + 'nodes/' + parent_node + '/wikis/')
-            print("GET'd " + self.api_base + 'nodes/' + parent_node + '/wikis/')
+            u = self.api_base + 'nodes/' + parent_node + '/wikis/'
+            response = await s.get(u)
+            # print("GET'd " + self.api_base + 'nodes/' + parent_node + '/wikis/')
             body = await response.read()
             response.close()
             if response.status <= 200:
@@ -276,8 +287,8 @@ class Crawler:
                 data = json_body['data']
                 for datum in data:
                     self.wikis_by_parent_guid[parent_node].append(datum['attributes']['name'])
-            else:
-                print('Status Code: ', response.status)
+                    # print("\t wiki: " + datum['attributes']['name'])
+            print(u + ': ', response.status)
 
     # async def get_wiki_real_link(self, parent_node, name):
     #     async with aiohttp.ClientSession() as s:
@@ -290,17 +301,21 @@ class Crawler:
         if async:
             self._scrape_pages(self.node_urls)
         else:
+            print(self.node_url_tuples)
+            print("\nnode_urls: " + str(self.node_urls) + "\n")
             for elem in self.node_url_tuples:
-                list = []
+                print(elem)
+                lst = []
                 while len(self.node_urls) > 0 and elem[0] in self.node_urls[0]:
-                    list.append(self.node_urls.pop(0))
-                self._scrape_pages(list)
+                    lst.append(self.node_urls.pop(0))
+                print("lst: " + str(lst))
+                self._scrape_pages(lst)
 
     # Get page content
     def _scrape_pages(self, aspect_list):
         sem = asyncio.BoundedSemaphore(value=5)
         tasks = []
-        for url in aspect_list: # TODO: change to "if weekday mod % 7 == 1"
+        for url in aspect_list:  # TODO: change to "if weekday mod % 7 == 1"
             tasks.append(asyncio.ensure_future(self.scrape_url(url, sem)))
 
         loop = asyncio.get_event_loop()
@@ -311,25 +326,21 @@ class Crawler:
     async def scrape_url(self, url, sem):
         async with sem:
             async with aiohttp.ClientSession() as s:
-                print(url)
+                # print(url)
                 response = await s.get(url, headers=self.headers)
                 body = await response.read()
                 response.close()
                 if response.status == 200:
                     save_html(body, url)
-                    print("Finished crawling " + url)
                     # self.crawled_url_log.write(url+"\n")
-                elif response.status == 504:
-                    # output url to log
-                    print("504")
-                    # self.log.write("504 TIMEOUT: " + url + "\n")
-                    pass
-                else:
-                    print(str(response.status))
+                print(str(response.status) + ": " + url)
+                # if response.status == 504:
+                    # sem_2 = asyncio.BoundedSemaphore(value=1)
+                    # self.scrape_url(url, sem_2)
 
 
 def save_html(html, page):
-    print(page)
+    # print(page)
     page = page.split('//', 1)[1]
     make_dirs(page)
     f = open(page + 'index.html', 'wb')
@@ -351,8 +362,10 @@ rosie = Crawler()
 # # Get URLs from API and add them to the async tasks
 # rosie.scrape_diff()
 rosie.crawl_nodes_api(page_limit=1)
+rosie.crawl_wiki()
 rosie.generate_node_urls(all_pages=True)
-rosie.scrape_nodes(async=False)
+rosie.scrape_nodes(async=True)
+print("~fin~")
 # rosie.crawl_registrations_api()
 # rosie.crawl_users_api()
 # rosie.crawl_institutions_api()
