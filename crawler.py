@@ -12,7 +12,6 @@ import logging
 # Configure for testing in settings.py
 base_urls = settings.base_urls
 # limit = settings.limit
-# verbose = settings.verbose
 
 
 class Crawler:
@@ -44,24 +43,24 @@ class Crawler:
 
         self._wikis_by_parent_guid = collections.defaultdict(list) # private instance variable for wiki utils
 
-        # for sorting
+        # For sorting
         self.node_url_tuples = []
 
-        # logging utils
+        # Logging utils
         logging.basicConfig(level=logging.DEBUG)
-        # logger for all debug infos
+        # Logger for all debug infos
         self.debug_logger = logging.getLogger('debug')
         self.debug_logger.propagate = 0
-        #   console handler for debug logger
+        # Console handler for debug logger
         self.console_log_handler = logging.StreamHandler()
         self.console_log_handler.setLevel(logging.DEBUG)
-        #   debug file handler for debug logger
+        # Debug file handler for debug logger
         self.debug_log_handler = logging.FileHandler(settings.DEBUG_LOG_FILENAME, mode='w')
         self.debug_log_handler.setLevel(logging.DEBUG)
-        #   error file handler for debug logger
+        # Error file handler for debug logger
         self.error_log_handler = logging.FileHandler(settings.ERROR_LOG_FILENAME, mode='w')
         self.error_log_handler.setLevel(logging.ERROR)
-        #   adding handlers to debug logger
+        # Adding handlers to debug logger
         self.debug_logger.addHandler(self.console_log_handler)
         self.debug_logger.addHandler(self.debug_log_handler)
         self.debug_logger.addHandler(self.error_log_handler)
@@ -163,7 +162,6 @@ class Crawler:
     # Go through pages for each API endpoint
 
     async def parse_nodes_api(self, api_url, sem):
-        # print('API request sent')
         async with sem:
             async with aiohttp.ClientSession() as s:
                 self.debug_logger.info("Crawling nodes api, url = " + api_url)
@@ -174,13 +172,11 @@ class Crawler:
                 data = json_body['data']
                 for element in data:
                     date_str = element['attributes']['date_modified']
-                    # print(date_str)
                     if '.' in date_str:
                         date = datetime.datetime.strptime(element['attributes']['date_modified'],
                                                           "%Y-%m-%dT%H:%M:%S.%f")
                     else:
                         date = datetime.datetime.strptime(element['attributes']['date_modified'], "%Y-%m-%dT%H:%M:%S")
-                    # >> .%f
                     self.node_url_tuples.append((self.http_base + 'project/' + element['id'] + '/', date))
                     self.node_url_tuples.sort(key=lambda x: x[1])
 
@@ -262,7 +258,7 @@ class Crawler:
             if all_pages or forks:
                 self.node_urls.append(base_url + 'forks/')
 
-    # call this method after tuple list truncation and before generate_node_urls
+    # Call this method after tuple list truncation and before generate_node_urls
     def crawl_wiki(self):
         tasks = []
         for node_url in [x[0] for x in self.node_url_tuples]:
@@ -270,7 +266,7 @@ class Crawler:
         loop = asyncio.get_event_loop()
         loop.run_until_complete(asyncio.wait(tasks))
 
-    # async method called by crawl_wiki
+    # Async method called by crawl_wiki
     async def get_wiki_names(self, parent_node):
         async with aiohttp.ClientSession() as s:
             u = self.api_base + 'nodes/' + parent_node + '/wikis/'
@@ -328,7 +324,6 @@ class Crawler:
 
 
 def save_html(html, page):
-    # print(page)
     page = page.split('//', 1)[1]
     make_dirs(page)
     f = open(page + 'index.html', 'w')
@@ -353,4 +348,4 @@ rosie.crawl_nodes_api(page_limit=1)
 rosie.crawl_wiki()
 rosie.generate_node_urls(all_pages=True)
 rosie.scrape_nodes(async=True)
-print("~fin~")
+print("Mirror complete. \nOptional:\tRun verification testing suite.")
