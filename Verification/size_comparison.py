@@ -16,46 +16,51 @@ failure_log = open('Logs/failure.log', 'a')
 
 
 # Get absolute paths to the specific page for a type of resource.
-def get_files(type, page=''):
+def get_files(osf_type, page=''):
     """
-    Type should be `project/`, `profile/`, `institution/` or `/` for registrations.
-    Page should be `` for dashboard or the name of folder within a type instance,
-        ex. 'files' for the file page of a node.
+    OSF_type should be `project/`, `profile/`, `institution/` or `/` for registrations.
+    Page should be `` for dashboard or the name of folder within a osf_type instance,
+        ex. 'files/' for the file page of a node.
 
-    get_files('project', 'files') gets every node's files page.
+    get_files('project/', 'files/') gets every node's files page.
     """
-    files = []
-    type_folder = mirror_path + type
-    type_instances = os.listdir(type_folder)
-    for instance in type_instances:
-        instance_path = type_folder + instance + '/' + page
-        fname = instance_path + 'index.html'        # Finally! The name of the folder we want.
-        if os.path.isdir(instance_path):
-            files.append(fname)
-    return files
+    file_paths = []
+    type_folder = mirror_path + osf_type                # `localhost:70/project`
+    type_instances = os.listdir(type_folder)            # GUID folders within the project folder
+    for instance in type_instances:                     # A folder for a specific project, user, etc.
+        instance_path = type_folder + instance + '/' + page # `localhost:70/project/GUID/files`
+        if not os.path.isdir(instance_path):            # Leave the homepage alone.
+            continue
+        fname = instance_path + 'index.html'            # Finally! The path to the file we want.
+        if os.path.exists(fname):
+            file_paths.append(fname)
+        else:
+            message = ['FILE_EXISTS', osf_type + instance + page, 'NOT FOUND', '\n']
+            failure_log.write('\t'.join(message))
+    return file_paths
 
 
-# Compare node page sizes to their respective templates
-class NodeDashboard:
-    def __init__(self):
-        self.template_size = 00
-        self.files = {}      #   self.urls['filename'] = int:file_size
-
-    def get_pages_of_type(self):
-        # add to URLs, get size
-        host = (os.getcwd())
-        file = ''
-        self.files[file] = os.path.getsize(file)
-        pass
-
-    def get_page_size(self):
-        for file in self.files:
-            page_size = self.files[file]
-            if page_size < self.template_size + 00:     #   Margin based on reasonable amount of specific content
-                success_log.write('Size check: ' + file + ', Dashboard' + ', PageSizeSuccess:' + str(page_size) + '/' + str(self.template_size))
-            else:
-                success_log.write('Size check: ' + file + ', Dashboard' + ', PageSizeFailure:' + str(page_size) + '/' + str(self.template_size) + ' , Sending to spot_check.' )
-                send_to_spot_check(file, 'node_dashboard')
+# # Compare node page sizes to their respective templates
+# class NodeDashboard:
+#     def __init__(self):
+#         self.template_size = 00
+#         self.files = {}      #   self.urls['filename'] = int:file_size
+#
+#     def get_pages_of_type(self):
+#         # add to URLs, get size
+#         host = (os.getcwd())
+#         file = ''
+#         self.files[file] = os.path.getsize(file)
+#         pass
+#
+#     def get_page_size(self):
+#         for file in self.files:
+#             page_size = self.files[file]
+#             if page_size < self.template_size + 00:     #   Margin based on reasonable amount of specific content
+#                 success_log.write('Size check: ' + file + ', Dashboard' + ', PageSizeSuccess:' + str(page_size) + '/' + str(self.template_size))
+#             else:
+#                 success_log.write('Size check: ' + file + ', Dashboard' + ', PageSizeFailure:' + str(page_size) + '/' + str(self.template_size) + ' , Sending to spot_check.' )
+#                 send_to_spot_check(file, 'node_dashboard')
 
 
 # class NodeFilesPageSize:
@@ -66,7 +71,7 @@ class NodeDashboard:
 #     def get_page_size(self, url):
 #         self.page_size = 00
 #         if self.page_size < self.template_size + 00:
-#             send_to_spot_check(self.url, 'type')
+#             send_to_spot_check(self.url, 'osf_type')
 #
 #
 # class NodeWikiPageSize:
@@ -77,7 +82,7 @@ class NodeDashboard:
 #     def get_page_size(self, url):
 #         self.page_size = 00
 #         if self.page_size < self.template_size + 00:
-#             send_to_spot_check(self.url, 'type')
+#             send_to_spot_check(self.url, 'osf_type')
 #
 #
 # class NodeAnalyticsPageSize:
@@ -88,7 +93,7 @@ class NodeDashboard:
 #     def get_page_size(self, url):
 #         self.page_size = 00
 #         if self.page_size < self.template_size + 00:
-#             send_to_spot_check(self.url, 'type')
+#             send_to_spot_check(self.url, 'osf_type')
 #
 #
 # class NodeRegistrationsPageSize:
@@ -99,7 +104,7 @@ class NodeDashboard:
 #     def get_page_size(self, url):
 #         self.page_size = 00
 #         if self.page_size < self.template_size + 00:
-#             send_to_spot_check(self.url, 'type')
+#             send_to_spot_check(self.url, 'osf_type')
 #
 #
 # class NodeForksPageSize:
@@ -110,7 +115,7 @@ class NodeDashboard:
 #     def get_page_size(self, url):
 #         self.page_size = 00
 #         if self.page_size < self.template_size + 00:
-#             send_to_spot_check(self.url, 'type')
+#             send_to_spot_check(self.url, 'osf_type')
 #
 #
 # # Compare registration page sizes to their respective templates
@@ -122,7 +127,7 @@ class NodeDashboard:
 #     def get_page_size(self, url):
 #         self.page_size = 00
 #         if self.page_size < self.template_size + 00:
-#             send_to_spot_check(self.url, 'type')
+#             send_to_spot_check(self.url, 'osf_type')
 #
 #
 # class RegistrationFilesPageSize:
@@ -133,7 +138,7 @@ class NodeDashboard:
 #     def get_page_size(self, url):
 #         self.page_size = 00
 #         if self.page_size < self.template_size + 00:
-#             send_to_spot_check(self.url, 'type')
+#             send_to_spot_check(self.url, 'osf_type')
 #
 #
 # class RegistrationWikiPageSize:
@@ -143,7 +148,7 @@ class NodeDashboard:
 #     def get_page_size(self, url):
 #         self.page_size = 00
 #         if self.page_size < self.template_size + 00:
-#             send_to_spot_check(self.url, 'type')
+#             send_to_spot_check(self.url, 'osf_type')
 #
 #
 # class RegistrationAnalyticsPageSize:
@@ -154,7 +159,7 @@ class NodeDashboard:
 #     def get_page_size(self, url):
 #         self.page_size = 00
 #         if self.page_size < self.template_size + 00:
-#             send_to_spot_check(self.url, 'type')
+#             send_to_spot_check(self.url, 'osf_type')
 #
 #
 # class RegistrationForksPageSize:
@@ -165,7 +170,7 @@ class NodeDashboard:
 #     def get_page_size(self, url):
 #         self.page_size = 00
 #         if self.page_size < self.template_size + 00:
-#             send_to_spot_check(self.url, 'type')
+#             send_to_spot_check(self.url, 'osf_type')
 #
 #
 # # Compare user and institution page sizes to their respective templates
@@ -177,7 +182,7 @@ class NodeDashboard:
 #     def get_page_size(self, url):
 #         self.page_size = 00
 #         if self.page_size < self.template_size + 00:
-#             send_to_spot_check(self.url, 'type')
+#             send_to_spot_check(self.url, 'osf_type')
 #
 #
 # class InstitutionProfilePageSize:
@@ -188,7 +193,7 @@ class NodeDashboard:
 #     def get_page_size(self, url):
 #         self.page_size = 00
 #         if self.page_size < self.template_size + 00:
-#             send_to_spot_check(self.url, 'type')
+#             send_to_spot_check(self.url, 'osf_type')
 #
 #
 # # Compare index page size to its template
@@ -200,14 +205,14 @@ class NodeDashboard:
 #     def get_page_size(self, url):
 #         self.page_size = 00
 #         if self.page_size < self.template_size + 00:
-#             send_to_spot_check(self.url, 'type')
+#             send_to_spot_check(self.url, 'osf_type')
 
 
-# def send_to_spot_check(page, type):
+# def send_to_spot_check(page, osf_type):
 #     pass
 #
 # node_dashboard = NodeDashboard()
 # node_dashboard.get_pages_of_type()
 
-success_log.close()
-failure_log.close()
+# success_log.close()
+# failure_log.close()
