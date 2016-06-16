@@ -192,6 +192,7 @@ class Crawler:
                 print(api_url)
                 data = json_body['data']
                 for element in data:
+<<<<<<< HEAD
                     self.node_dashboard_page_list.append(self.http_base + 'profile/' + element['id'] + '/')
                     self.node_files_page_list.append(self.http_base + 'profile/' + element['id'] + '/files/')
                     self.node_analytics_page_list.append(self.http_base + 'profile/' + element['id'] + '/analytics/')
@@ -199,6 +200,9 @@ class Crawler:
                         self.http_base + 'profile/' + element['id'] + '/registrations/'
                     )
                     self.node_forks_page_list.append(self.http_base + 'profile/' + element['id'] + '/forks/')
+=======
+                    self.user_profile.page_list.append(self.http_base + 'profile/' + element['id'] + '/')
+>>>>>>> master
 
     async def parse_institutions_api(self, api_url, sem):
         print('API request sent')
@@ -212,6 +216,7 @@ class Crawler:
                 print(api_url)
                 data = json_body['data']
                 for element in data:
+<<<<<<< HEAD
                     self.node_dashboard_page_list.append(self.http_base + 'institution/' + element['id'] + '/')
                     self.node_files_page_list.append(self.http_base + 'institution/' + element['id'] + '/files/')
                     self.node_analytics_page_list.append(self.http_base + 'institution/' + element['id'] + '/analytics/')
@@ -219,6 +224,9 @@ class Crawler:
                         self.http_base + 'institution/' + element['id'] + '/registrations/'
                     )
                     self.node_forks_page_list.append(self.http_base + 'institution/' + element['id'] + '/forks/')
+=======
+                    self.institution_url_list.append(self.http_base + 'institutions/' + element['id'] + '/')
+>>>>>>> master
 
     # Get page content
     def scrape_pages(self, aspect_list):
@@ -230,7 +238,7 @@ class Crawler:
         loop = asyncio.get_event_loop()
         loop.run_until_complete(asyncio.wait(tasks))
 
-# Page scraping (through execution)
+# Page scraping (through to execution)
 
     async def scrape_url(self, url, sem):
         async with sem:
@@ -244,14 +252,23 @@ class Crawler:
                     print("Finished crawling " + url)
                 elif response.status == 504:
                     sem_2 = asyncio.BoundedSemaphore(value=5)
-                    await self.scrape(self, url, sem_2)
+                    await self.scrape_url(url, sem_2)
+
 
 
 def save_html(html, page):
-    print(page)
+
+    warning = """
+            <div style="position:fixed;    bottom:0;left:0;    border-top-right-radius: 8px;    color:  white;
+            background-color: red;  padding: .5em;">
+                This is a read-only mirror of the OSF. Some features may not be available.
+            </div>
+            """
+
+    html = html.decode('utf-8') + warning
     page = page.split('//', 1)[1]
     make_dirs(page)
-    f = open(page + 'index.html', 'wb')
+    f = open(page + 'index.html', 'w')
     f.write(html)
     f.close()
     os.chdir(sys.path[0])
@@ -291,7 +308,6 @@ rosie.scrape_pages(rosie.registration_forks_page_list)
 
 rosie.scrape_pages(rosie.user_profile_page_list)  # User profile page ("osf.io/profile/mst3k/")
 rosie.scrape_pages(rosie.institution_url_list)  # Institution page ("osf.io/institution/cos")
-
 
 end = datetime.datetime.now()
 print(end - start)

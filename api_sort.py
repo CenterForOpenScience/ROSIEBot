@@ -296,13 +296,12 @@ class Crawler:
             tasks.append(asyncio.ensure_future(self.get_wiki_names(node_url.strip('/').split('/')[-1])))
         loop = asyncio.get_event_loop()
         loop.run_until_complete(asyncio.wait(tasks))
-        # self.debug_logger.debug(self._wikis_by_parent_guid)
 
+    # async method called by crawl_wiki
     async def get_wiki_names(self, parent_node):
         async with aiohttp.ClientSession() as s:
             u = self.api_base + 'nodes/' + parent_node + '/wikis/'
             response = await s.get(u)
-            # print("GET'd " + self.api_base + 'nodes/' + parent_node + '/wikis/')
             body = await response.read()
             response.close()
             if response.status <= 200:
@@ -310,16 +309,7 @@ class Crawler:
                 data = json_body['data']
                 for datum in data:
                     self._wikis_by_parent_guid[parent_node].append(datum['attributes']['name'])
-                    # print("\t wiki: " + datum['attributes']['name'])
             print(u + ': ', response.status)
-
-
-    # async def get_wiki_real_link(self, parent_node, name):
-    #     async with aiohttp.ClientSession() as s:
-    #         response = await s.request('get', self.http_base + 'project/' + parent_node + '/wiki/' + name)
-    #         self.wiki_url_list.append(self.http_base + 'project/' + parent_node + '/wiki/' + name)
-    #         print(response.url)
-    #         response.close()
 
     def scrape_nodes(self, async=True):
         self.debug_logger.info("Scraping nodes, async = " + str(async))
