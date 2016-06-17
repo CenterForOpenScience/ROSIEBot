@@ -8,6 +8,7 @@ import requests
 import math
 import collections
 import logging
+import urllib.parse
 
 # Configure for testing in settings.py
 base_urls = settings.base_urls
@@ -191,6 +192,7 @@ class Crawler:
                     self.node_url_tuples.append((self.http_base + 'project/' + element['id'] + '/', date))
                     self.node_url_tuples.sort(key=lambda x: x[1])
 
+
     async def parse_registrations_api(self, api_url, sem):
         print('API request sent')
         async with sem:
@@ -206,7 +208,7 @@ class Crawler:
                     self.registration_files_page_list.append(self.http_base + element['id'] + '/files/')
                     self.registration_analytics_page_list.append(self.http_base + element['id'] + '/analytics/')
                     self.registration_forks_page_list.append(self.http_base + element['id'] + '/forks/')
-                    self.registration_
+                    # self.registration_
 
     async def parse_users_api(self, api_url, sem):
         print('API request sent')
@@ -258,7 +260,7 @@ class Crawler:
                 self.node_urls.append(base_url + 'files/')
             if all_pages or wiki:
                 wiki_name_list = self._wikis_by_parent_guid[base_url.strip("/").split("/")[-1]]
-                wiki_url_list = [base_url + 'wiki/' + x.replace(" ", "%20") for x in wiki_name_list]
+                wiki_url_list = [base_url + 'wiki/' + urllib.parse.quote(x) for x in wiki_name_list]
                 print("adding " + str(wiki_url_list) + " to to_scrape list")
                 self.node_urls += wiki_url_list
 
@@ -270,7 +272,7 @@ class Crawler:
             if all_pages or forks:
                 self.node_urls.append(base_url + 'forks/')
 
-    # Call this method after tuple list truncation and before generate_node_urls
+
     def crawl_wiki(self):
         tasks = []
         for node_url in [x[0] for x in self.node_url_tuples]:
@@ -331,7 +333,7 @@ class Crawler:
                     save_html(body, url)
                     print(str(response.status) + ": " + url)
                 if response.status == 504:
-                    self.debug_logger.debug("504 on : " + url)
+                    # self.debug_logger.debug("504 on : " + url)
                     self.debug_logger.error("504 on : " + url)
 
 
@@ -361,12 +363,12 @@ rosie = Crawler()
 # rosie.generate_node_urls(all_pages=True)
 # rosie.scrape_nodes(async=True)
 
-rosie.crawl_institutions_api(page_limit=1)
-rosie.crawl_registrations_api(page_limit=1)
-rosie.crawl_users_api(page_limit=1)
+# rosie.crawl_institutions_api(page_limit=1)
+# rosie.crawl_registrations_api(page_limit=1)
+# rosie.crawl_users_api(page_limit=1)
+#
+# rosie._scrape_pages(rosie.institution_url_list)
+# rosie._scrape_pages(rosie.user_profile_page_list)
+# rosie._scrape_pages(rosie.registrations_url_list)
 
-rosie._scrape_pages(rosie.institution_url_list)
-rosie._scrape_pages(rosie.user_profile_page_list)
-rosie._scrape_pages(rosie.registrations_url_list)
-
-print("Mirror complete. \nOptional:\tRun verification testing suite.")
+# print("Mirror complete. \nOptional:\tRun verification testing suite.")
