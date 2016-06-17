@@ -8,6 +8,7 @@ import requests
 import math
 import collections
 import logging
+import urllib.parse
 
 # Configure for testing in settings.py
 base_urls = settings.base_urls
@@ -267,7 +268,7 @@ class Crawler:
                 self.node_urls.append(base_url + 'files/')
             if all_pages or wiki:
                 wiki_name_list = self._wikis_by_parent_guid[base_url.strip("/").split("/")[-1]]
-                wiki_url_list = [base_url + 'wiki/' + x.replace(" ", "%20") for x in wiki_name_list]
+                wiki_url_list = [base_url + 'wiki/' + urllib.parse.quote(x) for x in wiki_name_list]
                 print("adding " + str(wiki_url_list) + " to to_scrape list")
                 self.node_urls += wiki_url_list
 
@@ -369,13 +370,13 @@ def make_dirs(filename):
 # # Execution
 #
 
-# rosie = Crawler()
+rosie = Crawler()
 #
 # # Get URLs from API and add them to the async tasks
-# rosie.crawl_nodes_api(page_limit=1)
-# rosie.crawl_wiki()
-# rosie.generate_node_urls(all_pages=True)
-# rosie.scrape_nodes(async=True)
+rosie.crawl_nodes_api(page_limit=1)
+rosie.crawl_wiki()
+rosie.generate_node_urls(all_pages=True)
+rosie.scrape_nodes(async=True)
 
 # rosie.crawl_institutions_api(page_limit=1)
 # rosie.crawl_registrations_api(page_limit=1)
