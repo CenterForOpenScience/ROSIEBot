@@ -215,7 +215,7 @@ class Crawler:
                     self.registration_files_page_list.append(self.http_base + element['id'] + '/files/')
                     self.registration_analytics_page_list.append(self.http_base + element['id'] + '/analytics/')
                     self.registration_forks_page_list.append(self.http_base + element['id'] + '/forks/')
-                    self.registration_
+                    # self.registration_
 
     async def parse_users_api(self, api_url, sem):
         print('API request sent')
@@ -344,7 +344,7 @@ class Crawler:
                     save_html(body, url)
                     print(str(response.status) + ": " + url)
                 if response.status == 504:
-                    self.debug_logger.debug("504 on : " + url)
+                    # self.debug_logger.debug("504 on : " + url)
                     self.debug_logger.error("504 on : " + url)
 
 
@@ -369,7 +369,7 @@ def make_dirs(filename):
 # # Execution
 #
 
-rosie = Crawler()
+# rosie = Crawler()
 #
 # # Get URLs from API and add them to the async tasks
 # rosie.crawl_nodes_api(page_limit=1)
@@ -377,12 +377,12 @@ rosie = Crawler()
 # rosie.generate_node_urls(all_pages=True)
 # rosie.scrape_nodes(async=True)
 
-rosie.crawl_institutions_api(page_limit=1)
-rosie.crawl_registrations_api(page_limit=1)
-rosie.crawl_users_api(page_limit=1)
+# rosie.crawl_institutions_api(page_limit=1)
+# rosie.crawl_registrations_api(page_limit=1)
+# rosie.crawl_users_api(page_limit=1)
+#
+# rosie._scrape_pages(rosie.institution_url_list)
+# rosie._scrape_pages(rosie.user_profile_page_list)
+# rosie._scrape_pages(rosie.registrations_url_list)
 
-rosie._scrape_pages(rosie.institution_url_list)
-rosie._scrape_pages(rosie.user_profile_page_list)
-rosie._scrape_pages(rosie.registrations_url_list)
-
-print("Mirror complete. \nOptional:\tRun verification testing suite.")
+# print("Mirror complete. \nOptional:\tRun verification testing suite.")
