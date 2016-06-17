@@ -62,9 +62,22 @@ class test_crawler(unittest.TestCase):
         self.assertGreater(len(l2), len(l1))
         self.assertNotEqual(l1, l2)
 
+    def test_generate_node_urls(self):
+        c = Crawler()
+        c.crawl_nodes_api(page_limit=1)
+        try:
+            c.generate_node_urls()
+        except:
+            self.fail("crawler.generate_node_urls() failed")
+
     def test_scrape_url(self):
         c = Crawler()
-        c._scrape_pages(['http://google.com'])  # we need to put a slash at the end of each URL
+        try:
+            c._scrape_pages(['http://google.com'])  # we need to put a slash at the end of each URL
+            f = open('google.com/index.html')
+        except:
+            self.fail("page didn't save / get scraped at all")
+
         # if there isn't one already
 
 

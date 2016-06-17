@@ -373,10 +373,10 @@ def make_dirs(filename):
 rosie = Crawler()
 #
 # # Get URLs from API and add them to the async tasks
-rosie.crawl_nodes_api(page_limit=1)
-rosie.crawl_wiki()
-rosie.generate_node_urls(all_pages=True)
-rosie.scrape_nodes(async=True)
+# rosie.crawl_nodes_api(page_limit=1)
+# rosie.crawl_wiki()
+# rosie.generate_node_urls(all_pages=True)
+# rosie.scrape_nodes(async=True)
 
 # rosie.crawl_institutions_api(page_limit=1)
 # rosie.crawl_registrations_api(page_limit=1)
