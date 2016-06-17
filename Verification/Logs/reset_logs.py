@@ -1,15 +1,19 @@
 test_header = 'PROCESS_NAME\tTYPE\tINSTANCE\tSPOT\tSTATUS\n'
 
-logs = ['success.log', 'failure.log']
+test_logs = ['test_success.log', 'test_failure.log']
 
-for log in logs:
+for log in test_logs:
     file = open(log, 'w')
     file.write(test_header)
     file.close()
     print(log, 'cleared.')
 
 retry_header = 'FILE\t\tRETRY\tDATE\n'
-retry = open('retry.log', 'w')
-retry.write(retry_header)
-retry.close()
-print('retry.log cleared.')
+
+retry_logs = ['retry_success.log', 'retry_failure.log']
+
+for log in retry_logs:
+    file = open(log, 'w')
+    file.write(retry_header)
+    file.close()
+    print(log, 'cleared.')

@@ -1,0 +1,1950 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>OSF | Blank</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="
+">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="fragment" content="!">
+
+    <script>
+        window.Raven = {};
+        Raven.captureMessage = function(msg, context) {
+            console.error('=== Mock Raven.captureMessage called with: ===');
+            console.log('Message: ' + msg);
+            console.log(context);
+        };
+        Raven.captureException = function(err, context) {
+            console.error('=== Mock Raven.captureException called with: ===');
+            console.log('Error: ' + err);
+            console.log(context);
+        };
+    </script>
+
+    <!-- Facebook display -->
+    <meta name="og:image" content="http://centerforopenscience.org/static/img/cos_center_logo_small.png"/>
+    <meta name="og:title" content="Blank"/>
+    <meta name="og:ttl" content="3"/>
+    <meta name="og:description" content="
+    Hosted on the Open Science Framework
+"/>
+
+    
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+      <script src="//cdnjs.cloudflare.com/ajax/libs/es5-shim/4.0.3/es5-shim.min.js"></script>
+      <script src="//cdnjs.cloudflare.com/ajax/libs/es5-shim/4.0.3/es5-sham.min.js"></script>
+    <![endif]-->
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/es6-shim/0.35.0/es6-shim.min.js"></script>
+
+    <link rel="stylesheet" href="/static/vendor/bower_components/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/vendor/bower_components/select2/select2.css">
+    <link rel="stylesheet" href="/static/vendor/bower_components/osf-style/css/base.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+
+        <script src="/static/vendor/bower_components/jquery/dist/jquery.min.js"></script>
+        <script src="/static/vendor/bower_components/jquery-ui/ui/minified/jquery-ui.min.js"></script>
+    <!-- JQuery 3 for IE Patching -->
+    <script type="text/javascript" src="/static/vendor/jquery-compat-git/jquery-compat-git.js"></script>
+    <script type="text/javascript">
+        var $3 = jQuery.noConflict(true);
+    </script>
+    <script src="/static/public/js/vendor.js"></script>
+
+    
+   
+
+   <link rel="stylesheet" href='/static/css/pages/profile-page.css'>
+
+    <script src="/static/public/js/base-page.js"></script>
+    
+
+
+    <link href='//fonts.googleapis.com/css?family=Carrois+Gothic|Inika|Patua+One' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,600,300,700' rel='stylesheet' type='text/css'>
+
+</head>
+<body data-spy="scroll" data-target=".scrollspy">
+
+        <div class="dev-mode-helper scripted" id="devModeControls">
+        <div id="metaInfo" data-bind="visible: showMetaInfo">
+            <table>
+                <thead>
+                <tr>
+                    <th>PR</th>
+                    <th>Title</th>
+                    <th>Date Merged</th>
+                </tr>
+                </thead>
+                <tbody data-bind="foreach: pullRequests">
+                    <tr>
+                        <td>#<a data-bind="attr: {href: url}, text: number"></a></td>
+                        <td data-bind="text: title"></td>
+                        <td data-bind="text: mergedAt"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <style>
+            #devmode {
+                position:fixed;
+                bottom:0;
+                left:0;
+                border-top-right-radius:8px;
+                background-color:red;
+                color:white;
+                padding:.5em;
+            }
+        </style>
+        <div id='devmode' data-bind='click: showHideMetaInfo'><strong>WARNING</strong>: This site is running in development mode.</div>
+    </div>
+
+    
+    
+        
+<link rel="stylesheet" href='/static/css/nav.css'>
+<div class="osf-nav-wrapper">
+
+<nav class="navbar navbar-inverse navbar-fixed-top" id="navbarScope" role="navigation">
+    <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <!-- ko ifnot: onSearchPage -->
+      <span class="visible-xs" data-bind="click : toggleSearch, css: searchCSS">
+          <a class="osf-xs-search pull-right" style="padding-top: 12px" >
+            <span rel="tooltip" data-placement="bottom" title="Search OSF" class="fa fa-search fa-lg fa-inverse" ></span>
+          </a>
+      </span>
+      <!-- /ko -->
+      <a class="navbar-brand hidden-sm hidden-xs" href="/"><img src="/static/img/cos-white2.png" class="osf-navbar-logo" width="27" alt="COS logo"/> Open Science Framework</a>
+      <a class="navbar-brand visible-sm visible-xs" href="/"><img src="/static/img/cos-white2.png" class="osf-navbar-logo" width="27" alt="COS logo"/> OSF</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse navbar-right">
+      <ul class="nav navbar-nav">
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Browse <span class="caret"></span></a>
+          <ul class="dropdown-menu" role="menu">
+              <li><a href="http://localhost:5000/explore/activity/">New Projects</a></li>
+              <li><a href="http://localhost:5000/search/?q=*&amp;filter=registration">Registry</a></li>
+              <li><a href="http://localhost:5000/meetings/">Meetings</a></li>
+          </ul>
+        </li>
+        <li class="dropdown">
+          <a href="http://localhost:5000/support/" >Support</a>
+        </li>
+
+        <!-- ko ifnot: onSearchPage -->
+        <li class="hidden-xs" data-bind="click : toggleSearch, css: searchCSS">
+            <a class="" >
+                <span rel="tooltip" data-placement="bottom" title="Search OSF" class="fa fa-search fa-lg" ></span>
+            </a>
+        </li>
+        <!-- /ko -->
+            <li class="dropdown sign-in" data-bind="with: $root.signIn">
+                <div class="col-sm-12">
+                    <a href="/login/?sign_up=True" class="btn btn-success btn-top-signup m-r-xs">Sign up</a>
+                    <button type="button" class="btn btn-info btn-top-login p-sm dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                        Sign in <span class="caret hidden-xs"></span>
+                    </button>
+                    <ul class="dropdown-menu" id="menuLogin" role="menu">
+                        <form class="form" id="signInForm" data-bind="submit: submit" action="http://localhost:8080/login?service=http://localhost:5000/8bdhs/&amp;auto=true" method="POST">
+                            <div class="form-group"><input id="email" class="form-control" type="email" data-bind="value: username" name="username" placeholder="Email" aria-label="Username"></div>
+                            <div class="form-group"><input name="password" id="password" class="form-control" type="password" placeholder="Password" data-bind="value: password" aria-label="Password"></div>
+                            <div class="form-group"><button type="submit" id="btnLogin" class="btn btn-block btn-primary">Login</button></div>
+                            <div class="text-center m-b-sm"> <a href="/forgotpassword/">Forgot password?</a></div>
+                        </form>
+                    </ul>
+                </div>
+            </li>
+          </ul>
+    </div><!--/.navbar-collapse -->
+    </div>
+
+
+</nav>
+    <!-- ko ifnot: onSearchPage -->
+        
+<div class="osf-search" data-bind="fadeVisible: showSearch" style="display: none">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <form class="input-group" data-bind="submit: submit">
+                    <input id="searchPageFullBar" name="search-placeholder" type="text" class="osf-search-input form-control" placeholder="Search" data-bind="value: query, hasFocus: true">
+                    <label id="searchBarLabel" class="search-label-placeholder" for="search-placeholder">Search</label>
+                    <span class="input-group-btn">
+                        <button type=button class="btn osf-search-btn" data-bind="click: submit"><i class="fa fa-circle-arrow-right fa-lg"></i></button>
+                        <button type=button class="btn osf-search-btn" data-toggle="modal" data-target="#search-help-modal"><i class="fa fa-question fa-lg"></i></button>
+                        <button type="button" class="btn osf-search-btn" data-bind="visible: showClose, click : toggleSearch"><i class="fa fa-times fa-lg"></i></button>
+                    </span>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="search-help-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true"></span>&times;</button>
+                    <h3 class="modal-title" >Search help</h3>
+                </div>
+                <div class="modal-body">
+                    <h4>Queries</h4>
+                    <p>Search uses the <a href="http://extensions.xwiki.org/xwiki/bin/view/Extension/Search+Application+Query+Syntax">Lucene search syntax</a>.This gives you many options, but can be very simple as well. Examples of valid searches include:</p>
+                    <ul>
+                        <li><a href="/search/?q=repro*">repro*</a></li>
+                        <li><a href="/search/?q=brian+AND+title%3Amany">brian AND title:many</a></li>
+                        <li><a href="/search/?q=tags%3A%28psychology%29">tags:(psychology)</a></li>
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+</div>
+
+
+    <!-- /ko -->
+</div>
+
+    
+    
+    <div class="watermarked">
+        <div class="container 
+">
+
+            
+
+
+<div class="page-header">
+    <div class="profile-fullname">
+        <span>
+                <img class='profile-gravatar' src="https://secure.gravatar.com/avatar/0ff2cf3a6866e702f0f2fa6e6d4c85e9?d=identicon&amp;s=70"/>
+        </span>
+        <span id="profileFullname" class="h1 overflow m-l-sm">
+            Blank
+        </span>
+        <span class="edit-profile-settings">
+        </span>
+    </div>
+</div><!-- end-page-header -->
+
+
+<div class="row">
+
+    <div class="col-sm-6">
+
+        <table class="table table-plain">
+                <tr>
+                    <td>Member&nbsp;Since</td>
+                    <td>2016-06-16</td>
+                </tr>
+                <tr>
+                    <td>Public&nbsp;Profile</td>
+                    <td><a href="/8bdhs/">localhost:5000/8bdhs</a></td>
+                </tr>
+        </table>
+        <h2>
+           No activity points<br />
+           0 projects, 0 public
+        </h2>
+    </div>
+
+    <div class="col-sm-6">
+
+
+        <ul class="nav nav-tabs">
+            <li class="active"><a href="#social" data-toggle="tab">Social</a></li>
+            <li><a href="#jobs" data-toggle="tab">Employment</a></li>
+            <li><a href="#schools" data-toggle="tab">Education</a></li>
+        </ul>
+
+        <div class="tab-content" id="containDrag">
+
+            <div class="m-t-md tab-pane active" id="social">
+                <div data-bind="template: {name: 'profileSocial'}"></div>
+            </div>
+
+            <div class="m-t-md tab-pane" id="jobs">
+                <div data-bind="template: {name: 'profileJobs'}"></div>
+            </div>
+
+            <div class="m-t-md tab-pane" id="schools">
+                <div data-bind="template: {name: 'profileSchools'}"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<hr />
+<div class="row">
+    <div class="col-sm-6">
+        <div class="panel panel-default">
+            <div class="panel-heading clearfix">
+              <h3 class="panel-title" >Public projects</h3>
+            </div>
+            <div class="panel-body">
+                    <div class="help-block">This user has no public projects.</div>
+</div>
+        </div>
+    </div>
+    <div class="col-sm-6">
+        <div class="panel panel-default">
+            <div class="panel-heading clearfix">
+                <h3 class="panel-title">Public components</h3>
+            </div>
+            <div class="panel-body">
+                    <div class="help-block">This user has no public components.</div>
+    <script src=/static/public/js/render-nodes.js></script>
+</div>
+        </div>
+    </div>
+</div><!-- end row -->
+
+
+<script type="text/html" id="embargo_approved">
+approved embargoed registration of
+<a class="log-node-title-link overflow" data-bind="text: nodeTitle, attr: {href: nodeUrl}"></a>
+</script>
+
+<script type="text/html" id="embargo_approved_no_user">
+Embargo of registration of
+<a class="log-node-title-link overflow" data-bind="text: nodeTitle, attr: {href: nodeUrl}"></a> approved
+</script>
+
+<script type="text/html" id="embargo_cancelled">
+cancelled embargoed registration of
+<span class="log-node-title-link overflow" data-bind="text: nodeTitle"></span>
+</script>
+
+<script type="text/html" id="embargo_completed_no_user">
+Embargo of registration of
+<a class="log-node-title-link overflow" data-bind="text: nodeTitle, attr: {href: nodeUrl}"></a> completed
+</script>
+
+<script type="text/html" id="embargo_initiated">
+initiated an embargoed registration of
+<!-- ko if: !registrationCancelled -->
+<a class="log-node-title-link overflow" data-bind="text: nodeTitle, attr: {href: nodeUrl}"></a>
+<!-- /ko -->
+
+<!-- ko if: registrationCancelled -->
+<span class="log-node-title-link overflow" data-bind="text: nodeTitle"></span>
+<!-- /ko -->
+</script>
+
+<script type="text/html" id="embargo_terminated_no_user">
+Embargo for
+<a class="log-node-title-link overflow" data-bind="text: nodeTitle, attr: {href: nodeUrl}"></a>
+ended.
+</script>
+
+<script type="text/html" id="retraction_approved">
+approved withdrawal of registration of
+<a class="log-node-title-link overflow" data-bind="text: nodeTitle, attr: {href: nodeUrl}"></a>
+</script>
+
+<script type="text/html" id="retraction_cancelled">
+cancelled withdrawal of registration of
+<span class="log-node-title-link overflow" data-bind="text: nodeTitle"></span>
+</script>
+
+<script type="text/html" id="retraction_initiated">
+initiated withdrawal of registration of
+<a class="log-node-title-link overflow" data-bind="text: nodeTitle, attr: {href: nodeUrl}"></a>
+</script>
+
+<script type="text/html" id="registration_initiated">
+initiated registration of
+<!-- ko if: !registrationCancelled -->
+<a class="log-node-title-link overflow" data-bind="text: nodeTitle, attr: {href: nodeUrl}"></a>
+<!-- /ko -->
+
+<!-- ko if: registrationCancelled -->
+<span class="log-node-title-link overflow" data-bind="text: nodeTitle"></span>
+<!-- /ko -->
+</script>
+
+<script type="text/html" id="registration_cancelled">
+cancelled registration of
+<span class="log-node-title-link overflow" data-bind="text: nodeTitle"></span>
+</script>
+
+<script type="text/html" id="registration_approved">
+approved registration of
+<a class="log-node-title-link overflow" data-bind="text: nodeTitle , attr: {href: nodeUrl}"></a>
+</script>
+
+<script type="text/html" id="registration_approved_no_user">
+Registration of
+<a class="log-node-title-link overflow" data-bind="text: nodeTitle, attr: {href: nodeUrl}"></a> approved
+</script>
+
+<script type="text/html" id="project_created">
+created
+<a class="log-node-title-link overflow" data-bind="text: nodeTitle, attr: {href: nodeUrl}"></a>
+</script>
+
+<script type="text/html" id="project_deleted">
+deleted
+<span class="log-node-title-link overflow" data-bind="text: nodeTitle"></span>
+</script>
+
+<script type="text/html" id="created_from">
+created
+<a class="log-node-title-link overflow" data-bind="text: nodeTitle, attr: {href: nodeUrl}"></a>
+based on <a class="log-node-title-link overflow"
+data-bind="text: params.template_node.title || 'another', attr: {href: params.template_node.url}"></a>
+</script>
+
+<script type="text/html" id="node_created">
+created
+<a class="log-node-title-link overflow" data-bind="text: nodeTitle, attr: {href: nodeUrl}"></a>
+</script>
+
+<script type="text/html" id="node_removed">
+removed
+<span class="log-node-title-link overflow" data-bind="text: nodeTitle"></span>
+</script>
+
+<script type="text/html" id="contributor_added">
+added
+<span data-bind="html: displayContributors"></span>
+as contributor(s) to
+<a class="log-node-title-link overflow" data-bind="attr: {href: $parent.nodeUrl}, text: $parent.nodeTitle"></a>
+</script>
+
+<script type="text/html" id="contributor_removed">
+removed
+<span data-bind="html: displayContributors"></span>
+as contributor(s) from
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="contributors_reordered">
+reordered contributors for
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="checked_in">
+checked in <span data-bind="text: params.kind"></span>
+<a class="overflow log-file-link" data-bind="click: NodeActions.addonFileRedirect, text: stripSlash(params.path)"></a>
+from <a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="checked_out">
+checked out <span data-bind="text: params.kind"></span>
+<a class="overflow log-file-link" data-bind="click: NodeActions.addonFileRedirect, text: stripSlash(params.path)"></a>
+from
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="permissions_updated">
+changed permissions for
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="made_public">
+made
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a> public
+</script>
+
+<script type="text/html" id="made_public_no_user">
+    <a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a> made public
+</script>
+
+<script type="text/html" id="made_private">
+made
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a> private
+</script>
+
+<script type="text/html" id="tag_added">
+tagged
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a> as <a data-bind="attr: {href: '/search/?q=%22' + params.tag + '%22'}, text: params.tag"></a>
+</script>
+
+<script type="text/html" id="tag_removed">
+removed tag <a data-bind="attr: {href: '/search/?q=%22' + params.tag + '%22'}, text: params.tag"></a>
+from
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="file_tag_added">
+tagged <a class="overflow log-file-link" data-bind="click: NodeActions.addonFileRedirect, text: stripSlash(params.path)"></a>
+in <a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+as <a data-bind="attr: {href: '/search/?q=%22' + params.tag + '%22'}, text: params.tag"></a>
+in OSF Storage
+</script>
+
+<script type="text/html" id="file_tag_removed">
+removed tag <a data-bind="attr: {href: '/search/?q=%22' + params.tag + '%22'}, text: params.tag"></a>
+from <a class="overflow log-file-link" data-bind="click: NodeActions.addonFileRedirect, text: stripSlash(params.path)"></a>
+in <a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+in OSF Storage
+</script>
+
+<script type="text/html" id="edit_title">
+changed the title from <span class="overflow" data-bind="text: params.title_original"></span>
+to
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: params.title_new"></a>
+</script>
+
+<script type="text/html" id="project_registered">
+        registered
+        <a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="prereg_registration_initiated">
+    submitted for review to the Preregistration Challenge a registration of
+    <a class="log-node-title-link overflow" data-bind="text: nodeTitle, attr: {href: nodeUrl}"></a>.
+</script>
+
+<script type="text/html" id="project_registered_no_user">
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a> registered
+</script>
+
+<script type="text/html" id="node_forked">
+created fork from
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="edit_description">
+edited description of  <a class="log-node-title-link" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="license_changed">
+updated the license of <a class="log-node-title-link" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="updated_fields">
+  changed the <span data-bind="listing: {
+                                 data: params.updated_fields,
+                                 map: mapUpdates
+                               }"></span> for
+  <a class="log-node-title-link" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="pointer_created">
+created a link to <span data-bind="text: params.pointer.category"></span>
+<a class="log-node-title-link overflow" data-bind="text: params.pointer.title, attr: {href: params.pointer.url}"></a>
+</script>
+
+<script type="text/html" id="pointer_removed">
+removed a link to <span data-bind="text: params.pointer.category"></span>
+<a class="log-node-title-link overflow" data-bind="text: params.pointer.title, attr: {href: params.pointer.url}"></a>
+</script>
+
+<script type="text/html" id="pointer_forked">
+forked a link to <span data-bind="text: params.pointer.category"></span>
+<a class="log-node-title-link overflow" data-bind="text: params.pointer.title, attr: {href: params.pointer.url}"></a>
+</script>
+
+<script type="text/html" id="addon_added">
+added addon <span data-bind="text: params.addon"></span>
+to
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="addon_removed">
+removed addon <span data-bind="text: params.addon"></span>
+from
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="comment_added">
+added a comment
+to
+<!-- ko if: params.file -->
+<a data-bind="attr: {href: params.file.url}, text: params.file.name"></a>
+in
+<!-- /ko -->
+<!-- ko if: params.wiki -->
+wiki page
+<a data-bind="attr: {href: params.wiki.url}, text: params.wiki.name"></a>
+in
+<!-- /ko -->
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="comment_updated">
+updated a comment
+on
+<!-- ko if: params.file -->
+<a data-bind="attr: {href: params.file.url}, text: params.file.name"></a>
+in
+<!-- /ko -->
+<!-- ko: params.wiki -->
+wiki page
+<a data-bind="attr: {href: params.wiki.url}, text: params.wiki.name"></a>
+in
+<!-- /ko -->
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="comment_removed">
+deleted a comment
+on
+<!-- ko if: params.file -->
+<a data-bind="attr: {href: params.file.url}, text: params.file.name"></a>
+in
+<!-- /ko -->
+<!-- ko if: params.wiki -->
+wiki page
+<a data-bind="attr: {href: params.wiki.url}, text: params.wiki.name"></a>
+in
+<!-- /ko -->
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="comment_restored">
+restored a comment
+on
+<!-- ko if: params.file -->
+<a data-bind="attr: {href: params.file.url}, text: params.file.name"></a>
+in
+<!-- /ko -->
+<!-- ko if: params.wiki -->
+wiki page
+<a data-bind="attr: {href: params.wiki.url}, text: params.wiki.name"></a>
+in
+<!-- /ko -->
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="made_contributor_visible">
+    <!-- ko if: log.anonymous -->
+        changed a non-bibliographic contributor to a bibliographic contributor on
+    <!-- /ko -->
+    <!-- ko ifnot: log.anonymous -->
+        made non-bibliographic contributor
+        <span data-bind="html: displayContributors"></span>
+        a bibliographic contributor on
+    <!-- /ko -->
+    <a class="log-node-title-link overflow" data-bind="attr: {href: $parent.nodeUrl}, text: $parent.nodeTitle"></a>
+</script>
+
+<script type="text/html" id="made_contributor_invisible">
+    <!-- ko if: log.anonymous -->
+        changed a bibliographic contributor to a non-bibliographic contributor on
+    <!-- /ko -->
+    <!-- ko ifnot: log.anonymous -->
+        made bibliographic contributor
+        <span data-bind="html: displayContributors"></span>
+        a non-bibliographic contributor on
+    <!-- /ko -->
+    <a class="log-node-title-link overflow" data-bind="attr: {href: $parent.nodeUrl}, text: $parent.nodeTitle"></a>
+</script>
+
+<script type="text/html" id="addon_file_copied">
+  <!-- ko if: params.source.materialized.endsWith('/') -->
+    copied <span class="overflow log-folder" data-bind="text: params.source.materialized"></span> from <span data-bind="text: params.source.addon"></span> in
+    <a class="log-node-title-link overflow" data-bind="attr: {href: params.source.node.url}, text:params.source.node.title"></a>
+    to <span class="overflow log-folder" data-bind="text: params.destination.materialized"></span> in <span data-bind="text: params.destination.addon"></span> in
+    <a class="log-node-title-link overflow" data-bind="attr: {href: $parent.nodeUrl}, text: $parent.nodeTitle"></a>
+  <!-- /ko -->
+  <!-- ko ifnot: params.source.materialized.endsWith('/') -->
+    copied <a data-bind="attr: {href: params.source.url}, text: params.source.materialized" class="overflow"></a> from <span data-bind="text: params.source.addon"></span> in
+    <a class="log-node-title-link overflow" data-bind="attr: {href: params.source.node.url}, text: params.source.node.title"></a>
+    to <a data-bind="attr: {href: params.destination.url}, text: params.destination.materialized" class="overflow"></a> in <span data-bind="text: params.destination.addon"></span> in
+    <a class="log-node-title-link overflow" data-bind="attr: {href: $parent.nodeUrl}, text: $parent.nodeTitle"></a>
+  <!-- /ko -->
+</script>
+
+<script type="text/html" id="addon_file_moved">
+  <!-- ko if: params.source.materialized.endsWith('/') -->
+  moved <span class="overflow" data-bind="text: params.source.materialized"></span> from <span data-bind="text: params.source.addon"></span> in
+  <a class="log-node-title-link overflow" data-bind="attr: {href: params.source.node.url}, text: params.source.node.title"></a>
+  to <span class="overflow log-folder" data-bind="text: params.destination.materialized"></span> in <span data-bind="text: params.destination.addon"></span> in
+  <a class="log-node-title-link overflow" data-bind="attr: {href: $parent.nodeUrl}, text: $parent.nodeTitle"></a>
+  <!-- /ko -->
+  <!-- ko ifnot: params.source.materialized.endsWith('/') -->
+  moved <span class="overflow" data-bind="text: params.source.materialized"></span> from <span data-bind="text: params.source.addon"></span> in
+  <a class="log-node-title-link overflow" data-bind="attr: {href: params.source.node.url}, text: params.source.node.title"></a>
+  to <a class="overflow" data-bind="attr: {href: params.destination.url}, text: params.destination.materialized"></a> in <span data-bind="text: params.destination.addon"></span> in
+  <a class="log-node-title-link overflow" data-bind="attr: {href: $parent.nodeUrl}, text: $parent.nodeTitle"></a>
+  <!-- /ko -->
+</script>
+
+<script type="text/html" id="addon_file_renamed">
+    renamed <span class="overflow" data-bind="text: params.source.materialized"></span>
+  <!-- ko if: params.source.materialized.endsWith('/') -->
+  to <span class="overflow log-folder" data-bind="text: params.destination.materialized"></span> in <span data-bind="text: params.destination.addon"></span> in
+  <!-- /ko -->
+  <!-- ko ifnot: params.source.materialized.endsWith('/') -->
+  to <a class="overflow" data-bind="attr: {href: params.destination.url}, text: params.destination.materialized"></a> in <span data-bind="text: params.destination.addon"></span>  in
+  <!-- /ko -->
+    <a class="log-node-title-link overflow" data-bind="attr: {href: $parent.nodeUrl}, text: $parent.nodeTitle"></a>
+</script>
+
+<script type="text/html" id="external_ids_added">
+created external identifiers
+<span data-bind="text: 'doi:' + params.identifiers.doi"></span> and
+<span data-bind="text: 'ark:' + params.identifiers.ark"></span>
+on
+<a class="log-node-title-link overflow" data-bind="attr: {href: $parent.nodeUrl}, text: $parent.nodeTitle"></a>
+</script>
+
+<script type="text/html" id="citation_added">
+added a citation (<span data-bind="text: params.citation.name"></span>)
+to
+<a class="log-node-title-link overflow" data-bind="attr: {href: $parent.nodeUrl}, text: $parent.nodeTitle"></a>
+</script>
+
+<script type="text/html" id="citation_edited">
+<!-- ko if: params.citation.new_name -->
+updated a citation name from <span data-bind="text: params.citation.name"></span> to <strong data-bind="text: params.citation.new_name"></strong>
+  <!-- ko if: params.citation.new_text -->
+    and edited its text
+  <!-- /ko -->
+<!-- /ko -->
+<!-- ko ifnot: params.citation.new_name -->
+edited the text of a citation (<span data-bind="text: params.citation.name"></span>)
+<!-- /ko -->
+on
+<a class="log-node-title-link overflow" data-bind="attr: {href: $parent.nodeUrl}, text: $parent.nodeTitle"></a>
+</script>
+
+<script type="text/html" id="citation_removed">
+removed a citation (<span data-bind="text: params.citation.name"></span>)
+from
+<a class="log-node-title-link overflow" data-bind="attr: {href: $parent.nodeUrl}, text: $parent.nodeTitle"></a>
+</script>
+
+<script type="text/html" id="primary_institution_changed">
+changed primary institution of <a class="log-node-title-link overflow" data-bind="text: nodeTitle, attr: {href: nodeUrl}"></a>
+<!-- ko if: params.previous_institution.name != 'None' --><!-- TODO: Check datatypes here -->
+ from <a class="log-node-title-link overflow" data-bind="attr: {href: '/institutions/' + params.previous_institution.id}, text: params.previous_institution.name"></a>
+<!-- /ko -->
+ to <a class="log-node-title-link overflow" data-bind="attr: {href: '/institutions/' + params.institution.id}, text: params.institution.name"></a>.
+</script>
+
+<script type="text/html" id="primary_institution_removed">
+removed <a class="log-node-title-link overflow" data-bind="attr: {href: '/institutions/' + params.institution.id}, text: params.institution.name"></a>
+as the primary institution of <a class="log-node-title-link overflow" data-bind="text: nodeTitle, attr: {href: nodeUrl}"></a>.
+</script>
+<script type="text/html" id="box_file_added">
+added file
+<a class="overflow log-file-link" data-bind="click: NodeActions.addonFileRedirect, text: stripSlash(params.path)"></a> to
+Box in
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="box_folder_created">
+created folder
+<span class="overflow log-folder" data-bind="text: stripSlash(params.path)"></span> in
+Box in
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="box_file_updated">
+updated file
+<a class="overflow log-file-link" data-bind="click: NodeActions.addonFileRedirect, text: stripSlash(params.path)"></a> to
+Box in
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+
+<script type="text/html" id="box_file_removed">
+removed <span data-bind="text: pathType(params.path) "></span> <span class="overflow" data-bind="text: stripSlash(params.path)"></span> from
+Box in
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+
+<script type="text/html" id="box_folder_selected">
+linked Box folder
+<span class="overflow" data-bind="text: (params.folder === 'All Files' ? '/ (Full Box)' : (params.folder || '').replace('All Files',''))"></span> to
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+
+<script type="text/html" id="box_node_deauthorized">
+deauthorized the Box addon for
+<a class="log-node-title-link overflow"
+    data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+
+<script type="text/html" id="box_node_authorized">
+authorized the Box addon for
+<a class="log-node-title-link overflow"
+    data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="box_node_deauthorized_no_user">
+Box addon for
+<a class="log-node-title-link overflow"
+    data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+    deauthorized
+</script>
+<script type="text/html" id="dataverse_file_added">
+added file
+<a class="overflow log-file-link" data-bind="click: NodeActions.addonFileRedirect, text: params.filename"></a> to
+Dataverse dataset <span class="overflow" data-bind="text: params.dataset"></span>
+in
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="dataverse_file_removed">
+removed file <span class="overflow" data-bind="text: params.filename"></span> from
+Dataverse dataset <span class="overflow" data-bind="text: params.dataset"></span>
+in
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="dataverse_dataset_linked">
+linked Dataverse dataset
+<span class="overflow" data-bind="text: params.dataset"></span> to
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<!-- Legacy version -->
+<script type="text/html" id="dataverse_study_linked">
+linked Dataverse dataset
+<span class="overflow" data-bind="params.study"></span> to
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="dataverse_dataset_published">
+published a new version of Dataverse dataset
+<span class="overflow" data-bind="text: params.dataset"></span> to
+for
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<!-- Legacy version -->
+<script type="text/html" id="dataverse_study_released">
+published a new version of Dataverse dataset
+<span class="overflow" data-bind="text: params.study"></span> to
+for
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="dataverse_node_authorized">
+authorized the Dataverse addon for
+<a class="log-node-title-link overflow"
+    data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="dataverse_node_deauthorized">
+deauthorized the Dataverse addon for
+<a class="log-node-title-link overflow"
+    data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="dataverse_node_deauthorized_no_user">
+Dataverse addon for
+<a class="log-node-title-link overflow"
+    data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+    deauthorized
+</script>
+<script type="text/html" id="dropbox_file_added">
+added file
+<a class="overflow log-file-link" data-bind="click: NodeActions.addonFileRedirect, text: params.path"></a> to
+Dropbox in
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="dropbox_folder_created">
+created folder
+<span class="overflow log-folder" data-bind="text: stripSlash(params.path)"></span> in
+Dropbox in
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="dropbox_file_updated">
+updated file
+<a class="overflow log-file-link" data-bind="click: NodeActions.addonFileRedirect, text: params.path"></a> to
+Dropbox in
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+
+<script type="text/html" id="dropbox_file_removed">
+removed <span data-bind="text: pathType(params.path)"></span> <span class="overflow" data-bind="text: stripSlash(params.path)"></span> from
+Dropbox in
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+
+<script type="text/html" id="dropbox_folder_selected">
+linked Dropbox folder <span class="overflow" data-bind="text: params.folder === '/' ? '/ (Full Dropbox)' : params.folder"></span> to
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+
+<script type="text/html" id="dropbox_node_deauthorized">
+deauthorized the Dropbox addon for
+<a class="log-node-title-link overflow"
+    data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+
+<script type="text/html" id="dropbox_node_authorized">
+authorized the Dropbox addon for
+<a class="log-node-title-link overflow"
+    data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="dropbox_node_deauthorized_no_user">
+Dropbox addon for
+<a class="log-node-title-link overflow"
+    data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+    deauthorized
+</script>
+<script type="text/html" id="figshare_file_added">
+added file
+<a class="overflow log-file-link" data-bind="click: NodeActions.addonFileRedirect, text: params.path"></a> to
+figshare <span data-bind="text: params.figshare.title"></span> in
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="figshare_file_removed">
+removed file <span class="overflow" data-bind="text: params.path"></span> from
+figshare in
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="figshare_content_linked">
+linked figshare project /<span data-bind="text: params.figshare.title"></span> to
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="figshare_content_unlinked">
+unlinked figshare project /<span data-bind="text: params.figshare.title"></span> from
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="figshare_node_authorized">
+authorized the figshare addon for
+<a class="log-node-title-link overflow"
+    data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="figshare_node_deauthorized">
+deauthorized the figshare addon for
+<a class="log-node-title-link overflow"
+    data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="figshare_node_deauthorized_no_user">
+figshare addon for
+<a class="log-node-title-link overflow"
+    data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+    deauthorized
+</script>
+<script type="text/html" id="forward_url_changed">
+changed forward URL to
+<a target="_blank" class="overflow log-file-link" data-bind="attr: {href: params.forward_url}, text: params.forward_url"></a>
+in
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+<script type="text/html" id="github_file_added">
+added file
+<a class="overflow log-file-link" data-bind="click: NodeActions.addonFileRedirect, text: params.path"></a> to
+GitHub repo
+<span data-bind="text: params.github.user"></span> /
+<span data-bind="text: params.github.repo"></span> to
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="github_folder_created">
+created folder
+<span class="overflow log-folder" data-bind="text: stripSlash(params.path)"></span> in
+GitHub repo
+<span data-bind="text: params.github.user"></span> /
+<span data-bind="text: params.github.repo"></span> in
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="github_file_updated">
+updated file
+<a class="overflow log-file-link" data-bind="click: NodeActions.addonFileRedirect, text: params.path"></a> to
+GitHub repo
+<span data-bind="text: params.github.user"></span> /
+<span data-bind="text: params.github.repo"></span> in
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="github_file_removed">
+removed file <span class="overflow" data-bind="text: params.path"></span> from
+GitHub repo
+<span data-bind="text: params.github.user"></span> /
+<span data-bind="text: params.github.repo"></span> from
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="github_repo_linked">
+linked GitHub repo
+<span data-bind="text: params.github.user"></span> /
+<span data-bind="text: params.github.repo"></span> to
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="github_repo_unlinked">
+unlinked GitHub repo
+<span data-bind="text: params.github.user"></span> /
+<span data-bind="text: params.github.repo"></span> from
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="github_node_authorized">
+authorized the GitHub addon for
+<a class="log-node-title-link overflow"
+    data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="github_node_deauthorized">
+deauthorized the GitHub addon for
+<a class="log-node-title-link overflow"
+    data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="github_node_deauthorized_no_user">
+GitHub addon for
+<a class="log-node-title-link overflow"
+    data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+    deauthorized
+</script>
+<script type="text/html" id="mendeley_folder_selected">
+linked Mendeley folder /<span class="overflow" data-bind="text: params.folder_name"></span> to
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="mendeley_node_deauthorized">
+deauthorized the Mendeley addon for
+<a class="log-node-title-link overflow"
+    data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="mendeley_node_authorized">
+authorized the Mendeley addon for
+<a class="log-node-title-link overflow"
+    data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+<script type="text/html" id="zotero_folder_selected">
+linked Zotero folder /<span class="overflow" data-bind="text: params.folder_name"></span> to
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="zotero_node_deauthorized">
+deauthorized the Zotero addon for
+<a class="log-node-title-link overflow"
+    data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="zotero_node_authorized">
+authorized the Zotero addon for
+<a class="log-node-title-link overflow"
+    data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+<script type="text/html" id="osf_storage_file_added">
+added file
+<a class="overflow log-file-link" data-bind="click: NodeActions.addonFileRedirect, text: stripSlash(params.path)"></a> to OSF Storage in
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="osf_storage_folder_created">
+created folder
+<span class="overflow log-folder" data-bind="text: stripSlash(params.path)"></span> in
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="osf_storage_file_updated">
+updated file
+<a class="overflow log-file-link" data-bind="click: NodeActions.addonFileRedirect, text: stripSlash(params.path)"></a> to OSF Storage in
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="osf_storage_file_removed">
+  removed <span data-bind="text: pathType(params.path)"></span> <span class="overflow" data-bind="stripSlash(params.path)"></span>
+  from OSF Storage in
+  <a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+
+<script type="text/html" id="file_added">
+added file <a class="overflow log-file-link" data-bind="click: NodeActions.addonFileRedirect, text: params.path"></a> to
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="file_updated">
+updated file <a class="overflow log-file-link" data-bind="click: NodeActions.addonFileRedirect, text: params.path"></a> in
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="file_removed">
+removed file <span data-bind="text: params.path"></span> from
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+<script type="text/html" id="s3_file_added">
+added file
+<a class="overflow log-file-link" data-bind="click: NodeActions.addonFileRedirect, text: params.path"></a> to
+bucket
+<span data-bind="text: params.bucket"></span> in
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="s3_folder_created">
+created folder
+<span class="overflow log-folder" data-bind="text: stripSlash(params.path)"></span> in
+bucket <span data-bind="text: params.bucket"></span> in
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="s3_file_updated">
+updated file
+<a class="overflow log-file-link" data-bind="click: NodeActions.addonFileRedirect, text: params.path"></a> in
+bucket
+<span data-bind="text: params.bucket"></span> in
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="s3_file_removed">
+removed <span data-bind="text: pathType(params.path)"></span> <span class="overflow" data-bind="text: stripSlash(params.path)"></span> from
+bucket
+<span data-bind="text: params.bucket"></span> in
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="s3_bucket_linked">
+linked the Amazon S3 bucket /
+<span data-bind="text: params.bucket"></span> to
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="s3_bucket_unlinked">
+un-selected bucket
+<span data-bind="text: params.bucket"></span> in
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="s3_node_authorized">
+authorized the Amazon S3 addon for
+<a class="log-node-title-link overflow"
+    data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="s3_node_deauthorized">
+deauthorized the Amazon S3 addon for
+<a class="log-node-title-link overflow"
+    data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="s3_node_deauthorized_no_user">
+Amazon S3 addon for
+<a class="log-node-title-link overflow"
+    data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+    deauthorized
+</script>
+<script type="text/html" id="wiki_updated">
+updated wiki page
+<a data-bind="attr: {href: wikiUrl}, text: params.page"></a>
+to version <span data-bind="text: params.version"></span>
+of <a class = "log-node-title-link overflow" data-bind="text:nodeTitle, attr: {href: nodeUrl}"></a>
+</script>
+
+<script type="text/html" id="wiki_renamed">
+renamed wiki page
+<a data-bind="attr: {href: wikiIdUrl}, text: params.old_page"></a>
+to <a data-bind="attr: {href: wikiIdUrl}, text: params.page"></a>
+of <a class = "log-node-title-link overflow" data-bind="text:nodeTitle, attr: {href: nodeUrl}"></a>
+</script>
+
+<script type="text/html" id="wiki_deleted">
+deleted wiki page
+<a data-bind="attr: {href: wikiUrl}, text: params.page"></a>
+of <a class = "log-node-title-link overflow" data-bind="text:nodeTitle, attr: {href: nodeUrl}"></a>
+</script>
+
+<script type="text/html" id="made_wiki_public">
+made the wiki
+of <a class = "log-node-title-link overflow" data-bind="text:nodeTitle, attr: {href: nodeUrl}"></a>
+publicly editable
+</script>
+
+<script type="text/html" id="made_wiki_private">
+made the wiki
+of <a class = "log-node-title-link overflow" data-bind="text:nodeTitle, attr: {href: nodeUrl}"></a>
+privately editable
+</script>
+<script type="text/html" id="googledrive_file_added">
+added file
+<a class="overflow log-file-link" data-bind="click: NodeActions.addonFileRedirect, text: decodeURIComponent(params.path)"></a> to
+Google Drive in
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="googledrive_folder_created">
+created folder
+<span class="overflow log-folder" data-bind="text: stripSlash(decodeURIComponent(params.path))"></span> in
+Google Drive in
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="googledrive_file_updated">
+updated file
+<a class="overflow log-file-link" data-bind="click: NodeActions.addonFileRedirect, text: decodeURIComponent(params.path)"></a> to
+Google Drive in
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+
+<script type="text/html" id="googledrive_file_removed">
+removed <span data-bind="text: pathType(params.path) "></span> <span class="overflow" data-bind="text: stripSlash(decodeURIComponent(params.path))"></span> from
+Google Drive in
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+
+<script type="text/html" id="googledrive_folder_selected">
+linked Google Drive folder /<span class="overflow" data-bind="text: (params.folder === '/' ? '(Full Google Drive)' : decodeURIComponent(params.folder))"></span> to
+<a class="log-node-title-link overflow" data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+
+<script type="text/html" id="googledrive_node_deauthorized">
+deauthorized the Google Drive addon for
+<a class="log-node-title-link overflow"
+    data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="googledrive_node_deauthorized">
+Google Drive addon for
+<a class="log-node-title-link overflow"
+    data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+    deauthorized
+</script>
+
+
+<script type="text/html" id="googledrive_node_authorized">
+authorized the Google Drive addon for
+<a class="log-node-title-link overflow"
+    data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+</script>
+
+<script type="text/html" id="googledrive_node_deauthorized_no_user">
+Google Drive addon for
+<a class="log-node-title-link overflow"
+    data-bind="attr: {href: nodeUrl}, text: nodeTitle"></a>
+    deauthorized
+</script>
+
+<script id="profileSocial" type="text/html">
+
+    <link rel="stylesheet" href='/static/css/pages/profile-page.css'>
+
+    <div data-bind="if: mode() === 'edit'">
+
+        <form role="form" data-bind="submit: submit">
+
+            <label>Your websites</label>
+            <div data-bind="sortable: {
+                        data: profileWebsites,
+                        options: {
+                            handle: '.sort-handle',
+                            containment: '#containDrag'
+                        }
+                    }">
+
+                <div>
+                    <div class="sort-handle">
+                        <i title="Click to remove" class="btn text-danger pull-right  fa fa-times fa" data-bind="click: $parent.removeWebsite"></i>
+                        <div class="input-group" >
+                            <span class="input-group-addon"><i title="Drag to reorder"  class="fa fa-bars"></i></span>
+                            <input type="url" class="form-control" data-bind="value: $parent.profileWebsites()[$index()]" placeholder="http://yourwebsite.com"/>
+                        </div>
+                    </div>
+                    <div class="form-group" data-bind="visible: $index() != ($parent.profileWebsites().length - 1)">
+                    </div>
+                </div>
+            </div>
+            <div data-bind="ifnot: hasValidWebsites" class="text-danger">Please enter a valid website</div>
+            <div class="p-t-sm p-b-sm">
+                <a class="btn btn-default" data-bind="click: addWebsiteInput">
+                    Add website
+                </a>
+            </div>
+
+            <div class="form-group">
+                <label>ORCID</label>
+                <div class="input-group">
+                <span class="input-group-addon">http://orcid.org/</span>
+                <input class="form-control" data-bind="value: orcid" placeholder="xxxx-xxxx-xxxx-xxxx"/>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>ResearcherID</label>
+                <div class="input-group">
+                <span class="input-group-addon">http://researcherid.com/rid/</span>
+                <input class="form-control" data-bind="value: researcherId" placeholder="x-xxxx-xxxx" />
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Twitter</label>
+                <div class="input-group">
+                <span class="input-group-addon">@</span>
+                <input class="form-control" data-bind="value: twitter" placeholder="twitterhandle"/>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>GitHub</label>
+                <div class="input-group">
+                    <span class="input-group-addon">https://github.com/</span>
+                    <input class="form-control" data-bind="value: github" placeholder="username"/>
+                    <span class="input-group-btn" data-bind="if: github.hasAddon()">
+                        <button
+                                class="btn btn-primary"
+                                data-bind="click: github.importAddon"
+                                >Import</button>
+                     </span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>LinkedIn</label>
+                <div class="input-group">
+                <span class="input-group-addon">https://www.linkedin.com/</span>
+                <input class="form-control" data-bind="value: linkedIn" placeholder="in/userID, profile/view?id=profileID, or pub/pubID"/>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>ImpactStory</label>
+                <div class="input-group">
+                <span class="input-group-addon">https://impactstory.org/</span>
+                <input class="form-control" data-bind="value: impactStory" placeholder="profileID"/>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Google Scholar</label>
+                <div class="input-group">
+                <span class="input-group-addon">http://scholar.google.com/citations?user=</span>
+                <input class="form-control" data-bind="value: scholar" placeholder="profileID"/>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>ResearchGate</label>
+                <div class="input-group">
+                <span class="input-group-addon">https://researchgate.net/profile/</span>
+                <input class="form-control" data-bind="value: researchGate" placeholder="profileID"/>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Academia</label>
+                <div class="input-group">
+                <span class="input-group-addon">https://</span>
+                <input class="form-control" data-bind="value: academiaInstitution" placeholder="institution" size="5"/>
+                <span class="input-group-addon">.academia.edu/</span>
+                <input class="form-control" data-bind="value: academiaProfileID" placeholder="profileID"/>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Baidu Scholar</label>
+                <div class="input-group">
+                <span class="input-group-addon">http://xueshu.baidu.com/scholarID/</span>
+                <input class="form-control" data-bind="value: baiduScholar" placeholder="profileID"/>
+                </div>
+            </div>
+
+            <div class="p-t-lg p-b-lg">
+
+                <button
+                        type="button"
+                        class="btn btn-default"
+                        data-bind="click: cancel"
+                    >Discard changes</button>
+
+                <button
+                        type="submit"
+                        class="btn btn-success"
+                    >Save</button>
+
+                <!-- Flashed Messages -->
+                <div class="help-block flashed-message">
+                    <p data-bind="html: message, attr: {class: messageClass}"></p>
+                </div>
+
+            </div>
+
+        </form>
+
+    </div>
+
+    <div data-bind="if: mode() === 'view'">
+
+        <table class="table" data-bind="if: hasValues()">
+            <tbody>
+                <tr data-bind="if: hasProfileWebsites()">
+                    <td data-bind="visible: profileWebsites().length > 1">Personal websites</td>
+                    <td data-bind="visible: profileWebsites().length === 1">Personal website</td>
+                    <td data-bind="foreach: profileWebsites"><a target="_blank" data-bind="attr: {href: $data}, text: $data"></a><br></td>
+                </tr>
+            </tbody>
+
+            <tbody data-bind="foreach: values">
+                <tr data-bind="if: value">
+                    <td><span data-bind="text: label"></span></td>
+                    <td><a target="_blank" data-bind="attr: {href: value}, text: text"></a></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div data-bind="ifnot: hasValues()">
+            <div class="well well-sm">Not provided</div>
+        </div>
+
+        <div data-bind="if: editAllowed">
+            <a class="btn btn-primary" data-bind="click: edit">Edit</a>
+        </div>
+
+    </div>
+
+</script>
+
+<script id="profileJobs" type="text/html">
+
+    <div data-bind="if: mode() === 'edit'">
+
+        <form role="form" data-bind="submit: submit, validationOptions: {insertMessages: false, messagesOnModified: false}">
+
+            <div data-bind="sortable: {
+                    data: contents,
+                    options: {
+                        handle: '.sort-handle',
+                        containment: '#containDrag',
+                        tolerance: 'pointer'
+                    }
+                }">
+
+                <div>
+
+                    <div class="well well-sm sort-handle">
+                        <span>Position <span data-bind="text: $index() + 1"></span></span>
+                        <span data-bind="visible: $parent.contentsLength() > 1">
+                            [ drag to reorder ]
+                        </span>
+                        <a
+                                class="text-danger pull-right"
+                                data-bind="click: $parent.removeContent.bind($parent)"
+                                >Remove</a>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Institution / Employer</label>
+                        <input class="form-control" data-bind="value: institution"
+                            placeholder="Required"/>
+                        <div data-bind="visible: $parent.showMessages, css:'text-danger'">
+                            <p data-bind="validationMessage: institution"></p>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Department / Institute</label>
+                        <input class="form-control" data-bind="value: department" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Job title</label>
+                        <input class="form-control" data-bind="value: title" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Start date</label>
+                        <div class="row">
+                            <div class ="col-md-3">
+                                <select class="form-control" data-bind="options: months,
+                                         optionsCaption: '-- Month --',
+                                         value: startMonth">
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <input class="form-control" placeholder="Year" data-bind="value: startYear" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group" data-bind="ifnot: ongoing">
+                        <label>End date</label>
+                            <div class="row">
+                                <div class ="col-md-3">
+                                    <select class="form-control" data-bind="options: months,
+                                         optionsCaption: '-- Month --',
+                                         value: endMonth">
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <input class="form-control" placeholder="Year" data-bind="value: endYear" />
+                                </div>
+                            </div>
+                    </div>
+
+
+                    <div class="form-group">
+                        <label>Ongoing</label>
+                        <input type="checkbox" data-bind="checked: ongoing, click: clearEnd"/>
+                    </div>
+
+                    <div data-bind="visible: $parent.showMessages, css:'text-danger'">
+                        <p data-bind="validationMessage: start"></p>
+                        <p data-bind="validationMessage: end"></p>
+                        <p data-bind="validationMessage: startYear"></p>
+                        <p data-bind="validationMessage: endYear"></p>
+                    </div>
+
+                    <hr data-bind="visible: $index() != ($parent.contents().length - 1)" />
+
+                </div>
+
+            </div>
+
+            <div>
+                <a class="btn btn-default" data-bind="click: addContent">
+                    Add another
+                </a>
+            </div>
+
+            <div class="p-t-lg p-b-lg">
+
+                <button
+                        type="button"
+                        class="btn btn-default"
+                        data-bind="click: cancel"
+                    >Discard changes</button>
+
+                <button
+                        type="submit"
+                        class="btn btn-success"
+                    >Save</button>
+
+            </div>
+
+            <!-- Flashed Messages -->
+            <div class="help-block">
+                <p data-bind="html: message, attr: {class: messageClass}"></p>
+            </div>
+
+        </form>
+
+    </div>
+
+    <div data-bind="if: mode() === 'view'">
+
+        <div data-bind="ifnot: contents().length">
+            <div class="well well-sm">Not provided</div>
+        </div>
+
+        <div class="row" data-bind="if: contents().length">
+
+            <div data-bind="foreach: contents">
+                <div class="col-xs-12">
+                    <!-- ko if: expandable() -->
+                        <div class="panel panel-default">
+                            <div class="panel-heading card-heading" data-bind="click: toggle(), attr: {id: 'jobHeading' + $index(), href: '#jobCard' + $index()}" role="button" data-toggle="collapse" aria-controls="card" aria-expanded="false">
+                                <div class="header-content">
+                                    <h5 class="institution" data-bind="text: institution"></h5>
+                                    <span data-bind="if: startYear()" class="subheading">
+                                        <span data-bind="text: startMonth"></span> <span data-bind="text: startYear"></span> - <span data-bind="text: endView"></span>
+                                    </span>
+                                </div>
+                                <span data-bind="attr: {class: expanded() ? 'fa toggle-icon fa-angle-down' : 'fa toggle-icon fa-angle-up'}"></span>
+                            </div>
+                            <div data-bind="attr: {id: 'jobCard' + $index(), 'aria-labelledby': 'jobHeading' + $index()}" class="panel-collapse collapse">
+                                <div class="panel-body">
+                                    <span data-bind="if: department().length"><h5>Department / Institute:</h5> <span data-bind="text: department"></span></span>
+                                    <span data-bind="if: title().length"><h5>Title:</h5> <span data-bind="text: title"></span></span>
+                                    <span data-bind="if: startYear()"><h5>Dates:</h5>
+                                        <span data-bind="text: startMonth"></span> <span data-bind="text: startYear"></span> - <span data-bind="text: endView"></span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    <!-- /ko -->
+                    <!-- ko ifnot: expandable() -->
+                        <div class="panel panel-default">
+                            <div class="panel-heading no-bottom-border">
+                                <div>
+                                    <h5 data-bind="text: institution"></h5>
+                                </div>
+                            </div>
+                        </div>
+                    <!-- /ko -->
+                </div>
+            </div>
+        </div>
+
+        <div data-bind="if: editable">
+            <a class="btn btn-default" data-bind="click: edit">Edit</a>
+        </div>
+
+    </div>
+
+</script>
+
+<script id="profileSchools" type="text/html">
+
+    <div data-bind="if: mode() === 'edit'">
+
+        <form role="form" data-bind="submit: submit, validationOptions: {insertMessages: false, messagesOnModified: false}">
+
+            <div data-bind="sortable: {
+                    data: contents,
+                    options: {
+                        handle: '.sort-handle',
+                        containment: '#containDrag',
+                        tolerance: 'pointer'
+                    }
+                }">
+
+                <div>
+
+                    <div class="well well-sm sort-handle">
+                        <span>Position <span data-bind="text: $index() + 1"></span></span>
+                        <span data-bind="visible: $parent.contentsLength() > 1">
+                            [ drag to reorder ]
+                        </span>
+                        <a
+                                class="text-danger pull-right"
+                                data-bind="click: $parent.removeContent.bind($parent)"
+                                >Remove</a>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Institution</label>
+                        <input class="form-control" data-bind="value: institution" 
+                            placeholder="Required" />
+                        <div data-bind="visible: $parent.showMessages, css:'text-danger'">
+                            <p data-bind="validationMessage: institution"></p>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Department</label>
+                        <input class="form-control" data-bind="value: department" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Degree</label>
+                        <input class="form-control" data-bind="value: degree" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Start date</label>
+                        <div class="row">
+                            <div class ="col-md-3">
+                                <select class="form-control" data-bind="options: months,
+                                         optionsCaption: '-- Month --',
+                                         value: startMonth">
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <input class="form-control" placeholder="Year" data-bind="value: startYear" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group" data-bind="ifnot: ongoing">
+                        <label>End date</label>
+                            <div class="row">
+                                <div class ="col-md-3">
+                                    <select class="form-control" data-bind="options: months,
+                                         optionsCaption: '-- Month --',
+                                         value: endMonth">
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <input class="form-control" placeholder="Year" data-bind="value: endYear" />
+                                </div>
+                            </div>
+                    </div>
+
+
+                    <div class="form-group">
+                        <label>Ongoing</label>
+                        <input type="checkbox" data-bind="checked: ongoing, click: clearEnd"/>
+                    </div>
+
+                    <div data-bind="visible: $parent.showMessages, css:'text-danger'">
+                        <p data-bind="validationMessage: start"></p>
+                        <p data-bind="validationMessage: end"></p>
+                        <p data-bind="validationMessage: startYear"></p>
+                        <p data-bind="validationMessage: endYear"></p>
+                    </div>
+
+                    <hr data-bind="visible: $index() != ($parent.contents().length - 1)" />
+
+                </div>
+
+            </div>
+
+            <div>
+                <a class="btn btn-default" data-bind="click: addContent">
+                    Add another
+                </a>
+            </div>
+
+            <div class="p-t-lg p-b-lg">
+
+                <button
+                        type="button"
+                        class="btn btn-default"
+                        data-bind="click: cancel"
+                    >Discard changes</button>
+
+                <button
+                        type="submit"
+                        class="btn btn-success"
+                    >Save</button>
+
+            </div>
+
+            <!-- Flashed Messages -->
+            <div class="help-block">
+                <p data-bind="html: message, attr: {class: messageClass}"></p>
+            </div>
+
+        </form>
+
+    </div>
+
+    <div data-bind="if: mode() === 'view'">
+
+        <div data-bind="ifnot: contents().length">
+            <div class="well well-sm">Not provided</div>
+        </div>
+
+        <div class="row" data-bind="if: contents().length">
+            <div data-bind="foreach: contents">
+                <div class="col-xs-12">
+                    <!-- ko if: expandable() -->
+                        <div class="panel panel-default">
+                            <div class="panel-heading card-heading" data-bind="click: toggle(), attr: {id: 'schoolHeading' + $index(), href: '#schoolCard' + $index()}" role="button" data-toggle="collapse" aria-controls="card" aria-expanded="false">
+                                <div class="header-content">
+                                    <h5 class="institution" data-bind="text: institution"></h5>
+                                    <span data-bind="if: startYear()" class="subheading">
+                                        <span data-bind="text: startMonth"></span> <span data-bind="text: startYear"></span> - <span data-bind="text: endView"></span>
+                                    </span>
+                                </div>
+                                <span data-bind="attr: {class: expanded() ? 'fa toggle-icon fa-angle-down' : 'fa toggle-icon fa-angle-up'}"></span>
+                            </div>
+                            <div data-bind="attr: {id: 'schoolCard' + $index(), 'aria-labelledby': 'schoolHeading' + $index()}" class="panel-collapse collapse">
+                                <div class="panel-body">
+                                    <span data-bind="if: department().length"><h5>Department:</h5> <span data-bind="text: department"></span></span>
+                                    <span data-bind="if: degree().length"><h5>Degree:</h5> <span data-bind="text: degree"></span></span>
+                                    <span data-bind="if: startYear()"><h5>Dates:</h5>
+                                        <span data-bind="text: startMonth"></span> <span data-bind="text: startYear"></span> - <span data-bind="text: endView"></span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    <!-- /ko -->
+                    <!-- ko ifnot: expandable() -->
+                        <div class="panel panel-default">
+                            <div class="panel-heading no-bottom-border">
+                                <div>
+                                    <h5 data-bind="text: institution"></h5>
+                                </div>
+                            </div>
+                        </div>
+                    <!-- /ko -->
+                </div>
+            </div>
+
+        </div>
+
+
+        <div data-bind="if: editable">
+            <a class="btn btn-default" data-bind="click: edit">Edit</a>
+        </div>
+
+    </div>
+
+</script>
+
+<script type="text/javascript">
+  (function() {
+      var socialUrls = {
+          crud: "/api/v1/settings/social/8bdhs/"
+      };
+      var jobsUrls = {
+          crud: "/api/v1/settings/jobs/8bdhs/"
+      };
+      var schoolsUrls = {
+          crud: "/api/v1/settings/schools/8bdhs/"
+      };
+
+      window.contextVars = $.extend(true, {}, window.contextVars, {
+          socialUrls: socialUrls,
+          jobsUrls: jobsUrls,
+          schoolsUrls: schoolsUrls
+      });
+  })();
+</script>
+
+
+        </div><!-- end container -->
+    </div><!-- end watermarked -->
+
+
+<div id="footerSlideIn">
+    <div class="container">
+        <div class="row">
+            <div class='col-sm-2 hidden-xs'>
+                <img class="logo" src="/static/img/circle_logo.png">
+            </div>
+            <div class='col-sm-10 col-xs-12'>
+                <a data-bind="click: dismiss" class="close" href="#">&times;</a>
+                <h1>Start managing your projects on the OSF today.</h1>
+                <p>Free and easy to use, the Open Science Framework supports the entire research lifecycle: planning, execution, reporting, archiving, and discovery.</p>
+                <div>
+                    <a data-bind="click: trackClick.bind($data, 'Create Account')" class="btn btn-primary" href="/#signUp">Create an Account</a>
+
+                    <a data-bind="click: trackClick.bind($data, 'Learn More')" class="btn btn-primary" href="http://help.osf.io" target="_blank" rel="noreferrer">Learn More</a>
+                    <a data-bind="click: dismiss">Hide this message</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+    
+    <footer class="footer m-t-lg m-b-lg p-lg bg-color-light">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-2 col-md-3 col-md-offset-1">
+                <h4>OSF</h4>
+                <ul>
+                    <li><a href="http://localhost:5000/explore/activity/">Explore</a></li>
+                    <li><script type="text/javascript">document.write("<n uers=\"znvygb:pbagnpg@bfs.vb\" ery=\"absbyybj\">Pbagnpg</n>".replace(/[a-zA-Z]/g,function(e){return String.fromCharCode((e<="Z"?90:122)>=(e=e.charCodeAt(0)+13)?e:e-26)}));</script><noscript>Contact OSF: <span class="obfuscated-email-noscript"><strong><u>cont<span style="display:none;">null</span>act@<span style="display:none;">null</span>osf.<span style="display:none;">null</span>io</u></strong></span></noscript></li>
+                    <li><a href="http://localhost:5000/support">Help/Support</a></li>
+                    <li><a href="http://help.osf.io" target="_blank" rel="noreferrer">Guides</li>
+                    <li><a href="http://localhost:5000/faq">FAQ</a></li>
+                </ul>
+            </div>
+            <div class="col-sm-5 col-md-4">
+                <h4>Center for Open Science</h4>
+                <ul>
+                    <li><a href="http://cos.io">Home</a></li>
+                    <li><a href="http://localhost:5000/ezcuj/wiki/home/">Reproducibility Project: Psychology</a></li>
+                    <li><a href="http://localhost:5000/e81xl/wiki/home/">Reproducibility Project: Cancer Biology</a></li>
+                    <li><a href="http://cos.io/top/">TOP Guidelines</a></li>
+                     <li><a href="https://www.givinglibrary.org/organizations/center-for-open-science">Donate</a></li>
+               </ul>
+            </div>
+            <div class="col-sm-4 col-md-3">
+                <h4>Socialize</h4>
+                <a href="http://twitter.com/OSFramework" aria-label="Twitter"><i class="fa fa-twitter fa-2x"></i></a>
+                <a href="https://www.facebook.com/OpenScienceFramework" aria-label="Facebook"><i class="fa fa-facebook fa-2x"></i></a>
+                <a href="https://groups.google.com/forum/#!forum/openscienceframework" aria-label="Google Group"><i class="fa fa-group fa-2x"></i></a>
+                <a href="https://www.github.com/centerforopenscience" aria-label="GitHub"><i class="fa fa-github fa-2x"></i></a>
+                <a href="https://plus.google.com/103557785986281627994" aria-label="Google Plus" rel="publisher"><i class="fa fa-google-plus fa-2x"></i></a>
+            </div> <!-- column -->
+        </div>
+    </div>
+</footer><!-- end footer -->
+
+
+    <div class="container copyright">
+    <div class="row">
+        <div class="col-md-12">
+            <p>Copyright &copy; 2011-2016 <a href="http://centerforopenscience.org">Center for Open Science</a> |
+                <a href="https://github.com/CenterForOpenScience/centerforopenscience.org/blob/master/TERMS_OF_USE.md">Terms of Use</a> |
+                <a href="https://github.com/CenterForOpenScience/centerforopenscience.org/blob/master/PRIVACY_POLICY.md">Privacy Policy</a>
+            </p>
+        </div>
+    </div>
+</div><!-- end container copyright -->
+
+
+        
+
+        
+
+            <script>
+                window.ga = function() {};
+          </script>
+
+
+        <script>
+            // Mako variables accessible globally
+            window.contextVars = $.extend(true, {}, window.contextVars, {
+                waterbutlerURL: "http://localhost:7777/",
+                // Whether or not this page is loaded under osf.io or another domain IE: institutions
+                isOnRootDomain: "http://localhost:5000/" === window.location.origin + '/',
+                cookieName: "osf",
+                apiV2Prefix: "http://localhost:8000/v2/",
+                registerUrl: "/api/v1/register/",
+                currentUser: {
+                    id: "",
+                    locale: "",
+                    timezone: "",
+                    entryPoint: ""
+                },
+                popular: "yd3kr",
+                newAndNoteworthy: "yd3kr"
+            });
+        </script>
+
+
+
+
+        
+<script src=/static/public/js/profile-page.js></script>
+
+
+    </body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

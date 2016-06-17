@@ -1,7 +1,11 @@
 """
-Step 2: Check important elements on each page to ensure they aren't empty.
+Step 3: Check important elements on each page to ensure they aren't empty.
 
 Classes organized by type ('projects', 'users', etc.)
+
+Logging on this page:
+    SPOT_CHECK [not_found/empty/ok]
+
 """
 from bs4 import BeautifulSoup
 import os, sys
@@ -11,8 +15,8 @@ import Verification.size_comparison as size_comp
 # Let's pretend it's in here.
 get_files = size_comp.get_files
 
-success_log = open('Logs/success.log', 'a')
-failure_log = open('Logs/failure.log', 'a')
+success_log = open('Logs/test_success.log', 'a')
+failure_log = open('Logs/test_failure.log', 'a')
 
 
 # Parent class - Introduces relevant spot checking functions.
@@ -34,19 +38,19 @@ class ElementValueIdentifier:
             for element in self.elements:
                 result = soup.select(element)
                 if len(result) == 0:                    # No results
-                    message = ['SPOT_CHECK', name, element, 'NOT FOUND', '\n']
+                    message = ['SPOT_CHECK', name, element, 'not_found', '\n']
                     failure_log.write('\t'.join(message))
                 elif len(result[0].contents) == 0:      # Empty results
-                    message = ['SPOT_CHECK', name, element, 'EMPTY', '\n']
+                    message = ['SPOT_CHECK', name, element, 'empty', '\n']
                     failure_log.write('\t'.join(message))
                 else:
-                    message = ['SPOT_CHECK', name, element, 'OK', '\n']
+                    message = ['SPOT_CHECK', name, element, 'ok', '\n']
                     success_log.write('\t'.join(message))
         print('Spot checked.')
         success_log.write('\n'), failure_log.write('\n')
 
-# Project verification classes
 
+# Project verification classes
 
 class ProjectDashboard(ElementValueIdentifier):
     def __init__(self):

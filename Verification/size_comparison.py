@@ -1,19 +1,9 @@
 """
-STEP 1: Compare page sizes to a minimum acceptable size. Rejects move immediately to retry_scrape.py.
+STEP 2: Compare page sizes to a minimum acceptable size. Rejects move immediately to retry_scrape.py.
         Passing pages are sent to spot check to verify various fields are rendered.
 
-Classes organized by type ('projects', 'users', etc.)
-
-Pages:
-
-- Dashboard (project and registration)
-- Files (project and registration)
-- Wiki (project and registration)
-- FORGONE: Analytics (project and registration) (These pages often look a mess anyway and rarely prerender)
-- Forks (project and registration)
-- Registrations
-
-- Profile (user and institution)
+Logging on this page:
+    SIZE_CHECK [insufficient/sufficient + size]
 
 """
 
@@ -24,9 +14,12 @@ absolute_python_root = sys.path[1]                                              
 relative_mirror_root = settings.base_urls[0].split('//', 1)[1].strip('//')      # + Folder name of the mirror
 mirror_path = absolute_python_root + '/' + relative_mirror_root + '/'           # = Absolute path to the mirror
 
-success_log = open('Logs/success.log', 'a')
-failure_log = open('Logs/failure.log', 'a')
+success_log = open('Logs/test_success.log', 'a')
+failure_log = open('Logs/test_failure.log', 'a')
 
+# TODO: COMPARE TO TASK FILE
+def ensure_all_pages():
+    pass
 
 # Get absolute paths to the specific page for a type of resource.
 def get_files(osf_type, page=''):
@@ -41,7 +34,7 @@ def get_files(osf_type, page=''):
     type_folder = mirror_path + osf_type                        # `localhost:70/project`
 
     if not os.path.exists(type_folder):                         # No /project folder
-        message = ['FIND_TYPE', osf_type, 'NOT FOUND', '\n']
+        message = ['FIND_TYPE', osf_type, 'not_found', '\n']
         failure_log.write('\t'.join(message))
         return file_paths
 
@@ -53,7 +46,7 @@ def get_files(osf_type, page=''):
         if not os.path.isdir(type_folder + instance):           # Leave non-folders alone.
             continue
         if not os.path.isdir(instance_path):                    # Folder may not even be project.
-            message = ['FIND_FOLDER', osf_type + instance + '/' + page, 'NOT FOUND', '\n']
+            message = ['FIND_FOLDER', osf_type + instance + '/' + page, 'not_found', '\n']
             failure_log.write('\t'.join(message))
             continue
 
@@ -61,7 +54,7 @@ def get_files(osf_type, page=''):
         if os.path.exists(fname):
             file_paths.append(fname)
         else:
-            message = ['FIND_FILE', osf_type + instance + '/' + page, 'NOT FOUND', '\n']
+            message = ['FIND_FILE', osf_type + instance + '/' + page, 'not_found', '\n']
             failure_log.write('\t'.join(message))
     return file_paths
 
@@ -79,7 +72,13 @@ class SizeArbiter:
     def compare(self):
         for file in self.files:
             file_size = os.path.getsize(file) / 1000  # in KB
-            print(file, file_size > self.min_size)
+            meets_expectations = file_size > self.min_size
+            if meets_expectations:
+                message = ['SIZE_CHECK', file, 'sufficient:', file_size, '\n']
+                success_log.write('\t'.join(message))
+            else:
+                message = ['SIZE_CHECK', file, 'insufficient:', file_size, '\n' ]
+                failure_log.write('\t'.join(message))
 
 
 # Project verification classes
@@ -87,35 +86,43 @@ class SizeArbiter:
 class ProjectDashboard(SizeArbiter):
     def __init__(self):
         SizeArbiter.__init__(self)
-
+        self.min_size = 410
+        self.compare()
 
 
 class ProjectFiles(SizeArbiter):
     def __init__(self):
         SizeArbiter.__init__(self)
-
+        self.min_size = 380
+        self.compare()
 
 
 class ProjectWiki(SizeArbiter):
     def __init__(self):
         SizeArbiter.__init__(self)
+        self.min_size = 410
+        self.compare()
 
 
 # class ProjectAnalytics(SizeArbiter):
-    # def __init__(self):
-    #     SizeArbiter.__init__(self)
-
-
-class ProjectForks(SizeArbiter):
-    def __init__(self):
-        SizeArbiter.__init__(self)
-
+#     def __init__(self):
+#         SizeArbiter.__init__(self)
+#     self.min_size = 380
+#     self.compare()
 
 
 class ProjectRegistrations(SizeArbiter):
     def __init__(self):
         SizeArbiter.__init__(self)
+        self.min_size = 390
+        self.compare()
 
+
+class ProjectForks(SizeArbiter):
+    def __init__(self):
+        SizeArbiter.__init__(self)
+        self.min_size = 380
+        self.compare()
 
 
 # Registration verification classes
@@ -124,48 +131,70 @@ class ProjectRegistrations(SizeArbiter):
 class RegistrationDashboard(SizeArbiter):
     def __init__(self):
         SizeArbiter.__init__(self)
-
+        self.min_size = 410
+        self.compare()
 
 
 class RegistrationFiles(SizeArbiter):
     def __init__(self):
         SizeArbiter.__init__(self)
-
+        self.min_size = 380
+        self.compare()
 
 
 class RegistrationWiki(SizeArbiter):
     def __init__(self):
         SizeArbiter.__init__(self)
-
+        self.min_size = 410
+        self.compare()
 
 
 # class RegistrationAnalytics(SizeArbiter):
-    # def __init__(self):
-    #     SizeArbiter.__init__(self)
-
+#     def __init__(self):
+#         SizeArbiter.__init__(self)
+#         self.min_size = 380
+#         self.compare()
 
 
 class RegistrationForks(SizeArbiter):
     def __init__(self):
         SizeArbiter.__init__(self)
+        self.min_size = 380
+        self.compare()
 
 
 # User Verification Class
 
-
 class UserProfile(SizeArbiter):
     def __init__(self):
         SizeArbiter.__init__(self)
+        self.min_size = 80
+        self.compare()
 
 
 # Institution Verification Class
 
-
 class InstitutionProfile(SizeArbiter):
     def __init__(self):
         SizeArbiter.__init__(self)
+        self.min_size = 350
+        self.compare()
 
+# # Project Execution
+project_dashboard = ProjectDashboard()
+project_files = ProjectFiles()
+project_wiki = ProjectWiki()
+# project_analytics = ProjectAnalytics()
+project_registrations = ProjectRegistrations()
+project_forks = ProjectForks()
 
+# Registration Execution
+registration_dashboard = RegistrationDashboard()
+registration_files = RegistrationFiles()
+registration_wiki = RegistrationWiki()
+# registration_analytics = RegistrationAnalytics()
+registration_forks = RegistrationForks()
 
-# success_log.close()
-# failure_log.close()
+# User and institution execution
+user_profile = UserProfile()
+institution_profile = InstitutionProfile()
