@@ -66,6 +66,14 @@ class Crawler:
         self.debug_logger.addHandler(self.debug_log_handler)
         self.debug_logger.addHandler(self.error_log_handler)
 
+        # logger for milestone
+        self.milestone_logger = logging.getLogger('milestone')
+        self.milestone_logger.propagate = 0
+
+        self.milestone_handler = logging.FileHandler(settings.MILESTONE_LOG_FILENAME, mode='w')
+        self.milestone_handler.setLevel(logging.DEBUG)
+        self.milestone_logger.addHandler(self.milestone_handler)
+
     def truncate_node_url_tuples(self):
         if self.date_modified_marker is not None:
             self.node_url_tuples = [x for x in self.node_url_tuples if x[1] > self.date_modified_marker]
@@ -242,7 +250,7 @@ class Crawler:
 
         url_list = [x[0] for x in self.node_url_tuples]
 
-        print("Generating Node URLs...")
+        # print("Generating Node URLs...")
         for base_url in url_list:
             if all_pages or dashboard:
                 self.node_urls.append(base_url)
@@ -251,7 +259,7 @@ class Crawler:
             if all_pages or wiki:
                 wiki_name_list = self._wikis_by_parent_guid[base_url.strip("/").split("/")[-1]]
                 wiki_url_list = [base_url + 'wiki/' + x.replace(" ", "%20") for x in wiki_name_list]
-                print("adding " + str(wiki_url_list) + " to to_scrape list")
+                # print("adding " + str(wiki_url_list) + " to to_scrape list")
                 self.node_urls += wiki_url_list
 
                 # the strip split -1 bit returns the last section of the base_url, which is the GUId
@@ -289,21 +297,17 @@ class Crawler:
         if async:
             self._scrape_pages(self.node_urls)
         else:
-            print(self.node_url_tuples)
-            print("\nnode_urls: " + str(self.node_urls) + "\n")
             for elem in self.node_url_tuples:
-                print(elem)
                 lst = []
                 while len(self.node_urls) > 0 and elem[0] in self.node_urls[0]:
                     lst.append(self.node_urls.pop(0))
-                print("lst: " + str(lst))
                 self._scrape_pages(lst)
 
     # Get page content
     def _scrape_pages(self, aspect_list):
-        sem = asyncio.BoundedSemaphore(value=5)
+        sem = asyncio.BoundedSemaphore(value=1)
         tasks = []
-        for url in aspect_list:  # TODO: change to "if weekday mod % 7 == 1"
+        for url in aspect_list:
             tasks.append(asyncio.ensure_future(self.scrape_url(url, sem)))
 
         loop = asyncio.get_event_loop()
@@ -314,24 +318,29 @@ class Crawler:
     async def scrape_url(self, url, sem):
         async with sem:
             async with aiohttp.ClientSession() as s:
-
                 self.debug_logger.debug("Scraping : " + url)
                 response = await s.get(url, headers=self.headers)
                 body = await response.read()
                 response.close()
                 if response.status == 200:
+                    self.debug_logger.debug("Finished : " + url)
+                    self.record_milestone(url)
                     save_html(body, url)
-                print(str(response.status) + ": " + url)
+                # print(str(response.status) + ": " + url)
                 if response.status == 504:
-                    self.debug_logger.debug("504 on : " + url)
                     self.debug_logger.error("504 on : " + url)
+                    self.record_milestone(url)
+
+    def record_milestone(self, url):
+        if datetime.datetime.now().minute % 5 == 0:
+            self.milestone_logger.debug(url)
 
 
 def save_html(html, page):
     # print(page)
     page = page.split('//', 1)[1]
     make_dirs(page)
-    f = open(page + 'index.html', 'w')
+    f = open(page + 'index.html', 'wb+')
     f.write(html)
     f.close()
     os.chdir(sys.path[0])
@@ -349,8 +358,8 @@ rosie = Crawler()
 #
 # # Get URLs from API and add them to the async tasks
 # rosie.scrape_diff()
-rosie.crawl_nodes_api(page_limit=1)
+rosie.crawl_nodes_api(page_limit=10)
 rosie.crawl_wiki()
 rosie.generate_node_urls(all_pages=True)
 rosie.scrape_nodes(async=True)
-print("~fin~")
+# print("~fin~")
