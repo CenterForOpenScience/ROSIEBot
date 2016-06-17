@@ -40,14 +40,25 @@ class Crawler:
         if date_modified is not None:
             self.date_modified_marker = date_modified
 
-        self.node_urls = [] # urls for the node-related pages, in time order from oldest to newest, grouped by node
+        self.node_urls = []  # urls for the node-related pages, in time order from oldest to newest, grouped by node
 
         self._wikis_by_parent_guid = collections.defaultdict(list) # private instance variable for wiki utils
 
         # for sorting
         self.node_url_tuples = []
 
+        self.registration_dashboard_page_list = []
+        self.registration_files_page_list = []
+        self.registration_wiki_page_list = []
+        self.registration_analytics_page_list = []
+        self.registration_forks_page_list = []
+
+        self.user_profile_page_list = [] # User profile page ("osf.io/profile/mst3k/")
+        # Shoehorn index in to list of pages to scrape:
+        self.institution_url_list = [self.http_base] # Institution page ("osf.io/institution/cos")
+
         # logging utils
+
         logging.basicConfig(level=logging.DEBUG)
         # logger for all debug infos
         self.debug_logger = logging.getLogger('debug')
@@ -65,6 +76,8 @@ class Crawler:
         self.debug_logger.addHandler(self.console_log_handler)
         self.debug_logger.addHandler(self.debug_log_handler)
         self.debug_logger.addHandler(self.error_log_handler)
+
+
 
 
 
@@ -179,7 +192,6 @@ class Crawler:
     # Go through pages for each API endpoint
 
     async def parse_nodes_api(self, api_url, sem):
-        # print('API request sent')
         async with sem:
             async with aiohttp.ClientSession() as s:
                 self.debug_logger.info("Crawling nodes api, url = " + api_url)
@@ -190,13 +202,11 @@ class Crawler:
                 data = json_body['data']
                 for element in data:
                     date_str = element['attributes']['date_modified']
-                    # print(date_str)
                     if '.' in date_str:
                         date = datetime.datetime.strptime(element['attributes']['date_modified'],
                                                           "%Y-%m-%dT%H:%M:%S.%f")
                     else:
                         date = datetime.datetime.strptime(element['attributes']['date_modified'], "%Y-%m-%dT%H:%M:%S")
-                    # >> .%f
                     self.node_url_tuples.append((self.http_base + 'project/' + element['id'] + '/', date))
                     self.node_url_tuples.sort(key=lambda x: x[1])
 
@@ -215,6 +225,7 @@ class Crawler:
                     self.registration_files_page_list.append(self.http_base + element['id'] + '/files/')
                     self.registration_analytics_page_list.append(self.http_base + element['id'] + '/analytics/')
                     self.registration_forks_page_list.append(self.http_base + element['id'] + '/forks/')
+                    self.registration_
 
     async def parse_users_api(self, api_url, sem):
         print('API request sent')
@@ -229,7 +240,6 @@ class Crawler:
                 data = json_body['data']
                 for element in data:
                     self.user_profile_page_list.append(self.http_base + 'profile/' + element['id'] + '/')
-
 
     async def parse_institutions_api(self, api_url, sem):
         print('API request sent')
@@ -340,17 +350,16 @@ class Crawler:
                 response.close()
                 if response.status == 200:
                     save_html(body, url)
-                print(str(response.status) + ": " + url)
+                    print(str(response.status) + ": " + url)
                 if response.status == 504:
                     self.debug_logger.debug("504 on : " + url)
                     self.debug_logger.error("504 on : " + url)
 
 
 def save_html(html, page):
-    # print(page)
     page = page.split('//', 1)[1]
     make_dirs(page)
-    f = open(page + 'index.html', 'w')
+    f = open(page + 'index.html', 'wb+')
     f.write(html)
     f.close()
     os.chdir(sys.path[0])
@@ -364,12 +373,21 @@ def make_dirs(filename):
 #
 # # Execution
 #
+
 rosie = Crawler()
 #
 # # Get URLs from API and add them to the async tasks
 # rosie.scrape_diff()
-rosie.crawl_nodes_api(page_limit=1)
-rosie.crawl_wiki()
-rosie.generate_node_urls(all_pages=True)
-rosie.scrape_nodes(async=True)
+# rosie.crawl_nodes_api(page_limit=1)
+# rosie.crawl_wiki()
+# rosie.generate_node_urls(all_pages=True)
+# rosie.scrape_nodes(async=True)
+
+rosie.crawl_institutions_api(page_limit=1)
+rosie.crawl_registrations_api(page_limit=1)
+rosie.crawl_users_api(page_limit=1)
+
+rosie._scrape_pages(rosie.institution_url_list)
+rosie._scrape_pages(rosie.user_profile_page_list)
+rosie._scrape_pages(rosie.registrations_url_list)
 print("~fin~")
