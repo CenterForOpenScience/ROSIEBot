@@ -12,7 +12,6 @@ import logging
 # Configure for testing in settings.py
 base_urls = settings.base_urls
 # limit = settings.limit
-# verbose = settings.verbose
 
 
 class Crawler:
@@ -44,7 +43,7 @@ class Crawler:
 
         self._wikis_by_parent_guid = collections.defaultdict(list) # private instance variable for wiki utils
 
-        # for sorting
+        # For sorting
         self.node_url_tuples = []
 
         self.registration_dashboard_page_list = []
@@ -57,43 +56,25 @@ class Crawler:
         # Shoehorn index in to list of pages to scrape:
         self.institution_url_list = [self.http_base] # Institution page ("osf.io/institution/cos")
 
-        # logging utils
+        # Logging utils
 
         logging.basicConfig(level=logging.DEBUG)
-        # logger for all debug infos
+        # Logger for all debug infos
         self.debug_logger = logging.getLogger('debug')
         self.debug_logger.propagate = 0
-        #   console handler for debug logger
+        # Console handler for debug logger
         self.console_log_handler = logging.StreamHandler()
         self.console_log_handler.setLevel(logging.DEBUG)
-        #   debug file handler for debug logger
+        # Debug file handler for debug logger
         self.debug_log_handler = logging.FileHandler(settings.DEBUG_LOG_FILENAME, mode='w')
         self.debug_log_handler.setLevel(logging.DEBUG)
-        #   error file handler for debug logger
+        # Error file handler for debug logger
         self.error_log_handler = logging.FileHandler(settings.ERROR_LOG_FILENAME, mode='w')
         self.error_log_handler.setLevel(logging.ERROR)
-        #   adding handlers to debug logger
+        # Adding handlers to debug logger
         self.debug_logger.addHandler(self.console_log_handler)
         self.debug_logger.addHandler(self.debug_log_handler)
         self.debug_logger.addHandler(self.error_log_handler)
-
-
-
-
-
-        # if os.path.isfile('goal_urls.txt') and os.path.isfile('crawled_url_log.txt'):
-        #     self.scrape_diff()
-
-    def scrape_diff(self):
-        s1 = set(open("goal_urls.txt").readlines())
-        s2 = set(open("crawled_url_log.txt").readlines())
-        d = list(s1.difference(s2))
-        for x in d:
-            print(x)
-        if len(d) > 0:
-            self._scrape_pages(d)
-        else:
-            print("no diff :)")
 
     def truncate_node_url_tuples(self):
         if self.date_modified_marker is not None:
@@ -255,8 +236,6 @@ class Crawler:
                 for element in data:
                     self.institution_url_list.append(self.http_base + 'institutions/' + element['id'] + '/')
 
-
-
     def generate_node_urls(self, all_pages=True, dashboard=False, files=False,
                            wiki=False, analytics=False, registrations=False, forks=False):
         self.debug_logger.info("Generating node urls")
@@ -291,7 +270,7 @@ class Crawler:
             if all_pages or forks:
                 self.node_urls.append(base_url + 'forks/')
 
-    # call this method after tuple list truncation and before generate_node_urls
+    # Call this method after tuple list truncation and before generate_node_urls
     def crawl_wiki(self):
         tasks = []
         for node_url in [x[0] for x in self.node_url_tuples]:
@@ -299,7 +278,7 @@ class Crawler:
         loop = asyncio.get_event_loop()
         loop.run_until_complete(asyncio.wait(tasks))
 
-    # async method called by crawl_wiki
+    # Async method called by crawl_wiki
     async def get_wiki_names(self, parent_node):
         async with aiohttp.ClientSession() as s:
             u = self.api_base + 'nodes/' + parent_node + '/wikis/'
@@ -377,7 +356,6 @@ def make_dirs(filename):
 rosie = Crawler()
 #
 # # Get URLs from API and add them to the async tasks
-# rosie.scrape_diff()
 # rosie.crawl_nodes_api(page_limit=1)
 # rosie.crawl_wiki()
 # rosie.generate_node_urls(all_pages=True)
@@ -390,4 +368,5 @@ rosie.crawl_users_api(page_limit=1)
 rosie._scrape_pages(rosie.institution_url_list)
 rosie._scrape_pages(rosie.user_profile_page_list)
 rosie._scrape_pages(rosie.registrations_url_list)
-print("~fin~")
+
+print("Mirror complete. \nOptional:\tRun verification testing suite.")
