@@ -87,10 +87,6 @@ class Crawler:
 
     # TODO: Investigate making semaphore an instance object
 
-    # - doesn't crash
-    # - updates self.node_url_tuples
-    # - crawls the right number of pages (all if p_l = 0, else p_l)
-    # - doesn't try to crawl more pages than there are
     def crawl_nodes_api(self, page_limit=0):
         self.debug_logger.info("Start crawling nodes API pages")
         sem = asyncio.BoundedSemaphore(value=10)
@@ -112,8 +108,6 @@ class Crawler:
 
     # Wiki api call requires special code from Cameron's branch (feature/wiki)
 
-    # same as crawl_nodes api
-    # updates self.registration_url_tuples
     def crawl_registrations_api(self, page_limit=0):
         sem = asyncio.BoundedSemaphore(value=10)
 
@@ -179,7 +173,6 @@ class Crawler:
 
     # Go through pages for each API endpoint
 
-    # each datetime in the finished tuple should less than the next tuple in the list
     async def parse_nodes_api(self, api_url, sem):
         async with sem:
             async with aiohttp.ClientSession() as s:
@@ -200,7 +193,6 @@ class Crawler:
                     self.node_url_tuples.sort(key=lambda x: x[1])
 
 
-    # should work the same way as parse_nodes_api
     async def parse_registrations_api(self, api_url, sem):
         print('API request sent')
         async with sem:
@@ -280,9 +272,7 @@ class Crawler:
             if all_pages or forks:
                 self.node_urls.append(base_url + 'forks/')
 
-    # Call this method after tuple list truncation and before generate_node_urls
-    # doesn't crash
-    #
+
     def crawl_wiki(self):
         tasks = []
         for node_url in [x[0] for x in self.node_url_tuples]:
@@ -291,7 +281,6 @@ class Crawler:
         loop.run_until_complete(asyncio.wait(tasks))
 
     # Async method called by crawl_wiki
-    # doesn't crash
     async def get_wiki_names(self, parent_node):
         async with aiohttp.ClientSession() as s:
             u = self.api_base + 'nodes/' + parent_node + '/wikis/'
@@ -332,7 +321,6 @@ class Crawler:
 
 # Page scraping (through to execution)
 
-    # page exists where it was supposedly put
     async def scrape_url(self, url, sem):
         async with sem:
             async with aiohttp.ClientSession() as s:
@@ -349,9 +337,6 @@ class Crawler:
                     self.debug_logger.error("504 on : " + url)
 
 
-# creates new directories if they're not there
-# if directory is present, puts stuff in it without deleting and remaking directory
-# overwrites files of same name/path
 def save_html(html, page):
     page = page.split('//', 1)[1]
     make_dirs(page)
