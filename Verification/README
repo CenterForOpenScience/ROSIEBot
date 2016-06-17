@@ -1,5 +1,7 @@
 Validation Testing and Retry Suite
 
+TO USE: Run retry_scrape.py
+
 Terminology
 
     Type              -  An area on the OSF (e.g. project, institution)

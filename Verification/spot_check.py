@@ -14,6 +14,7 @@ import Verification.size_comparison as size_comp
 success_log = open('Logs/test_success.log', 'a')
 failure_log = open('Logs/test_failure.log', 'a')
 
+send_to_retry = size_comp.send_to_retry
 
 # Parent class - Introduces relevant spot checking functions.
 class ElementValueIdentifier:
@@ -27,7 +28,6 @@ class ElementValueIdentifier:
 
     def identify_values(self):
         for file in self.files:
-            print(file)
             name = file.split('/')[-3] + '\t' + file.split('/')[-2]
             soup = BeautifulSoup(open(file), 'html.parser')
             for element in self.elements:
@@ -224,6 +224,3 @@ registration_forks = RegistrationForks()
 # User and institution execution
 user_profile = UserProfile()
 institution_profile = InstitutionProfile()
-
-success_log.close()
-failure_log.close()
