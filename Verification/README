@@ -29,7 +29,8 @@ Terminology
 
 
 Validation Process
-   Any negative log means calling retry_scrape.
+   Any negative event means calling retry_scrape.
+   Flow is only from first steps to later. Step 1 won't call step 2.
 
 STEP 1:     initialize_list.py
 ACTIONS:    Check that there is a subdirectory for a type.

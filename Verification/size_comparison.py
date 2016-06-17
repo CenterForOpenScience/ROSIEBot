@@ -7,56 +7,14 @@ Logging on this page:
 
 """
 
-import os, shutil, sys
-import settings
+import os, sys
+import Verification.initialize_list as initialize
 
-absolute_python_root = sys.path[1]                                              #   Absolute root of this project
-relative_mirror_root = settings.base_urls[0].split('//', 1)[1].strip('//')      # + Folder name of the mirror
-mirror_path = absolute_python_root + '/' + relative_mirror_root + '/'           # = Absolute path to the mirror
+mirror_path = initialize.mirror_path
 
 success_log = open('Logs/test_success.log', 'a')
 failure_log = open('Logs/test_failure.log', 'a')
-
-# TODO: COMPARE TO TASK FILE
-def ensure_all_pages():
-    pass
-
-# Get absolute paths to the specific page for a type of resource.
-def get_files(osf_type, page=''):
-    """
-    OSF_type should be `project/`, `profile/`, `institution/` or `` for registrations.
-    Page should be `` for dashboard or the name of folder within a osf_type instance,
-        ex. 'files/' for the file page of a node.
-
-    get_files('project/', 'files/') gets every node's files page.
-    """
-    file_paths = []
-    type_folder = mirror_path + osf_type                        # `localhost:70/project`
-
-    if not os.path.exists(type_folder):                         # No /project folder
-        message = ['FIND_TYPE', osf_type, 'not_found', '\n']
-        failure_log.write('\t'.join(message))
-        return file_paths
-
-    type_instances = os.listdir(type_folder)                    # GUID folders within the project folder
-
-    for instance in type_instances:                             # A folder for a specific project, user, etc.
-        instance_path = type_folder + instance + '/' + page     # `localhost:70/project/GUID/files`
-
-        if not os.path.isdir(type_folder + instance):           # Leave non-folders alone.
-            continue
-        if not os.path.isdir(instance_path):                    # Folder may not even be project.
-            message = ['FIND_FOLDER', osf_type + instance + '/' + page, 'not_found', '\n']
-            failure_log.write('\t'.join(message))
-            continue
-
-        fname = instance_path + 'index.html'                    # Finally! The path to the file we want.
-        if os.path.exists(fname):
-            file_paths.append(fname)
-        else:
-            message = ['FIND_FILE', osf_type + instance + '/' + page, 'not_found', '\n']
-            failure_log.write('\t'.join(message))
-    return file_paths
+send_to_retry = initialize.send_to_retry
 
 
 # Super class for min_size comparison between bare minimum and actual files.
@@ -68,17 +26,22 @@ class SizeArbiter:
     def __init__(self):
         self.files = []
         self.min_size = 0
+        self.send_to_spot_check = []
 
     def compare(self):
         for file in self.files:
             file_size = os.path.getsize(file) / 1000  # in KB
             meets_expectations = file_size > self.min_size
+            relative_name = file.strip(mirror_path)
             if meets_expectations:
-                message = ['SIZE_CHECK', file, 'sufficient:', file_size, '\n']
+                message = ['SIZE_CHECK', relative_name, 'sufficient:', str(file_size), '\n']
                 success_log.write('\t'.join(message))
+                self.send_to_spot_check.append(file)
             else:
-                message = ['SIZE_CHECK', file, 'insufficient:', file_size, '\n' ]
+                message = ['SIZE_CHECK', relative_name, 'insufficient:', str(file_size), '\n' ]
                 failure_log.write('\t'.join(message))
+                send_to_retry.append(file)
+        return self.send_to_spot_check
 
 
 # Project verification classes
@@ -87,42 +50,48 @@ class ProjectDashboard(SizeArbiter):
     def __init__(self):
         SizeArbiter.__init__(self)
         self.min_size = 410
-        self.compare()
+        self.files = initialize.get_files('project/')
+        self.send_to_spot_check = self.compare()
 
 
 class ProjectFiles(SizeArbiter):
     def __init__(self):
         SizeArbiter.__init__(self)
         self.min_size = 380
-        self.compare()
+        self.files = initialize.get_files('project/', 'files/')
+        self.send_to_spot_check = self.compare()
 
 
 class ProjectWiki(SizeArbiter):
     def __init__(self):
         SizeArbiter.__init__(self)
         self.min_size = 410
-        self.compare()
+        self.files = initialize.get_files('project/', 'wiki/')
+        self.send_to_spot_check = self.compare()
 
 
-# class ProjectAnalytics(SizeArbiter):
-#     def __init__(self):
-#         SizeArbiter.__init__(self)
-#     self.min_size = 380
-#     self.compare()
+class ProjectAnalytics(SizeArbiter):
+    def __init__(self):
+        SizeArbiter.__init__(self)
+        self.min_size = 380
+        self.files = initialize.get_files('project/', 'analytics/')
+        self.send_to_spot_check = self.compare()
 
 
 class ProjectRegistrations(SizeArbiter):
     def __init__(self):
         SizeArbiter.__init__(self)
         self.min_size = 390
-        self.compare()
+        self.files = initialize.get_files('project/', 'registrations/')
+        self.send_to_spot_check = self.compare()
 
 
 class ProjectForks(SizeArbiter):
     def __init__(self):
         SizeArbiter.__init__(self)
         self.min_size = 380
-        self.compare()
+        self.files = initialize.get_files('project/', 'forks/')
+        self.send_to_spot_check = self.compare()
 
 
 # Registration verification classes
@@ -132,35 +101,40 @@ class RegistrationDashboard(SizeArbiter):
     def __init__(self):
         SizeArbiter.__init__(self)
         self.min_size = 410
-        self.compare()
+        self.files = initialize.get_files('registrations/')
+        self.send_to_spot_check = self.compare()
 
 
 class RegistrationFiles(SizeArbiter):
     def __init__(self):
         SizeArbiter.__init__(self)
         self.min_size = 380
-        self.compare()
+        self.files = initialize.get_files('registrations/', 'files/')
+        self.send_to_spot_check = self.compare()
 
 
 class RegistrationWiki(SizeArbiter):
     def __init__(self):
         SizeArbiter.__init__(self)
         self.min_size = 410
-        self.compare()
+        self.files = initialize.get_files('registrations/', 'wiki/')
+        self.send_to_spot_check = self.compare()
 
 
-# class RegistrationAnalytics(SizeArbiter):
-#     def __init__(self):
-#         SizeArbiter.__init__(self)
-#         self.min_size = 380
-#         self.compare()
+class RegistrationAnalytics(SizeArbiter):
+    def __init__(self):
+        SizeArbiter.__init__(self)
+        self.min_size = 380
+        self.files = initialize.get_files('registrations/', 'analytics/')
+        self.send_to_spot_check = self.compare()
 
 
 class RegistrationForks(SizeArbiter):
     def __init__(self):
         SizeArbiter.__init__(self)
         self.min_size = 380
-        self.compare()
+        self.files = initialize.get_files('registrations/', 'forks/')
+        self.send_to_spot_check = self.compare()
 
 
 # User Verification Class
@@ -169,7 +143,8 @@ class UserProfile(SizeArbiter):
     def __init__(self):
         SizeArbiter.__init__(self)
         self.min_size = 80
-        self.compare()
+        self.files = initialize.get_files('profile/')
+        self.send_to_spot_check = self.compare()
 
 
 # Institution Verification Class
@@ -178,23 +153,24 @@ class InstitutionProfile(SizeArbiter):
     def __init__(self):
         SizeArbiter.__init__(self)
         self.min_size = 350
-        self.compare()
+        self.files = initialize.get_files('institutions/')
+        self.send_to_spot_check = self.compare()
 
 # # Project Execution
-project_dashboard = ProjectDashboard()
-project_files = ProjectFiles()
-project_wiki = ProjectWiki()
-# project_analytics = ProjectAnalytics()
-project_registrations = ProjectRegistrations()
-project_forks = ProjectForks()
-
-# Registration Execution
-registration_dashboard = RegistrationDashboard()
-registration_files = RegistrationFiles()
-registration_wiki = RegistrationWiki()
-# registration_analytics = RegistrationAnalytics()
-registration_forks = RegistrationForks()
-
-# User and institution execution
-user_profile = UserProfile()
-institution_profile = InstitutionProfile()
+project_dashboard_to_spot_check = ProjectDashboard().send_to_spot_check
+# project_files_to_spot_check = ProjectFiles().send_to_spot_check
+# project_wiki_to_spot_check = ProjectWiki().send_to_spot_check
+# project_analytics_to_spot_check = ProjectAnalytics().send_to_spot_check
+# project_registrations_to_spot_check = ProjectRegistrations().send_to_spot_check
+# project_forks_to_spot_check = ProjectForks().send_to_spot_check
+#
+# # Registration Execution
+# registration_dashboard_to_spot_check = RegistrationDashboard().send_to_spot_check
+# registration_files_to_spot_check = RegistrationFiles().send_to_spot_check
+# registration_wiki_to_spot_check = RegistrationWiki().send_to_spot_check
+# registration_analytics_to_spot_check = RegistrationAnalytics().send_to_spot_check
+# registration_forks_to_spot_check = RegistrationForks().send_to_spot_check
+#
+# # User and institution execution
+# user_profile_to_spot_check = UserProfile().send_to_spot_check
+# institution_profile_to_spot_check = InstitutionProfile().send_to_spot_check
