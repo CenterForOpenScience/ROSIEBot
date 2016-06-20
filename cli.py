@@ -30,14 +30,20 @@ def cli_entry_point(normal, resume, verify, dm, tf, registrations, users, instit
 
     if normal and dm is not None:
         click.echo('Starting normal scrape with date marker set to : ' + dm)
-        filename = "task-" + str(datetime.datetime.now()) + ".task"
+        now = datetime.datetime.now()
+        filename = str(now.year)+str(now.month)+str(now.day)+str(now.hour)+str(now.minute)+".task"
         click.echo('Creating a task file named : ' + filename)
-        with shelve.open(filename, writeback=True) as db:
+        with shelve.open(filename, writeback=True, flag='n') as db:
             normal_scrape(dm, registrations, users, institutions, nodes, d, f, w, a, r, fr, db)
         return
 
     if resume and tf is not None:
-        # resume_scrape(tf)
+        click.echo('Resuming scrape withe the task file : ' + tf)
+        try:
+            with shelve.open(tf, writeback=True, flag='w') as db:
+                resume_scrape(db)
+        except:
+            click.echo('File Not Foound for the task .')
         return
 
     if verify and tf is not None:
@@ -73,6 +79,11 @@ def normal_scrape(dm,
     db['include_analytics'] = include_analytics
     db['include_registrations'] = include_registrations
     db['include_forks'] = include_forks
+    db['nodes_finished'] = False
+    db['registrations_finished'] = False
+    db['users_finished'] = False
+    db['institutions_finished'] = False
+    db['scrape_finished'] = False
 
     rosie = crawler.Crawler(date_modified=date_marker, db=db)
 
@@ -100,9 +111,9 @@ def normal_scrape(dm,
 
     if scrape_institutions:
         rosie.scrape_institutions()
-        db['institution_finished'] = True
+        db['institutions_finished'] = True
 
-    db['scraped_finished'] = True
+    db['scrape_finished'] = True
 
 
 def scrape_api(cr, db, scrape_nodes, scrape_registrations, scrape_users, scrape_institutions):
@@ -126,6 +137,50 @@ def scrape_api(cr, db, scrape_nodes, scrape_registrations, scrape_users, scrape_
         cr.crawl_institutions_api()
         db['institutions_urls'] = cr.institution_urls
 
+
+def resume_scrape(db):
+    rosie = crawler.Crawler(db=db)
+    # Restore variables from persistent file
+    try:
+        scrape_nodes = db['scrape_nodes']
+        scrape_registrations = db['scrape_registrations']
+        scrape_users = db['scrape_users']
+        scrape_institutions = db['scrape_institutions']
+        include_dashboard = db['include_dashboard']
+        include_files = db['include_files']
+        include_wiki = db['include_wiki']
+        include_analytics = db['include_analytics']
+        include_registrations =  db['include_registrations']
+        include_forks = db['include_forks']
+        nodes_finished = db['nodes_finished']
+        registrations_finished = db['registrations_finished']
+        users_finished = db['users_finished']
+        institutions_finished = db['institutions_finished']
+        scrape_finished = db['scrape_finished']
+        milestone_url = db['milestone']
+        rosie.node_url_tuples = db['node_url_tuples']
+        rosie.registration_url_tuples = db['registration_url_tuples']
+        rosie.user_profile_page_urls = db['user_profile_page_urls']
+        rosie.institution_urls = db['institution_urls']
+    except:
+        click.echo('Cannot restore variables from file')
+        return
+
+    if scrape_finished:
+        click.echo("The scrape to resume was already finished")
+        return
+
+    if scrape_nodes and not nodes_finished:
+        pass
+
+    if scrape_registrations and not registrations_finished:
+        pass
+
+    if scrape_users and not users_finished:
+        pass
+
+    if scrape_institutions and not institutions_finished:
+        pass
 
 if __name__ == '__main__':
     cli_entry_point()
