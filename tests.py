@@ -25,14 +25,14 @@ class test_crawler(unittest.TestCase):
         for t in c.node_url_tuples:
             self.assertTrue(is_valid_url(t[0]))
 
-    # def test_registration_urls_updated_by_crawl(self):
-    #     c = Crawler()
-    #     l1 = c.registration_url_tuples.copy()
-    #     c.crawl_registrations_api(page_limit=1)
-    #     l2 = c.registration_url_tuples.copy()
-    #     self.assertEqual(len(l1), 0)
-    #     self.assertGreater(len(l2), len(l1))
-    #     self.assertNotEqual(l1, l2)
+    def test_registration_urls_updated_by_crawl(self):
+        c = Crawler()
+        l1 = c.registration_url_tuples.copy()
+        c.crawl_registrations_api(page_limit=1)
+        l2 = c.registration_url_tuples.copy()
+        self.assertEqual(len(l1), 0)
+        self.assertGreater(len(l2), len(l1))
+        self.assertNotEqual(l1, l2)
 
     def test_institutions_urls_updated_by_crawl(self):
         c = Crawler()
@@ -52,12 +52,22 @@ class test_crawler(unittest.TestCase):
         self.assertGreater(len(l2), len(l1))
         self.assertNotEqual(l1, l2)
 
-    def test_wiki_urls_updated_by_crawl(self):  # needs node_url_tuples to work
+    def test_node_wiki_urls_updated_by_crawl(self):  # needs node_url_tuples to work
         c = Crawler()
         c.crawl_nodes_api(page_limit=1)
-        l1 = c._wikis_by_parent_guid.copy()
-        c.crawl_wiki()
-        l2 = c._wikis_by_parent_guid.copy()
+        l1 = c._node_wikis_by_parent_guid.copy()
+        c.crawl_node_wiki()
+        l2 = c._node_wikis_by_parent_guid.copy()
+        self.assertEqual(len(l1), 0)
+        self.assertGreater(len(l2), len(l1))
+        self.assertNotEqual(l1, l2)
+
+    def test_registration_wiki_urls_updated_by_crawl(self):  # needs node_url_tuples to work
+        c = Crawler()
+        c.crawl_registrations_api(page_limit=1)
+        l1 = c._registration_wikis_by_parent_guid.copy()
+        c.crawl_registration_wiki()
+        l2 = c._registration_wikis_by_parent_guid.copy()
         self.assertEqual(len(l1), 0)
         self.assertGreater(len(l2), len(l1))
         self.assertNotEqual(l1, l2)
@@ -73,8 +83,9 @@ class test_crawler(unittest.TestCase):
     def test_scrape_url(self):
         c = Crawler()
         try:
-            c._scrape_pages(['http://google.com'])  # we need to put a slash at the end of each URL
+            c._scrape_pages(['http://google.com', 'http://google.com/'])
             f = open('google.com/index.html')
+            f.close()
         except:
             self.fail("page didn't save / get scraped at all")
 
