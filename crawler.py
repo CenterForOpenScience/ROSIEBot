@@ -8,6 +8,7 @@ import requests
 import math
 import collections
 import logging
+import urllib.parse
 
 # Configure for testing in settings.py
 base_urls = settings.base_urls
@@ -39,14 +40,25 @@ class Crawler:
         if date_modified is not None:
             self.date_modified_marker = date_modified
 
-        self.node_urls = [] # urls for the node-related pages, in time order from oldest to newest, grouped by node
+        self.node_urls = []  # urls for the node-related pages, in time order from oldest to newest, grouped by node
 
         self._wikis_by_parent_guid = collections.defaultdict(list) # private instance variable for wiki utils
 
         # For sorting
         self.node_url_tuples = []
 
+        self.registration_dashboard_page_list = []
+        self.registration_files_page_list = []
+        self.registration_wiki_page_list = []
+        self.registration_analytics_page_list = []
+        self.registration_forks_page_list = []
+
+        self.user_profile_page_list = [] # User profile page ("osf.io/profile/mst3k/")
+        # Shoehorn index in to list of pages to scrape:
+        self.institution_url_list = [self.http_base] # Institution page ("osf.io/institution/cos")
+
         # Logging utils
+
         logging.basicConfig(level=logging.DEBUG)
         # Logger for all debug infos
         self.debug_logger = logging.getLogger('debug')
@@ -188,6 +200,7 @@ class Crawler:
                     self.node_url_tuples.append((self.http_base + 'project/' + element['id'] + '/', date))
                     self.node_url_tuples.sort(key=lambda x: x[1])
 
+
     async def parse_registrations_api(self, api_url, sem):
         print('API request sent')
         async with sem:
@@ -203,6 +216,7 @@ class Crawler:
                     self.registration_files_page_list.append(self.http_base + element['id'] + '/files/')
                     self.registration_analytics_page_list.append(self.http_base + element['id'] + '/analytics/')
                     self.registration_forks_page_list.append(self.http_base + element['id'] + '/forks/')
+                    # self.registration_
 
     async def parse_users_api(self, api_url, sem):
         print('API request sent')
@@ -254,8 +268,8 @@ class Crawler:
                 self.node_urls.append(base_url + 'files/')
             if all_pages or wiki:
                 wiki_name_list = self._wikis_by_parent_guid[base_url.strip("/").split("/")[-1]]
-                wiki_url_list = [base_url + 'wiki/' + x.replace(" ", "%20") for x in wiki_name_list]
-                # print("adding " + str(wiki_url_list) + " to to_scrape list")
+                wiki_url_list = [base_url + 'wiki/' + urllib.parse.quote(x) for x in wiki_name_list]
+                print("adding " + str(wiki_url_list) + " to to_scrape list")
                 self.node_urls += wiki_url_list
 
                 # the strip split -1 bit returns the last section of the base_url, which is the GUId
@@ -266,7 +280,7 @@ class Crawler:
             if all_pages or forks:
                 self.node_urls.append(base_url + 'forks/')
 
-    # Call this method after tuple list truncation and before generate_node_urls
+
     def crawl_wiki(self):
         tasks = []
         for node_url in [x[0] for x in self.node_url_tuples]:
@@ -322,8 +336,8 @@ class Crawler:
                     self.debug_logger.debug("Finished : " + url)
                     self.record_milestone(url)
                     save_html(body, url)
-                # print(str(response.status) + ": " + url)
                 if response.status == 504:
+                    # self.debug_logger.debug("504 on : " + url)
                     self.debug_logger.error("504 on : " + url)
                     self.record_milestone(url)
 
@@ -349,6 +363,7 @@ def make_dirs(filename):
 #
 # # Execution
 #
+
 rosie = Crawler()
 #
 # # Get URLs from API and add them to the async tasks
@@ -359,4 +374,3 @@ rosie.generate_node_urls(all_pages=True)
 rosie.scrape_nodes(async=True)
 
 print("Mirror complete. \nOptional:\tRun verification testing suite.")
-
