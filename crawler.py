@@ -195,12 +195,9 @@ class Crawler:
                 body = await response.read()
                 response.close()
                 json_body = json.loads(body.decode('utf-8'))
-                # print(api_url)
                 data = json_body['data']
                 for element in data:
-                    # print(element)
                     date_str = element['attributes']['date_modified']
-                    # print(date_str)
                     # TODO: probably not a good long term solution. should change this
                     if date_str is None:
                         date_str = element['attributes']['date_registered']
@@ -208,9 +205,7 @@ class Crawler:
                         date = datetime.datetime.strptime(date_str,"%Y-%m-%dT%H:%M:%S.%f")
                     else:
                         date = datetime.datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S")
-                    # print(date)
                     self.registration_url_tuples.append((self.http_base + element['id'] + '/', date))
-                    # print(self.registration_url_tuples)
                     self.registration_url_tuples.sort(key=lambda x: x[1])
 
     async def parse_users_api(self, api_url, sem):
@@ -264,7 +259,6 @@ class Crawler:
             if all_pages or wiki:
                 wiki_name_list = self._node_wikis_by_parent_guid[base_url.strip("/").split("/")[-1]]
                 wiki_url_list = [base_url + 'wiki/' + urllib.parse.quote(x) for x in wiki_name_list]
-                # print("adding " + str(wiki_url_list) + " to to_scrape list")
                 self.node_urls += wiki_url_list
 
                 # the strip split -1 bit returns the last section of the base_url, which is the GUId
@@ -299,7 +293,6 @@ class Crawler:
                 # the strip split -1 bit returns the last section of the base_url, which is the GUId
                 wiki_name_list = self._registration_wikis_by_parent_guid[base_url.strip("/").split("/")[-1]]
                 wiki_url_list = [base_url + 'wiki/' + urllib.parse.quote(x) for x in wiki_name_list]
-                # print("adding " + str(wiki_url_list) + " to to_scrape list")
                 self.registration_urls += wiki_url_list
             if all_pages or analytics:
                 self.registration_urls.append(base_url + 'analytics/')
@@ -325,7 +318,6 @@ class Crawler:
                 data = json_body['data']
                 for datum in data:
                     self._node_wikis_by_parent_guid[parent_node].append(datum['attributes']['name'])
-            # print(u + ': ', response.status)
 
     def crawl_registration_wiki(self):
         tasks = []
@@ -333,7 +325,6 @@ class Crawler:
             tasks.append(asyncio.ensure_future(self.get_registration_wiki_names(node_url.strip('/').split('/')[-1])))
         loop = asyncio.get_event_loop()
         loop.run_until_complete(asyncio.wait(tasks))
-        # print(self._registration_wikis_by_parent_guid)
 
     # Async method called by crawl_wiki
     async def get_registration_wiki_names(self, parent_node):
@@ -347,7 +338,6 @@ class Crawler:
                 data = json_body['data']
                 for datum in data:
                     self._registration_wikis_by_parent_guid[parent_node].append(datum['attributes']['name'])
-            # print(u + ': ', response.status)
 
     def scrape_nodes(self, async=True):
         self.debug_logger.info("Scraping nodes, async = " + str(async))
@@ -388,7 +378,6 @@ class Crawler:
                     save_html(body, url)
                     print(str(response.status) + ": " + url)
                 if response.status == 504:
-                    # self.debug_logger.debug("504 on : " + url)
                     self.debug_logger.error("504 on : " + url)
 
 
@@ -407,25 +396,3 @@ def make_dirs(filename):
     folder = os.path.dirname(filename)
     if not os.path.exists(folder):
         os.makedirs(folder)
-
-#
-# # Execution
-#
-
-rosie = Crawler()
-
-# # registration URLs
-# print("getting registration URLs...")
-# rosie.crawl_registrations_api(page_limit=1)
-# rosie.crawl_registration_wiki()
-# rosie.generate_registration_urls()
-# print("REGISTRATIONS: " + str(rosie.registration_urls))
-#
-#
-# # node URLs
-# print("getting node URLs...")
-# rosie.crawl_nodes_api(page_limit=1)
-# rosie.crawl_node_wiki()
-# rosie.generate_node_urls()
-# print("NODES: " + str(rosie.node_urls))
-
