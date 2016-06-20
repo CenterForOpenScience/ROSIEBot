@@ -3,3 +3,5 @@ __pycache__/
 localhost:70/
 staging.osf.io/
 osf.io/
+*.txt
+.env
