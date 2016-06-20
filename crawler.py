@@ -28,7 +28,7 @@ class Crawler:
 
     """
 
-    def __init__(self, date_modified=None):
+    def __init__(self, date_modified=None, db=None):
         self.headers = {
             'User-Agent':
                 'LinkedInBot/1.0 (compatible; Mozilla/5.0; Jakarta Commons-HttpClient/3.1 +http://www.linkedin.com)'
@@ -40,17 +40,13 @@ class Crawler:
             self.date_modified_marker = date_modified
 
         self.node_urls = []  # urls for the node-related pages, in time order from oldest to newest, grouped by node
-
-        self._wikis_by_parent_guid = collections.defaultdict(list) # private instance variable for wiki utils
+        self.registration_urls = []
+        self._node_wikis_by_parent_guid = collections.defaultdict(list)  # private instance variable for wiki utils
+        self._registration_wikis_by_parent_guid = collections.defaultdict(list)
 
         # For sorting
         self.node_url_tuples = []
-
-        self.registration_dashboard_page_list = []
-        self.registration_files_page_list = []
-        self.registration_wiki_page_list = []
-        self.registration_analytics_page_list = []
-        self.registration_forks_page_list = []
+        self.registration_url_tuples = []
 
         self.user_profile_page_list = [] # User profile page ("osf.io/profile/mst3k/")
         # Shoehorn index in to list of pages to scrape:
@@ -76,13 +72,8 @@ class Crawler:
         self.debug_logger.addHandler(self.debug_log_handler)
         self.debug_logger.addHandler(self.error_log_handler)
 
-        # logger for milestone
-        self.milestone_logger = logging.getLogger('milestone')
-        self.milestone_logger.propagate = 0
-
-        self.milestone_handler = logging.FileHandler(settings.MILESTONE_LOG_FILENAME, mode='w')
-        self.milestone_handler.setLevel(logging.DEBUG)
-        self.milestone_logger.addHandler(self.milestone_handler)
+        # Database for persistent saving
+        self.database = db
 
     def truncate_node_url_tuples(self):
         if self.date_modified_marker is not None:
@@ -192,13 +183,11 @@ class Crawler:
                 for element in data:
                     date_str = element['attributes']['date_modified']
                     if '.' in date_str:
-                        date = datetime.datetime.strptime(element['attributes']['date_modified'],
-                                                          "%Y-%m-%dT%H:%M:%S.%f")
+                        date = datetime.datetime.strptime(date_str,"%Y-%m-%dT%H:%M:%S.%f")
                     else:
-                        date = datetime.datetime.strptime(element['attributes']['date_modified'], "%Y-%m-%dT%H:%M:%S")
+                        date = datetime.datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S")
                     self.node_url_tuples.append((self.http_base + 'project/' + element['id'] + '/', date))
                     self.node_url_tuples.sort(key=lambda x: x[1])
-
 
     async def parse_registrations_api(self, api_url, sem):
         print('API request sent')
@@ -208,14 +197,18 @@ class Crawler:
                 body = await response.read()
                 response.close()
                 json_body = json.loads(body.decode('utf-8'))
-                print(api_url)
                 data = json_body['data']
                 for element in data:
-                    self.registration_dashboard_page_list.append(self.http_base + element['id'] + '/')
-                    self.registration_files_page_list.append(self.http_base + element['id'] + '/files/')
-                    self.registration_analytics_page_list.append(self.http_base + element['id'] + '/analytics/')
-                    self.registration_forks_page_list.append(self.http_base + element['id'] + '/forks/')
-                    # self.registration_
+                    date_str = element['attributes']['date_modified']
+                    # TODO: probably not a good long term solution. should change this
+                    if date_str is None:
+                        date_str = element['attributes']['date_registered']
+                    if '.' in date_str:
+                        date = datetime.datetime.strptime(date_str,"%Y-%m-%dT%H:%M:%S.%f")
+                    else:
+                        date = datetime.datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S")
+                    self.registration_url_tuples.append((self.http_base + element['id'] + '/', date))
+                    self.registration_url_tuples.sort(key=lambda x: x[1])
 
     async def parse_users_api(self, api_url, sem):
         print('API request sent')
@@ -243,7 +236,7 @@ class Crawler:
                 print(api_url)
                 data = json_body['data']
                 for element in data:
-                    self.institution_page_list.append(self.http_base + 'institutions/' + element['id'] + '/')
+                    self.institution_url_list.append(self.http_base + 'institutions/' + element['id'] + '/')
 
     def generate_node_urls(self, all_pages=True, dashboard=False, files=False,
                            wiki=False, analytics=False, registrations=False, forks=False):
@@ -266,9 +259,8 @@ class Crawler:
             if all_pages or files:
                 self.node_urls.append(base_url + 'files/')
             if all_pages or wiki:
-                wiki_name_list = self._wikis_by_parent_guid[base_url.strip("/").split("/")[-1]]
+                wiki_name_list = self._node_wikis_by_parent_guid[base_url.strip("/").split("/")[-1]]
                 wiki_url_list = [base_url + 'wiki/' + urllib.parse.quote(x) for x in wiki_name_list]
-                print("adding " + str(wiki_url_list) + " to to_scrape list")
                 self.node_urls += wiki_url_list
 
                 # the strip split -1 bit returns the last section of the base_url, which is the GUId
@@ -279,16 +271,45 @@ class Crawler:
             if all_pages or forks:
                 self.node_urls.append(base_url + 'forks/')
 
+    def generate_registration_urls(self, all_pages=True, dashboard=False, files=False,
+                                wiki=False, analytics=False, forks=False):
 
-    def crawl_wiki(self):
+        self.debug_logger.info("Generating registration urls")
+        self.debug_logger.info(" all_pages = " + str(all_pages) +
+                               " dashboard = " + str(dashboard) +
+                               " files = " + str(files) +
+                               " wiki = " + str(wiki) +
+                               "analytics = " + str(analytics) +
+                               " forks = " + str(forks)
+                               )
+
+        url_list = [x[0] for x in self.registration_url_tuples]
+
+        print("Generating Registration URLs...")
+        for base_url in url_list:
+            if all_pages or dashboard:
+                self.registration_urls.append(base_url)
+            if all_pages or files:
+                self.registration_urls.append(base_url + 'files/')
+            if all_pages or wiki:
+                # the strip split -1 bit returns the last section of the base_url, which is the GUId
+                wiki_name_list = self._registration_wikis_by_parent_guid[base_url.strip("/").split("/")[-1]]
+                wiki_url_list = [base_url + 'wiki/' + urllib.parse.quote(x) for x in wiki_name_list]
+                self.registration_urls += wiki_url_list
+            if all_pages or analytics:
+                self.registration_urls.append(base_url + 'analytics/')
+            if all_pages or forks:
+                self.registration_urls.append(base_url + 'forks/')
+
+    def crawl_node_wiki(self):
         tasks = []
         for node_url in [x[0] for x in self.node_url_tuples]:
-            tasks.append(asyncio.ensure_future(self.get_wiki_names(node_url.strip('/').split('/')[-1])))
+            tasks.append(asyncio.ensure_future(self.get_node_wiki_names(node_url.strip('/').split('/')[-1])))
         loop = asyncio.get_event_loop()
         loop.run_until_complete(asyncio.wait(tasks))
 
     # Async method called by crawl_wiki
-    async def get_wiki_names(self, parent_node):
+    async def get_node_wiki_names(self, parent_node):
         async with aiohttp.ClientSession() as s:
             u = self.api_base + 'nodes/' + parent_node + '/wikis/'
             response = await s.get(u)
@@ -298,8 +319,27 @@ class Crawler:
                 json_body = json.loads(body.decode('utf-8'))
                 data = json_body['data']
                 for datum in data:
-                    self._wikis_by_parent_guid[parent_node].append(datum['attributes']['name'])
-            print(u + ': ', response.status)
+                    self._node_wikis_by_parent_guid[parent_node].append(datum['attributes']['name'])
+
+    def crawl_registration_wiki(self):
+        tasks = []
+        for node_url in [x[0] for x in self.registration_url_tuples]:
+            tasks.append(asyncio.ensure_future(self.get_registration_wiki_names(node_url.strip('/').split('/')[-1])))
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(asyncio.wait(tasks))
+
+    # Async method called by crawl_wiki
+    async def get_registration_wiki_names(self, parent_node):
+        async with aiohttp.ClientSession() as s:
+            u = self.api_base + 'registrations/' + parent_node + '/wikis/'
+            response = await s.get(u)
+            body = await response.read()
+            response.close()
+            if response.status <= 200:
+                json_body = json.loads(body.decode('utf-8'))
+                data = json_body['data']
+                for datum in data:
+                    self._registration_wikis_by_parent_guid[parent_node].append(datum['attributes']['name'])
 
     def scrape_nodes(self, async=True):
         self.debug_logger.info("Scraping nodes, async = " + str(async))
@@ -314,7 +354,7 @@ class Crawler:
 
     # Get page content
     def _scrape_pages(self, aspect_list):
-        sem = asyncio.BoundedSemaphore(value=1)
+        sem = asyncio.BoundedSemaphore(value=5)
         tasks = []
         for url in aspect_list:
             tasks.append(asyncio.ensure_future(self.scrape_url(url, sem)))
@@ -337,16 +377,19 @@ class Crawler:
                     save_html(body, url)
                 if response.status == 504:
                     # self.debug_logger.debug("504 on : " + url)
+
                     self.debug_logger.error("504 on : " + url)
                     self.record_milestone(url)
 
     def record_milestone(self, url):
         if datetime.datetime.now().minute % 5 == 0:
-            self.milestone_logger.debug(url)
+            self.database['milestone'] = url
 
 
 def save_html(html, page):
     page = page.split('//', 1)[1]
+    if page[-1] != '/':
+        page += '/'
     make_dirs(page)
     f = open(page + 'index.html', 'wb+')
     f.write(html)

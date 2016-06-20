@@ -5,3 +5,4 @@ staging.osf.io/
 osf.io/
 *.txt
 .env
+*.task
