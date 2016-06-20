@@ -9,6 +9,7 @@ import math
 import collections
 import logging
 import urllib.parse
+import shelve
 
 # Configure for testing in settings.py
 base_urls = settings.base_urls
@@ -74,7 +75,10 @@ class Crawler:
         self.debug_logger.addHandler(self.error_log_handler)
 
         # Database for persistent saving
-        self.database = db
+        if db is None:
+            db = shelve.open("tmp.task", writeback=True)
+        else:
+            self.database = db
 
     def truncate_node_url_tuples(self):
         if self.date_modified_marker is not None:
@@ -304,43 +308,47 @@ class Crawler:
 
     def crawl_node_wiki(self):
         tasks = []
+        sem = asyncio.BoundedSemaphore(value=5)
         for node_url in [x[0] for x in self.node_url_tuples]:
-            tasks.append(asyncio.ensure_future(self.get_node_wiki_names(node_url.strip('/').split('/')[-1])))
+            tasks.append(asyncio.ensure_future(self.get_node_wiki_names(node_url.strip('/').split('/')[-1], sem)))
         loop = asyncio.get_event_loop()
         loop.run_until_complete(asyncio.wait(tasks))
 
     # Async method called by crawl_wiki
-    async def get_node_wiki_names(self, parent_node):
-        async with aiohttp.ClientSession() as s:
-            u = self.api_base + 'nodes/' + parent_node + '/wikis/'
-            response = await s.get(u)
-            body = await response.read()
-            response.close()
-            if response.status <= 200:
-                json_body = json.loads(body.decode('utf-8'))
-                data = json_body['data']
-                for datum in data:
-                    self._node_wikis_by_parent_guid[parent_node].append(datum['attributes']['name'])
+    async def get_node_wiki_names(self, parent_node, sem):
+        async with sem:
+            async with aiohttp.ClientSession() as s:
+                u = self.api_base + 'nodes/' + parent_node + '/wikis/'
+                response = await s.get(u)
+                body = await response.read()
+                response.close()
+                if response.status <= 200:
+                    json_body = json.loads(body.decode('utf-8'))
+                    data = json_body['data']
+                    for datum in data:
+                        self._node_wikis_by_parent_guid[parent_node].append(datum['attributes']['name'])
 
     def crawl_registration_wiki(self):
         tasks = []
+        sem = asyncio.BoundedSemaphore(value=5)
         for node_url in [x[0] for x in self.registration_url_tuples]:
-            tasks.append(asyncio.ensure_future(self.get_registration_wiki_names(node_url.strip('/').split('/')[-1])))
+            tasks.append(asyncio.ensure_future(self.get_registration_wiki_names(node_url.strip('/').split('/')[-1], sem)))
         loop = asyncio.get_event_loop()
         loop.run_until_complete(asyncio.wait(tasks))
 
     # Async method called by crawl_wiki
-    async def get_registration_wiki_names(self, parent_node):
-        async with aiohttp.ClientSession() as s:
-            u = self.api_base + 'registrations/' + parent_node + '/wikis/'
-            response = await s.get(u)
-            body = await response.read()
-            response.close()
-            if response.status <= 200:
-                json_body = json.loads(body.decode('utf-8'))
-                data = json_body['data']
-                for datum in data:
-                    self._registration_wikis_by_parent_guid[parent_node].append(datum['attributes']['name'])
+    async def get_registration_wiki_names(self, parent_node, sem):
+        async with sem:
+            async with aiohttp.ClientSession() as s:
+                u = self.api_base + 'registrations/' + parent_node + '/wikis/'
+                response = await s.get(u)
+                body = await response.read()
+                response.close()
+                if response.status <= 200:
+                    json_body = json.loads(body.decode('utf-8'))
+                    data = json_body['data']
+                    for datum in data:
+                        self._registration_wikis_by_parent_guid[parent_node].append(datum['attributes']['name'])
 
     def scrape_nodes(self, async=True):
         self.debug_logger.info("Scraping nodes, async = " + str(async))
