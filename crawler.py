@@ -11,8 +11,7 @@ import logging
 import urllib.parse
 
 # Configure for testing in settings.py
-base_urls = settings.base_urls
-# limit = settings.limit
+from settings import base_urls
 
 
 class Crawler:
@@ -359,18 +358,3 @@ def make_dirs(filename):
     folder = os.path.dirname(filename)
     if not os.path.exists(folder):
         os.makedirs(folder)
-
-#
-# # Execution
-#
-
-rosie = Crawler()
-#
-# # Get URLs from API and add them to the async tasks
-# rosie.scrape_diff()
-rosie.crawl_nodes_api(page_limit=10)
-rosie.crawl_wiki()
-rosie.generate_node_urls(all_pages=True)
-rosie.scrape_nodes(async=True)
-
-print("Mirror complete. \nOptional:\tRun verification testing suite.")
