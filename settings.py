@@ -15,6 +15,4 @@ limit = 1
 
 DEBUG_LOG_FILENAME = "debug_log.txt"
 ERROR_LOG_FILENAME = "error_log.txt"
-# GOAL_LOG_FILENAME = "goal_log.txt"
-# SCRAPED_LOG_FILENAME = "scraped_log.txt"
-MILESTONE_LOG_FILENAME = "milestone_log.txt"
+

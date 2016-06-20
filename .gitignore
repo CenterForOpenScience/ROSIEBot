@@ -6,3 +6,4 @@ osf.io/
 *.txt
 .env
 127.0.0.1:70/
+*.task
