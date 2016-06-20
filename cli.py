@@ -75,11 +75,10 @@ def normal_scrape(dm,
     db['include_forks'] = include_forks
 
     rosie = crawler.Crawler(date_modified=date_marker, db=db)
+
+    scrape_api(rosie, db, scrape_nodes, scrape_registrations, scrape_users, scrape_institutions)
+
     if scrape_nodes:
-        rosie.crawl_nodes_api()
-        rosie.truncate_node_url_tuples()
-        rosie.crawl_node_wiki()
-        db['node_url_tuples'] = rosie.node_url_tuples
         if include_dashboard and include_files and include_analytics and \
                 include_forks and include_registrations and include_wiki:
             rosie.generate_node_urls(all_pages=True)
@@ -91,27 +90,41 @@ def normal_scrape(dm,
         db['nodes_finished'] = True
 
     if scrape_registrations:
-        rosie.crawl_registrations_api()
-        rosie.truncate_registration_url_tuples()
-        rosie.crawl_registration_wiki()
-        db['registration_url_tuples'] = rosie.registration_url_tuples
         rosie.generate_registration_urls()
         rosie.scrape_registrations(async=False)
         db['registrations_finished'] = True
 
     if scrape_users:
-        rosie.crawl_users_api()
-        db['users_profile_page_urls'] = rosie.user_profile_page_urls
         rosie.scrape_users()
         db['users_finished'] = True
 
     if scrape_institutions:
-        rosie.crawl_institutions_api()
-        db['institutions_urls'] = rosie.institution_urls
         rosie.scrape_institutions()
         db['institution_finished'] = True
 
     db['scraped_finished'] = True
+
+
+def scrape_api(cr, db, scrape_nodes, scrape_registrations, scrape_users, scrape_institutions):
+    if scrape_nodes:
+        cr.crawl_nodes_api()
+        cr.truncate_node_url_tuples()
+        cr.crawl_node_wiki()
+        db['node_url_tuples'] = cr.node_url_tuples
+
+    if scrape_registrations:
+        cr.crawl_registrations_api()
+        cr.truncate_registration_url_tuples()
+        cr.crawl_registration_wiki()
+        db['registration_url_tuples'] = cr.registration_url_tuples
+
+    if scrape_users:
+        cr.crawl_users_api()
+        db['users_profile_page_urls'] = cr.user_profile_page_urls
+
+    if scrape_institutions:
+        cr.crawl_institutions_api()
+        db['institutions_urls'] = cr.institution_urls
 
 
 if __name__ == '__main__':

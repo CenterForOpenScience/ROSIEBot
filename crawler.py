@@ -223,7 +223,6 @@ class Crawler:
                 body = await response.read()
                 response.close()
                 json_body = json.loads(body.decode('utf-8'))
-                print(api_url)
                 data = json_body['data']
                 for element in data:
                     self.user_profile_page_urls.append(self.http_base + 'profile/' + element['id'] + '/')
@@ -236,7 +235,6 @@ class Crawler:
                 body = await response.read()
                 response.close()
                 json_body = json.loads(body.decode('utf-8'))
-                print(api_url)
                 data = json_body['data']
                 for element in data:
                     self.institution_url_list.append(self.http_base + 'institutions/' + element['id'] + '/')
