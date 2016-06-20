@@ -114,6 +114,8 @@ class Crawler:
             )))
         loop = asyncio.get_event_loop()
         loop.run_until_complete(asyncio.wait(tasks))
+        self.truncate_node_url_tuples()
+        self.crawl_node_wiki()
 
     def crawl_registrations_api(self, page_limit=0):
         sem = asyncio.BoundedSemaphore(value=10)
@@ -136,6 +138,8 @@ class Crawler:
             )))
         loop = asyncio.get_event_loop()
         loop.run_until_complete(asyncio.wait(tasks))
+        self.truncate_registration_url_tuples()
+        self.crawl_registration_wiki()
 
     def crawl_users_api(self, page_limit=0):
         sem = asyncio.BoundedSemaphore(value=10)
