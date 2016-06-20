@@ -29,7 +29,7 @@ class Crawler:
 
     """
 
-    def __init__(self, date_modified=None):
+    def __init__(self, date_modified=None, db=None):
         self.headers = {
             'User-Agent':
                 'LinkedInBot/1.0 (compatible; Mozilla/5.0; Jakarta Commons-HttpClient/3.1 +http://www.linkedin.com)'
@@ -72,6 +72,9 @@ class Crawler:
         self.debug_logger.addHandler(self.console_log_handler)
         self.debug_logger.addHandler(self.debug_log_handler)
         self.debug_logger.addHandler(self.error_log_handler)
+
+        # Database for persistent saving
+        self.database = db
 
     def truncate_node_url_tuples(self):
         if self.date_modified_marker is not None:
@@ -250,7 +253,7 @@ class Crawler:
 
         url_list = [x[0] for x in self.node_url_tuples]
 
-        print("Generating Node URLs...")
+        # print("Generating Node URLs...")
         for base_url in url_list:
             if all_pages or dashboard:
                 self.node_urls.append(base_url)
@@ -344,21 +347,17 @@ class Crawler:
         if async:
             self._scrape_pages(self.node_urls)
         else:
-            print(self.node_url_tuples)
-            print("\nnode_urls: " + str(self.node_urls) + "\n")
             for elem in self.node_url_tuples:
-                print(elem)
                 lst = []
                 while len(self.node_urls) > 0 and elem[0] in self.node_urls[0]:
                     lst.append(self.node_urls.pop(0))
-                print("lst: " + str(lst))
                 self._scrape_pages(lst)
 
     # Get page content
     def _scrape_pages(self, aspect_list):
         sem = asyncio.BoundedSemaphore(value=5)
         tasks = []
-        for url in aspect_list:  # TODO: change to "if weekday mod % 7 == 1"
+        for url in aspect_list:
             tasks.append(asyncio.ensure_future(self.scrape_url(url, sem)))
 
         loop = asyncio.get_event_loop()
@@ -369,16 +368,21 @@ class Crawler:
     async def scrape_url(self, url, sem):
         async with sem:
             async with aiohttp.ClientSession() as s:
-
                 self.debug_logger.debug("Scraping : " + url)
                 response = await s.get(url, headers=self.headers)
                 body = await response.read()
                 response.close()
                 if response.status == 200:
+                    self.debug_logger.debug("Finished : " + url)
+                    self.record_milestone(url)
                     save_html(body, url)
-                    print(str(response.status) + ": " + url)
                 if response.status == 504:
                     self.debug_logger.error("504 on : " + url)
+                    self.record_milestone(url)
+
+    def record_milestone(self, url):
+        if datetime.datetime.now().minute % 5 == 0:
+            self.database['milestone'] = url
 
 
 def save_html(html, page):
