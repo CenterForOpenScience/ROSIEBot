@@ -1,3 +1,12 @@
+"""
+Main body of code for ROSIEBot.
+
+Endpoints:
+
+Crawler.crawl_<type>_api populates a list of URLs to visit.
+Crawler.scrape_<type> visits the URLs and saves their content as files.
+
+"""
 import asyncio
 import aiohttp
 import json
@@ -54,7 +63,7 @@ class Crawler:
 
         self.user_profile_page_list = [] # User profile page ("osf.io/profile/mst3k/")
         # Shoehorn index in to list of pages to scrape:
-        self.institution_url_list = [self.http_base] # Institution page ("osf.io/institution/cos")
+        self.institution_page_list = [self.http_base] # Institution page ("osf.io/institution/cos")
 
         # Logging utils
 
@@ -199,7 +208,6 @@ class Crawler:
                     self.node_url_tuples.append((self.http_base + 'project/' + element['id'] + '/', date))
                     self.node_url_tuples.sort(key=lambda x: x[1])
 
-
     async def parse_registrations_api(self, api_url, sem):
         print('API request sent')
         async with sem:
@@ -278,7 +286,6 @@ class Crawler:
                 self.node_urls.append(base_url + 'registrations/')
             if all_pages or forks:
                 self.node_urls.append(base_url + 'forks/')
-
 
     def crawl_wiki(self):
         tasks = []

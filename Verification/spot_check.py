@@ -42,7 +42,6 @@ class ElementValueIdentifier:
                     message = ['SPOT_CHECK', name, element, 'ok', '\n']
                     success_log.write('\t'.join(message))
         print('Spot checked.')
-        success_log.write('\n'), failure_log.write('\n')
 
 
 # Project verification classes

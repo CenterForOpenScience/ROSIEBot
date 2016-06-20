@@ -1,17 +1,12 @@
 """
 Step 4: Try again for failed pages.
 """
-import datetime
-import Verification.spot_check as spot_check
-import Verification.initialize_list as initialize
-import settings
+from Verification.spot_check import send_to_retry as new_tasks
+from Verification.initialize_list import mirror_path
+from settings import base_urls
 import requests
 
-http_base = settings.base_urls[0]
-
-mirror_path = initialize.mirror_path
-
-new_tasks = spot_check.send_to_retry
+http_base = base_urls[0]
 
 # # Number of times to retry download before giving up.
 tries = 3

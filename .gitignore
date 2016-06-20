@@ -5,3 +5,4 @@ staging.osf.io/
 osf.io/
 *.txt
 .env
+127.0.0.1:70/

@@ -109,7 +109,7 @@ class RegistrationFiles(SizeArbiter):
     def __init__(self):
         SizeArbiter.__init__(self)
         self.min_size = 380
-        self.files = initialize.get_files('registrations/', 'files/')
+        self.files = initialize.get_files('', 'files/')
         self.send_to_spot_check = self.compare()
 
 
@@ -117,7 +117,7 @@ class RegistrationWiki(SizeArbiter):
     def __init__(self):
         SizeArbiter.__init__(self)
         self.min_size = 410
-        self.files = initialize.get_files('registrations/', 'wiki/')
+        self.files = initialize.get_files('', 'wiki/')
         self.send_to_spot_check = self.compare()
 
 
@@ -125,7 +125,7 @@ class RegistrationAnalytics(SizeArbiter):
     def __init__(self):
         SizeArbiter.__init__(self)
         self.min_size = 380
-        self.files = initialize.get_files('registrations/', 'analytics/')
+        self.files = initialize.get_files('', 'analytics/')
         self.send_to_spot_check = self.compare()
 
 
@@ -133,7 +133,7 @@ class RegistrationForks(SizeArbiter):
     def __init__(self):
         SizeArbiter.__init__(self)
         self.min_size = 380
-        self.files = initialize.get_files('registrations/', 'forks/')
+        self.files = initialize.get_files('', 'forks/')
         self.send_to_spot_check = self.compare()
 
 
