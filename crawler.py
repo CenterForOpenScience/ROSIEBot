@@ -355,7 +355,7 @@ class Crawler:
 
     # Get page content
     def _scrape_pages(self, aspect_list):
-        sem = asyncio.BoundedSemaphore(value=1)
+        sem = asyncio.BoundedSemaphore(value=5)
         tasks = []
         for url in aspect_list:
             tasks.append(asyncio.ensure_future(self.scrape_url(url, sem)))
