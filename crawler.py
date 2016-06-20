@@ -29,7 +29,7 @@ class Crawler:
 
     """
 
-    def __init__(self, date_modified=None):
+    def __init__(self, date_modified=None, db=None):
         self.headers = {
             'User-Agent':
                 'LinkedInBot/1.0 (compatible; Mozilla/5.0; Jakarta Commons-HttpClient/3.1 +http://www.linkedin.com)'
@@ -73,13 +73,8 @@ class Crawler:
         self.debug_logger.addHandler(self.debug_log_handler)
         self.debug_logger.addHandler(self.error_log_handler)
 
-        # logger for milestone
-        self.milestone_logger = logging.getLogger('milestone')
-        self.milestone_logger.propagate = 0
-
-        self.milestone_handler = logging.FileHandler(settings.MILESTONE_LOG_FILENAME, mode='w')
-        self.milestone_handler.setLevel(logging.DEBUG)
-        self.milestone_logger.addHandler(self.milestone_handler)
+        # Database for persistent saving
+        self.database = db
 
     def truncate_node_url_tuples(self):
         if self.date_modified_marker is not None:
@@ -387,7 +382,7 @@ class Crawler:
 
     def record_milestone(self, url):
         if datetime.datetime.now().minute % 5 == 0:
-            self.milestone_logger.debug(url)
+            self.database['milestone'] = url
 
 
 def save_html(html, page):
