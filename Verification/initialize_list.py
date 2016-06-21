@@ -34,7 +34,7 @@ def ensure_all_instances(expected_list, instance_list, type):
         if element.replace(type, '') in instance_list:
             continue
         else:
-            message = ['FIND_INSTANCES', element, 'not_found', '\n']
+            message = [element, 'not_found', 'FIND_INSTANCES', '\n']
             failure_log.write('\t'.join(message))
             send_to_retry.append(element)
 
@@ -52,7 +52,7 @@ def get_files(osf_type, page=''):
     type_folder = mirror_path + osf_type                        # `localhost:70/project`
 
     if not os.path.exists(type_folder):                         # No /project folder
-        message = ['FIND_TYPE', osf_type, 'not_found', '\n']
+        message = [osf_type, 'FIND_TYPE', 'not_found', '\n']
         failure_log.write('\t'.join(message))
         return file_paths
 
@@ -63,7 +63,7 @@ def get_files(osf_type, page=''):
         instance_path = type_folder + instance + '/' + page     # `localhost:70/project/GUID/files`
 
         if not os.path.isdir(instance_path):           # `Files` folder not found.
-            message = ['FIND_FOLDER', osf_type + instance + '/' + page, 'not_found', '\n']
+            message = [osf_type + instance + '/' + page, 'FIND_FOLDER', 'not_found', '\n']
             failure_log.write('\t'.join(message))
             send_to_retry.append(instance_path)
             continue
@@ -72,7 +72,7 @@ def get_files(osf_type, page=''):
         if os.path.exists(fname):
             file_paths.append(fname)
         else:
-            message = ['FIND_FILE', osf_type + instance + '/' + page, 'not_found', '\n']
+            message = [osf_type + instance + '/' + page, 'FIND_FILE', 'not_found', '\n']
             failure_log.write('\t'.join(message))
             send_to_retry.append(fname)
     return file_paths

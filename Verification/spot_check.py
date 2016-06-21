@@ -16,6 +16,7 @@ failure_log = open('Logs/test_failure.log', 'a')
 
 send_to_retry = size_comp.send_to_retry
 
+
 # Parent class - Introduces relevant spot checking functions.
 class ElementValueIdentifier:
     """
@@ -33,13 +34,13 @@ class ElementValueIdentifier:
             for element in self.elements:
                 result = soup.select(element)
                 if len(result) == 0:                    # No results
-                    message = ['SPOT_CHECK', name, element, 'not_found', '\n']
+                    message = [name, element, 'SPOT_CHECK', 'not_found', '\n']
                     failure_log.write('\t'.join(message))
                 elif len(result[0].contents) == 0:      # Empty results
-                    message = ['SPOT_CHECK', name, element, 'empty', '\n']
+                    message = [name, element, 'SPOT_CHECK', 'empty', '\n']
                     failure_log.write('\t'.join(message))
                 else:
-                    message = ['SPOT_CHECK', name, element, 'ok', '\n']
+                    message = [name, element, 'SPOT_CHECK', 'ok', '\n']
                     success_log.write('\t'.join(message))
         print('Spot checked.')
 
@@ -204,22 +205,3 @@ class InstitutionProfile(ElementValueIdentifier):
         ]
         self.files = size_comp.InstitutionProfile().send_to_spot_check
         self.identify_values()
-
-# # Project Execution
-project_dashboard = ProjectDashboard()
-project_files = ProjectFiles()
-project_wiki = ProjectWiki()
-# project_analytics = ProjectAnalytics()
-project_registrations = ProjectRegistrations()
-project_forks = ProjectForks()
-
-# Registration Execution
-registration_dashboard = RegistrationDashboard()
-registration_files = RegistrationFiles()
-registration_wiki = RegistrationWiki()
-# registration_analytics = RegistrationAnalytics()
-registration_forks = RegistrationForks()
-
-# User and institution execution
-user_profile = UserProfile()
-institution_profile = InstitutionProfile()

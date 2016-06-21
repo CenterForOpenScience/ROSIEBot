@@ -113,8 +113,6 @@ class Crawler:
         loop = asyncio.get_event_loop()
         loop.run_until_complete(asyncio.wait(tasks))
 
-    # Wiki api call requires special code from Cameron's branch (feature/wiki)
-
     def crawl_registrations_api(self, page_limit=0):
         sem = asyncio.BoundedSemaphore(value=10)
 
@@ -317,7 +315,7 @@ class Crawler:
         loop = asyncio.get_event_loop()
         loop.run_until_complete(asyncio.wait(tasks))
 
-    # Async method called by crawl_wiki
+    # Async method called by crawl_node_wiki
     async def get_node_wiki_names(self, parent_node):
         async with aiohttp.ClientSession() as s:
             u = self.api_base + 'nodes/' + parent_node + '/wikis/'

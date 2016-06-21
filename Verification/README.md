@@ -2,9 +2,10 @@
 
 
 ## Execution
-run.py (through IDE or CLI)
+Project CLI
 
 OPTIONS
+- Verify specific areas of the OSF
 - Identify trouble (see PROCESS below)
 - Identify and correct trouble (see STEP 4 below)
 

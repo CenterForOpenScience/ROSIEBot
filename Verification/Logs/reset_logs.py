@@ -1,6 +1,6 @@
 test_header = 'PROCESS_NAME\tTYPE\tINSTANCE\tSPOT\tSTATUS\n'
 
-test_logs = ['test_success.log', 'test_failure.log']
+test_logs = ['Verification/Logs/test_success.log', 'Verification/Logs/test_failure.log']
 
 for log in test_logs:
     file = open(log, 'w')

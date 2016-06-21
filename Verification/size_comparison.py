@@ -34,17 +34,18 @@ class SizeArbiter:
             meets_expectations = file_size > self.min_size
             relative_name = file.replace(mirror_path, '')
             if meets_expectations:
-                message = ['SIZE_CHECK', relative_name, 'sufficient:', str(file_size), '\n']
+                message = [relative_name, 'SIZE_CHECK', 'sufficient:', str(file_size), '\n']
                 success_log.write('\t'.join(message))
                 self.send_to_spot_check.append(file)
             else:
-                message = ['SIZE_CHECK', relative_name, 'insufficient:', str(file_size), '\n' ]
+                message = [relative_name, 'SIZE_CHECK', 'insufficient:', str(file_size), '\n' ]
                 failure_log.write('\t'.join(message))
                 send_to_retry.append(file)
         return self.send_to_spot_check
 
 
 # Project verification classes
+# Min sizes are rough numbers based on template sizes
 
 class ProjectDashboard(SizeArbiter):
     def __init__(self):
