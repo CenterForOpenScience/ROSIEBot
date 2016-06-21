@@ -412,9 +412,11 @@ class Crawler:
     async def scrape_url(self, url, sem):
         async with sem:
             async with aiohttp.ClientSession() as s:
+                print("Sending url request to : " + url)
                 response = await s.get(url, headers=self.headers)
                 body = await response.read()
                 response.close()
+                print(response.status)
                 if response.status == 200:
                     self.debug_logger.debug("Finished : " + url)
                     self.record_milestone(url)
