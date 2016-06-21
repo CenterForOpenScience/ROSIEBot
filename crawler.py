@@ -9,6 +9,7 @@ import math
 import collections
 import logging
 import urllib.parse
+import shelve
 
 # Configure for testing in settings.py
 from settings import base_urls
@@ -48,9 +49,9 @@ class Crawler:
         self.node_url_tuples = []
         self.registration_url_tuples = []
 
-        self.user_profile_page_list = [] # User profile page ("osf.io/profile/mst3k/")
+        self.user_profile_page_urls = [] # User profile page ("osf.io/profile/mst3k/")
         # Shoehorn index in to list of pages to scrape:
-        self.institution_url_list = [self.http_base] # Institution page ("osf.io/institution/cos")
+        self.institution_urls = [self.http_base] # Institution page ("osf.io/institution/cos")
 
         # Logging utils
 
@@ -73,12 +74,21 @@ class Crawler:
         self.debug_logger.addHandler(self.error_log_handler)
 
         # Database for persistent saving
-        self.database = db
+        if db is None:
+            self.database = shelve.open("tmp.task", writeback=True)
+        else:
+            self.database = db
 
     def truncate_node_url_tuples(self):
         if self.date_modified_marker is not None:
-            self.node_url_tuples = [x for x in self.node_url_tuples if x[1] > self.date_modified_marker]
+            self.node_url_tuples = [x for x in self.node_url_tuples if x[1] >= self.date_modified_marker]
             self.debug_logger.info("node_url_tuples truncated according to date_modified_marker: " +
+                                   str(self.date_modified_marker))
+
+    def truncate_registration_url_tuples(self):
+        if self.date_modified_marker is not None:
+            self.registration_url_tuples = [x for x in self.registration_url_tuples if x[1] >= self.date_modified_marker]
+            self.debug_logger.info("registration_url_tuples truncated according to date_modified_marker: " +
                                    str(self.date_modified_marker))
 
 # API Crawling
@@ -103,8 +113,7 @@ class Crawler:
             )))
         loop = asyncio.get_event_loop()
         loop.run_until_complete(asyncio.wait(tasks))
-
-    # Wiki api call requires special code from Cameron's branch (feature/wiki)
+        self.truncate_node_url_tuples()
 
     def crawl_registrations_api(self, page_limit=0):
         sem = asyncio.BoundedSemaphore(value=10)
@@ -127,6 +136,7 @@ class Crawler:
             )))
         loop = asyncio.get_event_loop()
         loop.run_until_complete(asyncio.wait(tasks))
+        self.truncate_registration_url_tuples()
 
     def crawl_users_api(self, page_limit=0):
         sem = asyncio.BoundedSemaphore(value=10)
@@ -169,7 +179,7 @@ class Crawler:
         loop = asyncio.get_event_loop()
         loop.run_until_complete(asyncio.wait(tasks))
 
-    # Go through pages for each API endpoint
+# API Scraping
 
     async def parse_nodes_api(self, api_url, sem):
         async with sem:
@@ -190,9 +200,9 @@ class Crawler:
                     self.node_url_tuples.sort(key=lambda x: x[1])
 
     async def parse_registrations_api(self, api_url, sem):
-        print('API request sent')
         async with sem:
             async with aiohttp.ClientSession() as s:
+                self.debug_logger.info("Crawling registrations api, url = " + api_url)
                 response = await s.get(api_url)
                 body = await response.read()
                 response.close()
@@ -211,35 +221,37 @@ class Crawler:
                     self.registration_url_tuples.sort(key=lambda x: x[1])
 
     async def parse_users_api(self, api_url, sem):
-        print('API request sent')
-
         async with sem:
             async with aiohttp.ClientSession() as s:
+                self.debug_logger.info("Crawling users api, url = " + api_url)
                 response = await s.get(api_url)
                 body = await response.read()
                 response.close()
                 json_body = json.loads(body.decode('utf-8'))
-                print(api_url)
                 data = json_body['data']
                 for element in data:
-                    self.user_profile_page_list.append(self.http_base + 'profile/' + element['id'] + '/')
+                    self.user_profile_page_urls.append(self.http_base + 'profile/' + element['id'] + '/')
 
     async def parse_institutions_api(self, api_url, sem):
-        print('API request sent')
-
         async with sem:
             async with aiohttp.ClientSession() as s:
+                self.debug_logger.info("Crawling institutions api, url = " + api_url)
                 response = await s.get(api_url)
                 body = await response.read()
                 response.close()
                 json_body = json.loads(body.decode('utf-8'))
-                print(api_url)
                 data = json_body['data']
                 for element in data:
-                    self.institution_url_list.append(self.http_base + 'institutions/' + element['id'] + '/')
+                    self.institution_urls.append(self.http_base + 'institutions/' + element['id'] + '/')
+
+# Generating URLs for Nodes and Registrations
 
     def generate_node_urls(self, all_pages=True, dashboard=False, files=False,
                            wiki=False, analytics=False, registrations=False, forks=False):
+
+        if all_pages or wiki:
+            self.crawl_node_wiki()
+
         self.debug_logger.info("Generating node urls")
         self.debug_logger.info(" all_pages = " + str(all_pages) +
                                " dashboard = " + str(dashboard) +
@@ -252,7 +264,6 @@ class Crawler:
 
         url_list = [x[0] for x in self.node_url_tuples]
 
-        # print("Generating Node URLs...")
         for base_url in url_list:
             if all_pages or dashboard:
                 self.node_urls.append(base_url)
@@ -274,6 +285,9 @@ class Crawler:
     def generate_registration_urls(self, all_pages=True, dashboard=False, files=False,
                                 wiki=False, analytics=False, forks=False):
 
+        if all_pages or wiki:
+            self.crawl_registration_wiki()
+
         self.debug_logger.info("Generating registration urls")
         self.debug_logger.info(" all_pages = " + str(all_pages) +
                                " dashboard = " + str(dashboard) +
@@ -285,7 +299,6 @@ class Crawler:
 
         url_list = [x[0] for x in self.registration_url_tuples]
 
-        print("Generating Registration URLs...")
         for base_url in url_list:
             if all_pages or dashboard:
                 self.registration_urls.append(base_url)
@@ -301,46 +314,60 @@ class Crawler:
             if all_pages or forks:
                 self.registration_urls.append(base_url + 'forks/')
 
+# Resolving wiki links for Nodes
+
     def crawl_node_wiki(self):
         tasks = []
+        sem = asyncio.BoundedSemaphore(value=5)
         for node_url in [x[0] for x in self.node_url_tuples]:
-            tasks.append(asyncio.ensure_future(self.get_node_wiki_names(node_url.strip('/').split('/')[-1])))
+            tasks.append(asyncio.ensure_future(self.get_node_wiki_names(node_url.strip('/').split('/')[-1], sem)))
         loop = asyncio.get_event_loop()
         loop.run_until_complete(asyncio.wait(tasks))
 
     # Async method called by crawl_wiki
-    async def get_node_wiki_names(self, parent_node):
-        async with aiohttp.ClientSession() as s:
-            u = self.api_base + 'nodes/' + parent_node + '/wikis/'
-            response = await s.get(u)
-            body = await response.read()
-            response.close()
-            if response.status <= 200:
-                json_body = json.loads(body.decode('utf-8'))
-                data = json_body['data']
-                for datum in data:
-                    self._node_wikis_by_parent_guid[parent_node].append(datum['attributes']['name'])
+
+    async def get_node_wiki_names(self, parent_node, sem):
+        async with sem:
+            async with aiohttp.ClientSession() as s:
+                u = self.api_base + 'nodes/' + parent_node + '/wikis/'
+                response = await s.get(u)
+                body = await response.read()
+                response.close()
+                if response.status <= 200:
+                    json_body = json.loads(body.decode('utf-8'))
+                    data = json_body['data']
+                    for datum in data:
+                        self._node_wikis_by_parent_guid[parent_node].append(datum['attributes']['name'])
+
+
+# Resolving wiki links for Registrations
 
     def crawl_registration_wiki(self):
         tasks = []
+        sem = asyncio.BoundedSemaphore(value=5)
         for node_url in [x[0] for x in self.registration_url_tuples]:
-            tasks.append(asyncio.ensure_future(self.get_registration_wiki_names(node_url.strip('/').split('/')[-1])))
+            tasks.append(asyncio.ensure_future(self.get_registration_wiki_names(node_url.strip('/').split('/')[-1], sem)))
         loop = asyncio.get_event_loop()
         loop.run_until_complete(asyncio.wait(tasks))
 
     # Async method called by crawl_wiki
-    async def get_registration_wiki_names(self, parent_node):
-        async with aiohttp.ClientSession() as s:
-            u = self.api_base + 'registrations/' + parent_node + '/wikis/'
-            response = await s.get(u)
-            body = await response.read()
-            response.close()
-            if response.status <= 200:
-                json_body = json.loads(body.decode('utf-8'))
-                data = json_body['data']
-                for datum in data:
-                    self._registration_wikis_by_parent_guid[parent_node].append(datum['attributes']['name'])
+    async def get_registration_wiki_names(self, parent_node, sem):
+        async with sem:
+            async with aiohttp.ClientSession() as s:
+                u = self.api_base + 'registrations/' + parent_node + '/wikis/'
+                response = await s.get(u)
+                body = await response.read()
+                response.close()
+                if response.status <= 200:
+                    json_body = json.loads(body.decode('utf-8'))
+                    data = json_body['data']
+                    for datum in data:
+                        self._registration_wikis_by_parent_guid[parent_node].append(datum['attributes']['name'])
 
+
+# Wrapper methods for scraping different type of pages
+
+# Wrapper methods for scraping different types of pages
     def scrape_nodes(self, async=True):
         self.debug_logger.info("Scraping nodes, async = " + str(async))
         if async:
@@ -352,7 +379,26 @@ class Crawler:
                     lst.append(self.node_urls.pop(0))
                 self._scrape_pages(lst)
 
-    # Get page content
+    def scrape_registrations(self, async=True):
+        self.debug_logger.info("Scraping registrations, async = " + str(async))
+        if async:
+            self._scrape_pages(self.registration_urls)
+        else:
+            for elem in self.registration_url_tuples:
+                lst = []
+                while len(self.registration_urls) > 0 and elem[0] in self.registration_urls:
+                    lst.append(self.registration_urls.pop(0))
+                self._scrape_pages(lst)
+
+    def scrape_users(self):
+        self.debug_logger.info("Scraping users")
+        self._scrape_pages(self.user_profile_page_urls)
+
+    def scrape_institutions(self):
+        self.debug_logger.info("Scraping institutions")
+        self._scrape_pages(self.institution_urls)
+
+# Wrapper method for scraping a list of pages
     def _scrape_pages(self, aspect_list):
         sem = asyncio.BoundedSemaphore(value=5)
         tasks = []
@@ -362,12 +408,10 @@ class Crawler:
         loop = asyncio.get_event_loop()
         loop.run_until_complete(asyncio.wait(tasks))
 
-# Page scraping (through to execution)
-
+# Async method for actual scraping
     async def scrape_url(self, url, sem):
         async with sem:
             async with aiohttp.ClientSession() as s:
-                self.debug_logger.debug("Scraping : " + url)
                 response = await s.get(url, headers=self.headers)
                 body = await response.read()
                 response.close()
@@ -381,6 +425,7 @@ class Crawler:
                     self.debug_logger.error("504 on : " + url)
                     self.record_milestone(url)
 
+# Method to record the milestone
     def record_milestone(self, url):
         if datetime.datetime.now().minute % 5 == 0:
             self.database['milestone'] = url

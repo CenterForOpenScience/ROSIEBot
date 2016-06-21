@@ -34,7 +34,6 @@ def cli_entry_point(normal, resume, verify, dm, tf, registrations, users, instit
         click.echo('Creating a task file named : ' + filename)
         with shelve.open(filename, writeback=True) as db:
             normal_scrape(dm, registrations, users, institutions, nodes, d, f, w, a, r, fr, db)
-
         return
 
     if resume and tf is not None:
@@ -61,6 +60,7 @@ def normal_scrape(dm,
 
     if date_marker is None:
         click.echo("Date marker is not specified or specified date marker cannot be parsed")
+        return
 
     # Store variables into persistent file
     db['scrape_registrations'] = scrape_registrations
@@ -75,28 +75,57 @@ def normal_scrape(dm,
     db['include_forks'] = include_forks
 
     rosie = crawler.Crawler(date_modified=date_marker, db=db)
+
+    scrape_api(rosie, db, scrape_nodes, scrape_registrations, scrape_users, scrape_institutions)
+
     if scrape_nodes:
-        rosie.crawl_nodes_api()
-        rosie.truncate_node_url_tuples()
-        db['node_url_tuples'] = rosie.node_url_tuples
         if include_dashboard and include_files and include_analytics and \
                 include_forks and include_registrations and include_wiki:
             rosie.generate_node_urls(all_pages=True)
         else:
-            rosie.generate_node_urls(dashboard=include_dashboard, files=include_files, wiki=include_wiki,
+            rosie.generate_node_urls(all_pages=False, dashboard=include_dashboard, files=include_files, wiki=include_wiki,
                                      analytics=include_analytics, registrations=include_registrations,
                                      forks=include_forks)
         rosie.scrape_nodes(async=False)
         db['nodes_finished'] = True
 
     if scrape_registrations:
-        pass
+        rosie.generate_registration_urls()
+        rosie.scrape_registrations(async=False)
+        db['registrations_finished'] = True
 
     if scrape_users:
-        pass
+        rosie.scrape_users()
+        db['users_finished'] = True
 
     if scrape_institutions:
-        pass
+        rosie.scrape_institutions()
+        db['institution_finished'] = True
+
+    db['scraped_finished'] = True
+
+
+def scrape_api(cr, db, scrape_nodes, scrape_registrations, scrape_users, scrape_institutions):
+    if scrape_nodes:
+        cr.crawl_nodes_api()
+        cr.truncate_node_url_tuples()
+        cr.crawl_node_wiki()
+        db['node_url_tuples'] = cr.node_url_tuples
+
+    if scrape_registrations:
+        cr.crawl_registrations_api()
+        cr.truncate_registration_url_tuples()
+        cr.crawl_registration_wiki()
+        db['registration_url_tuples'] = cr.registration_url_tuples
+
+    if scrape_users:
+        cr.crawl_users_api()
+        db['users_profile_page_urls'] = cr.user_profile_page_urls
+
+    if scrape_institutions:
+        cr.crawl_institutions_api()
+        db['institutions_urls'] = cr.institution_urls
+
 
 if __name__ == '__main__':
     cli_entry_point()
