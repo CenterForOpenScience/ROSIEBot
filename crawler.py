@@ -54,6 +54,9 @@ class Crawler:
         # Shoehorn index in to list of pages to scrape:
         self.institution_urls = [self.http_base] # Institution page ("osf.io/institution/cos")
 
+        # List of 504s:
+        self.error_list = []
+
         # Logging utils
 
         logging.basicConfig(level=logging.DEBUG)
@@ -331,6 +334,7 @@ class Crawler:
         async with sem:
             async with aiohttp.ClientSession() as s:
                 u = self.api_base + 'nodes/' + parent_node + '/wikis/'
+                self.debug_logger.info("Crawling nodes api, url = " + u)
                 response = await s.get(u)
                 body = await response.read()
                 response.close()
@@ -338,7 +342,10 @@ class Crawler:
                     json_body = json.loads(body.decode('utf-8'))
                     data = json_body['data']
                     for datum in data:
-                        self._node_wikis_by_parent_guid[parent_node].append(datum['attributes']['name'])
+                        try:
+                            self._node_wikis_by_parent_guid[parent_node].append(datum['attributes']['name'])
+                        except:
+                            pass
 
 
 # Resolving wiki links for Registrations
@@ -356,6 +363,7 @@ class Crawler:
         async with sem:
             async with aiohttp.ClientSession() as s:
                 u = self.api_base + 'registrations/' + parent_node + '/wikis/'
+                self.debug_logger.info("Crawling registrations api, url = " + u)
                 response = await s.get(u)
                 body = await response.read()
                 response.close()
@@ -363,7 +371,10 @@ class Crawler:
                     json_body = json.loads(body.decode('utf-8'))
                     data = json_body['data']
                     for datum in data:
-                        self._registration_wikis_by_parent_guid[parent_node].append(datum['attributes']['name'])
+                        try:
+                            self._registration_wikis_by_parent_guid[parent_node].append(datum['attributes']['name'])
+                        except:
+                            pass
 
 
 # Wrapper methods for scraping different type of pages
@@ -378,7 +389,8 @@ class Crawler:
                 lst = []
                 while len(self.node_urls) > 0 and elem[0] in self.node_urls[0]:
                     lst.append(self.node_urls.pop(0))
-                self._scrape_pages(lst)
+                if len(lst) > 0:
+                    self._scrape_pages(lst)
 
     def scrape_registrations(self, async=True):
         self.debug_logger.info("Scraping registrations, async = " + str(async))
@@ -420,9 +432,10 @@ class Crawler:
                     self.debug_logger.debug("Finished : " + url)
                     self.record_milestone(url)
                     save_html(body, url)
-                if response.status == 504:
-                    self.debug_logger.error("504 on : " + url)
-                    self.record_milestone(url)
+                else:
+                    self.debug_logger.debug(str(response.status) + " on : " + url)
+                    self.error_list.append(url)
+                    self.database['error_list'] = self.error_list
 
 # Method to record the milestone
     def record_milestone(self, url):
