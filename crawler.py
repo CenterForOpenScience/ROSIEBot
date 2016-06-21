@@ -115,7 +115,6 @@ class Crawler:
         loop = asyncio.get_event_loop()
         loop.run_until_complete(asyncio.wait(tasks))
         self.truncate_node_url_tuples()
-        self.crawl_node_wiki()
 
     def crawl_registrations_api(self, page_limit=0):
         sem = asyncio.BoundedSemaphore(value=10)
@@ -139,7 +138,6 @@ class Crawler:
         loop = asyncio.get_event_loop()
         loop.run_until_complete(asyncio.wait(tasks))
         self.truncate_registration_url_tuples()
-        self.crawl_registration_wiki()
 
     def crawl_users_api(self, page_limit=0):
         sem = asyncio.BoundedSemaphore(value=10)
@@ -251,6 +249,10 @@ class Crawler:
 
     def generate_node_urls(self, all_pages=True, dashboard=False, files=False,
                            wiki=False, analytics=False, registrations=False, forks=False):
+
+        if all_pages or wiki:
+            self.crawl_node_wiki()
+
         self.debug_logger.info("Generating node urls")
         self.debug_logger.info(" all_pages = " + str(all_pages) +
                                " dashboard = " + str(dashboard) +
@@ -283,6 +285,9 @@ class Crawler:
 
     def generate_registration_urls(self, all_pages=True, dashboard=False, files=False,
                                 wiki=False, analytics=False, forks=False):
+
+        if all_pages or wiki:
+            self.crawl_registration_wiki()
 
         self.debug_logger.info("Generating registration urls")
         self.debug_logger.info(" all_pages = " + str(all_pages) +
