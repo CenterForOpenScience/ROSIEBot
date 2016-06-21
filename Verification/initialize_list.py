@@ -16,8 +16,8 @@ absolute_python_root = sys.path[1]                                              
 relative_mirror_root = settings.base_urls[0].split('//', 1)[1].strip('//')      # + Folder name of the mirror
 mirror_path = absolute_python_root + '/' + relative_mirror_root + '/'           # = Absolute path to the mirror
 
-success_log = open('Logs/test_success.log', 'a')
-failure_log = open('Logs/test_failure.log', 'a')
+success_log = open('Verification/Logs/test_success.log', 'a')
+failure_log = open('Verification/Logs/test_failure.log', 'a')
 
 send_to_retry = []
 

@@ -9,8 +9,8 @@ import aiohttp
 import os
 import sys
 
-success_log = open('Logs/retry_success.log', 'a')
-failure_log = open('Logs/retry_failure.log', 'a')
+success_log = open('Verification/Logs/retry_success.log', 'a')
+failure_log = open('Verification/Logs/retry_failure.log', 'a')
 
 
 class Rescraper:

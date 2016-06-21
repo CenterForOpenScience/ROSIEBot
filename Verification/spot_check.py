@@ -11,8 +11,8 @@ from bs4 import BeautifulSoup
 import os, sys
 import Verification.size_comparison as size_comp
 
-success_log = open('Logs/test_success.log', 'a')
-failure_log = open('Logs/test_failure.log', 'a')
+success_log = open('Verification/Logs/test_success.log', 'a')
+failure_log = open('Verification/Logs/test_failure.log', 'a')
 
 send_to_retry = size_comp.send_to_retry
 

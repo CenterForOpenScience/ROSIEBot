@@ -3,6 +3,7 @@
 # # It is possible to only log issues, not correct them.
 #
 
+# This import clears the logs prior to relogging
 import Verification.Logs.reset_logs
 import Verification.spot_check as identify
 import Verification.retry_scrape as correct
