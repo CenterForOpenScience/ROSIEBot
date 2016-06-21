@@ -3,6 +3,7 @@ __pycache__/
 localhost:70/
 staging.osf.io/
 osf.io/
+Verification/Logs/*.log
 *.txt
 .env
 127.0.0.1:70/
