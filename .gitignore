@@ -8,3 +8,4 @@ osf.io/
 .env
 *.task
 settings.py
+!task_file_example.txt

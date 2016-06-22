@@ -1,0 +1,53 @@
+List of information stored in the task file:
+
+scrape_registrations    -> whether the task scrapes registrations
+scrape_users            -> whether the task scrapes users
+scrape_institutions     -> whether the task scrapes institutions
+scrape_nodes            -> whether the task scrapes nodes
+include_dashboard       -> If the task scrape nodes, whether to include dashboard
+include_files           -> If the task scrape nodes, whether to include files
+include_wiki            -> If the task scrape nodes, whether to include wiki
+include_analytics       -> If the task scrape nodes, whether to include analytics
+include_registrations   -> If the task scrape nodes, whether to include registrations
+include_forks           -> If the task scrape nodes, whether to include forks
+nodes_finished          -> whether the nodes scrape has finished
+registrations_finished  -> whether the registrations scrape has finished
+users_finished          -> whether the users scrape has finished
+institutions_finished   -> whether the institutions scrape has finished
+scrape_finished         -> whether the entire task has finished
+node_urls               -> List of node urls to scrape
+node_url_tuples         -> List of node tuples
+registration_urls       -> List of registration urls
+registration_url_tuples -> List of registration tuples
+user_profile_page_urls  -> List of user urls to scrape
+institution_urls        -> List of institution urls to scrape
+
+Example:
+import shelve
+
+with shelve.open('198906040000.task') as db:
+    try:
+        scrape_nodes = db['scrape_nodes']
+        scrape_registrations = db['scrape_registrations']
+        scrape_users = db['scrape_users']
+        scrape_institutions = db['scrape_institutions']
+        include_dashboard = db['include_dashboard']
+        include_files = db['include_files']
+        include_wiki = db['include_wiki']
+        include_analytics = db['include_analytics']
+        include_registrations = db['include_registrations']
+        include_forks = db['include_forks']
+        nodes_finished = db['nodes_finished']
+        registrations_finished = db['registrations_finished']
+        users_finished = db['users_finished']
+        institutions_finished = db['institutions_finished']
+        scrape_finished = db['scrape_finished']
+        milestone_url = db['milestone']
+        rosie.node_url_tuples = db['node_url_tuples']
+        rosie.node_urls = db['node_urls']
+        rosie.registration_url_tuples = db['registration_url_tuples']
+        rosie.registration_urls = db['registration_urls']
+        rosie.user_profile_page_urls = db['user_profile_page_urls']
+        rosie.institution_urls = db['institution_urls']
+    except KeyError:
+        print('Could not find key in the file')

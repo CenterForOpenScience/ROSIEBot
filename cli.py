@@ -2,6 +2,7 @@ import click
 import shelve
 import datetime
 import crawler
+import urllib
 
 @click.command()
 # Specify parameters that choose between different modes
@@ -32,6 +33,12 @@ def cli_entry_point(normal, resume, verify, dm, tf, registrations, users, instit
         click.echo('You have to choose a mode to run')
 
     if normal and dm is not None:
+        try:
+            test_connectivity()
+        except:
+            click.echo('Cannot connect to destinations')
+            return
+
         click.echo('Starting normal scrape with date marker set to : ' + dm)
         now = datetime.datetime.now()
         filename = now.strftime('%Y%m%d%H%M' + '.task')
@@ -41,6 +48,12 @@ def cli_entry_point(normal, resume, verify, dm, tf, registrations, users, instit
         return
 
     if resume and tf is not None:
+        try:
+            test_connectivity()
+        except:
+            click.echo('Cannot connect to destinations')
+            return
+
         click.echo('Resuming scrape withe the task file : ' + tf)
         try:
             with shelve.open(tf, writeback=False, flag='w') as db:
@@ -54,6 +67,10 @@ def cli_entry_point(normal, resume, verify, dm, tf, registrations, users, instit
         return
 
     return
+
+def test_connectivity():
+    response = urllib.urlopen(crawler.base_urls[0], timeout=1)
+    response2 = urllib.urlopen(crawler.base_urls[1], timeout=1)
 
 
 def normal_scrape(dm,
