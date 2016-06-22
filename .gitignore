@@ -3,7 +3,10 @@ __pycache__/
 localhost:70/
 staging.osf.io/
 127.0.0.1:70/
+127.0.0.1/
 osf.io/
 *.txt
 .env
 *.task
+settings.py
+!task_file_example.txt
