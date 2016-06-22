@@ -9,8 +9,8 @@ import aiohttp
 import os
 import sys
 
-success_log = open('Verification/Logs/retry_success.log', 'a')
-failure_log = open('Verification/Logs/retry_failure.log', 'a')
+success_log = open(sys.path[0]+'/Verification/Logs/retry_success.log', 'a')
+failure_log = open(sys.path[0]+'/Verification/Logs/retry_failure.log', 'a')
 
 
 class Rescraper:
@@ -78,4 +78,3 @@ def make_dirs(filename):
         os.makedirs(folder)
 
 success_log.close(), failure_log.close()
-

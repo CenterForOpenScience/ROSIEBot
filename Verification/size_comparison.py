@@ -12,8 +12,8 @@ import Verification.initialize_list as initialize
 
 mirror_path = initialize.mirror_path
 
-success_log = open('Verification/Logs/test_success.log', 'a')
-failure_log = open('Verification/Logs/test_failure.log', 'a')
+success_log = open(sys.path[0]+'/Verification/Logs/test_success.log', 'a')
+failure_log = open(sys.path[0]+'/Verification/Logs/test_failure.log', 'a')
 send_to_retry = initialize.send_to_retry
 
 

@@ -1,6 +1,9 @@
+import sys
+absolute = sys.path[0]
+
 test_header = 'PROCESS_NAME\tTYPE\tINSTANCE\tSPOT\tSTATUS\n'
 
-test_logs = ['Verification/Logs/test_success.log', 'Verification/Logs/test_failure.log']
+test_logs = [absolute+'/Verification/Logs/test_success.log', absolute+'/Verification/Logs/test_failure.log']
 
 for log in test_logs:
     file = open(log, 'w')
@@ -10,7 +13,7 @@ for log in test_logs:
 
 retry_header = 'FILE\t\tRETRY\tDATE\n'
 
-retry_logs = ['retry_success.log', 'retry_failure.log']
+retry_logs = [absolute+'/Verification/Logs/retry_success.log', absolute+'/Verification/Logs/retry_failure.log']
 
 for log in retry_logs:
     file = open(log, 'w')

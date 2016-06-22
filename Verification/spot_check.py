@@ -11,8 +11,8 @@ from bs4 import BeautifulSoup
 import os, sys
 import Verification.size_comparison as size_comp
 
-success_log = open('Verification/Logs/test_success.log', 'a')
-failure_log = open('Verification/Logs/test_failure.log', 'a')
+success_log = open(sys.path[0]+'/Verification/Logs/test_success.log', 'a')
+failure_log = open(sys.path[0]+'/Verification/Logs/test_failure.log', 'a')
 
 send_to_retry = size_comp.send_to_retry
 
@@ -29,18 +29,18 @@ class ElementValueIdentifier:
 
     def identify_values(self):
         for file in self.files:
-            name = file.split('/')[-3] + '\t' + file.split('/')[-2]
+            name = file.split('/')[-3] + '/' + file.split('/')[-2]
             soup = BeautifulSoup(open(file), 'html.parser')
             for element in self.elements:
                 result = soup.select(element)
                 if len(result) == 0:                    # No results
-                    message = [name, element, 'SPOT_CHECK', 'not_found', '\n']
+                    message = [name, 'SPOT_CHECK', element, 'not_found', '\n']
                     failure_log.write('\t'.join(message))
                 elif len(result[0].contents) == 0:      # Empty results
-                    message = [name, element, 'SPOT_CHECK', 'empty', '\n']
+                    message = [name, 'SPOT_CHECK', element, 'empty', '\n']
                     failure_log.write('\t'.join(message))
                 else:
-                    message = [name, element, 'SPOT_CHECK', 'ok', '\n']
+                    message = [name, 'SPOT_CHECK', element, 'ok', '\n']
                     success_log.write('\t'.join(message))
         print('Spot checked.')
 
@@ -77,7 +77,7 @@ class ProjectWiki(ElementValueIdentifier):
         ElementValueIdentifier.__init__(self)
         self.elements = [
             '#wikiViewRender',                              # Links to files (names them)
-            '#viewVersionSelect option:nth-child(2)',       # Current version date modified
+            '#viewVersionSelect option',                    # Current version date modified
             '.fg-file-links'                                # Links to other pages (names them)
         ]
         self.files = size_comp.ProjectWiki().send_to_spot_check

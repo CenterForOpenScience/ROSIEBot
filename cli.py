@@ -17,11 +17,11 @@ import crawler
 @click.option('--institutions', is_flag=True, help="Add this flag if you want to scrape for institutions")
 @click.option('--nodes', is_flag=True, help="Add this flag if you want to scrape for nodes")
 # Specify types of node pages needed to scrape, only works for scraping nodes; if none are include, scrape all types
-@click.option('-d', is_flag=True, help="Add this flag if you want to include dashboard page for nodes")
-@click.option('-f', is_flag=True, help="Add this flag if you want to include files page for nodes")
-@click.option('-w', is_flag=True, help="Add this flag if you want to include wiki page for nodes")
-@click.option('-a', is_flag=True, help="Add this flag if you want to include analytics page for nodes")
-@click.option('-r', is_flag=True, help="Add this flag if you want to include registrations page for nodes")
+@click.option('--d', is_flag=True, help="Add this flag if you want to include dashboard page for nodes")
+@click.option('--f', is_flag=True, help="Add this flag if you want to include files page for nodes")
+@click.option('--w', is_flag=True, help="Add this flag if you want to include wiki page for nodes")
+@click.option('--a', is_flag=True, help="Add this flag if you want to include analytics page for nodes")
+@click.option('--r', is_flag=True, help="Add this flag if you want to include registrations page for nodes")
 @click.option('--fr', is_flag=True, help="Add this flag if you want to include forks page for nodes")
 def cli_entry_point(normal, resume, verify, dm, tf, registrations, users, institutions, nodes, d, f, w, a, r, fr):
     if normal and resume and verify:
