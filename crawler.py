@@ -101,7 +101,7 @@ class Crawler:
 
     def crawl_nodes_api(self, page_limit=0):
         self.debug_logger.info("Start crawling nodes API pages")
-        sem = asyncio.BoundedSemaphore(value=10)
+        sem = asyncio.BoundedSemaphore(value=5)
         # Request number of pages in nodes API
         with requests.Session() as s:
             response = s.get(self.api_base + 'nodes/')
@@ -344,8 +344,8 @@ class Crawler:
                     for datum in data:
                         try:
                             self._node_wikis_by_parent_guid[parent_node].append(datum['attributes']['name'])
-                        except:
-                            pass
+                        except KeyError:
+                            self.debug_logger.critical("Fail api call on " + u)
 
 
 # Resolving wiki links for Registrations
