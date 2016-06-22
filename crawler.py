@@ -101,7 +101,7 @@ class Crawler:
 
     def crawl_nodes_api(self, page_limit=0):
         self.debug_logger.info("Start crawling nodes API pages")
-        sem = asyncio.BoundedSemaphore(value=5)
+        sem = asyncio.BoundedSemaphore(value=10)
         # Request number of pages in nodes API
         with requests.Session() as s:
             response = s.get(self.api_base + 'nodes/')
