@@ -344,8 +344,8 @@ class Crawler:
                     for datum in data:
                         try:
                             self._node_wikis_by_parent_guid[parent_node].append(datum['attributes']['name'])
-                        except:
-                            pass
+                        except KeyError:
+                            self.debug_logger.critical("Fail api call on " + u)
 
 
 # Resolving wiki links for Registrations

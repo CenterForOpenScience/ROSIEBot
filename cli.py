@@ -28,10 +28,13 @@ def cli_entry_point(normal, resume, verify, dm, tf, registrations, users, instit
         click.echo('Invalid parameters.')
         return
 
+    if not normal and not resume and not verify:
+        click.echo('You have to choose a mode to run')
+
     if normal and dm is not None:
         click.echo('Starting normal scrape with date marker set to : ' + dm)
         now = datetime.datetime.now()
-        filename = str(now.year)+str(now.month)+str(now.day)+str(now.hour)+str(now.minute)+".task"
+        filename = now.strftime('%Y%m%d%H%M' + '.task')
         click.echo('Creating a task file named : ' + filename)
         with shelve.open(filename, writeback=True, flag='n') as db:
             normal_scrape(dm, registrations, users, institutions, nodes, d, f, w, a, r, fr, db)
@@ -68,7 +71,7 @@ def normal_scrape(dm,
         click.echo("Date marker is not specified or specified date marker cannot be parsed")
         return
 
-    # Store variables into persistent file
+    # Store/initialize variables into persistent file
     db['scrape_registrations'] = scrape_registrations
     db['scrape_users'] = scrape_users
     db['scrape_institutions'] = scrape_institutions
@@ -93,15 +96,19 @@ def normal_scrape(dm,
 
     rosie = crawler.Crawler(date_modified=date_marker, db=db)
 
-    scrape_api(rosie, db, scrape_nodes, scrape_registrations, scrape_users, scrape_institutions)
+    _scrape_api(rosie, db, scrape_nodes, scrape_registrations, scrape_users, scrape_institutions)
 
     if scrape_nodes:
         if include_dashboard and include_files and include_analytics and \
                 include_forks and include_registrations and include_wiki:
             rosie.generate_node_urls(all_pages=True)
         else:
-            rosie.generate_node_urls(all_pages=False, dashboard=include_dashboard, files=include_files, wiki=include_wiki,
-                                     analytics=include_analytics, registrations=include_registrations,
+            rosie.generate_node_urls(all_pages=False,
+                                     dashboard=include_dashboard,
+                                     files=include_files,
+                                     wiki=include_wiki,
+                                     analytics=include_analytics,
+                                     registrations=include_registrations,
                                      forks=include_forks)
         db['nodes_url'] = rosie.node_urls
         rosie.scrape_nodes(async=False)
@@ -124,15 +131,13 @@ def normal_scrape(dm,
     db['scrape_finished'] = True
 
 
-def scrape_api(cr, db, scrape_nodes, scrape_registrations, scrape_users, scrape_institutions):
+def _scrape_api(cr, db, scrape_nodes, scrape_registrations, scrape_users, scrape_institutions):
     if scrape_nodes:
         cr.crawl_nodes_api()
         db['node_url_tuples'] = cr.node_url_tuples
 
     if scrape_registrations:
         cr.crawl_registrations_api()
-        cr.truncate_registration_url_tuples()
-        cr.crawl_registration_wiki()
         db['registration_url_tuples'] = cr.registration_url_tuples
 
     if scrape_users:
@@ -181,8 +186,12 @@ def resume_scrape(db):
     if scrape_nodes and not nodes_finished:
         if rosie.node_urls is None:
             rosie.node_urls = []
-            rosie.generate_node_urls(all_pages=False, dashboard=include_dashboard, files=include_files, wiki=include_wiki,
-                                     analytics=include_analytics, registrations=include_registrations,
+            rosie.generate_node_urls(all_pages=False,
+                                     dashboard=include_dashboard,
+                                     files=include_files,
+                                     wiki=include_wiki,
+                                     analytics=include_analytics,
+                                     registrations=include_registrations,
                                      forks=include_forks)
         if milestone_url in rosie.node_urls:
             rosie.node_urls = rosie.node_urls[rosie.node_urls.index(milestone_url):]
