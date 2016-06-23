@@ -83,13 +83,13 @@ class Crawler:
         else:
             self.database = db
 
-    def truncate_node_url_tuples(self):
+    def _truncate_node_url_tuples(self):
         if self.date_modified_marker is not None:
             self.node_url_tuples = [x for x in self.node_url_tuples if x[1] >= self.date_modified_marker]
             self.debug_logger.info("node_url_tuples truncated according to date_modified_marker: " +
                                    str(self.date_modified_marker))
 
-    def truncate_registration_url_tuples(self):
+    def _truncate_registration_url_tuples(self):
         if self.date_modified_marker is not None:
             self.registration_url_tuples = [x for x in self.registration_url_tuples if x[1] >= self.date_modified_marker]
             self.debug_logger.info("registration_url_tuples truncated according to date_modified_marker: " +
@@ -117,7 +117,7 @@ class Crawler:
             )))
         loop = asyncio.get_event_loop()
         loop.run_until_complete(asyncio.wait(tasks))
-        self.truncate_node_url_tuples()
+        self._truncate_node_url_tuples()
 
     def crawl_registrations_api(self, page_limit=0):
         sem = asyncio.BoundedSemaphore(value=10)
@@ -140,7 +140,7 @@ class Crawler:
             )))
         loop = asyncio.get_event_loop()
         loop.run_until_complete(asyncio.wait(tasks))
-        self.truncate_registration_url_tuples()
+        self._truncate_registration_url_tuples()
 
     def crawl_users_api(self, page_limit=0):
         sem = asyncio.BoundedSemaphore(value=10)

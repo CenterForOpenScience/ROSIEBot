@@ -89,19 +89,16 @@ def normal_scrape(dm,
     db['institutions_finished'] = False
     db['scrape_finished'] = False
     db['node_urls'] = None
-    db['node_url_tuples'] = None
     db['registration_urls'] = None
-    db['registration_url_tuples'] = None
     db['user_profile_page_urls'] = None
     db['institution_urls'] = None
     db['error_list'] = None
 
     rosie = crawler.Crawler(date_modified=date_marker, db=db)
 
-    _scrape_api(rosie, db, scrape_nodes, scrape_registrations, scrape_users, scrape_institutions)
-    print(json.JSONEncoder().encode(rosie.node_url_tuples))
-
+    # Crawling the respective API for this scrape
     if scrape_nodes:
+        rosie.crawl_nodes_api()
         if include_dashboard and include_files and include_analytics and \
                 include_forks and include_registrations and include_wiki:
             rosie.generate_node_urls(all_pages=True)
@@ -114,12 +111,26 @@ def normal_scrape(dm,
                                      registrations=include_registrations,
                                      forks=include_forks)
         db['node_urls'] = rosie.node_urls
+
+    if scrape_registrations:
+        rosie.crawl_registrations_api()
+        rosie.generate_registration_urls()
+        db['registration_urls'] = rosie.registration_urls
+
+    if scrape_users:
+        rosie.crawl_users_api()
+        db['user_profile_page_urls'] = rosie.user_profile_page_urls
+
+    if scrape_institutions:
+        rosie.crawl_institutions_api()
+        db['institution_urls'] = rosie.institution_urls
+
+    # Actual Scraping of the pages
+    if scrape_nodes:
         rosie.scrape_nodes(async=True)
         db['nodes_finished'] = True
 
     if scrape_registrations:
-        rosie.generate_registration_urls()
-        db['registration_urls'] = rosie.registration_urls
         rosie.scrape_registrations(async=True)
         db['registrations_finished'] = True
 
@@ -134,24 +145,6 @@ def normal_scrape(dm,
     db['scrape_finished'] = True
 
 
-def _scrape_api(cr, db, scrape_nodes, scrape_registrations, scrape_users, scrape_institutions):
-    if scrape_nodes:
-        cr.crawl_nodes_api()
-        db['node_url_tuples'] = cr.node_url_tuples
-
-    if scrape_registrations:
-        cr.crawl_registrations_api()
-        db['registration_url_tuples'] = cr.registration_url_tuples
-
-    if scrape_users:
-        cr.crawl_users_api()
-        db['user_profile_page_urls'] = cr.user_profile_page_urls
-
-    if scrape_institutions:
-        cr.crawl_institutions_api()
-        db['institution_urls'] = cr.institution_urls
-
-
 def resume_scrape(db):
     rosie = crawler.Crawler(db=db)
     # Restore variables from persistent file
@@ -160,21 +153,13 @@ def resume_scrape(db):
         scrape_registrations = db['scrape_registrations']
         scrape_users = db['scrape_users']
         scrape_institutions = db['scrape_institutions']
-        include_dashboard = db['include_dashboard']
-        include_files = db['include_files']
-        include_wiki = db['include_wiki']
-        include_analytics = db['include_analytics']
-        include_registrations = db['include_registrations']
-        include_forks = db['include_forks']
         nodes_finished = db['nodes_finished']
         registrations_finished = db['registrations_finished']
         users_finished = db['users_finished']
         institutions_finished = db['institutions_finished']
         scrape_finished = db['scrape_finished']
         milestone_url = db['milestone']
-        rosie.node_url_tuples = db['node_url_tuples']
         rosie.node_urls = db['node_urls']
-        rosie.registration_url_tuples = db['registration_url_tuples']
         rosie.registration_urls = db['registration_urls']
         rosie.user_profile_page_urls = db['user_profile_page_urls']
         rosie.institution_urls = db['institution_urls']
@@ -188,24 +173,12 @@ def resume_scrape(db):
         return
 
     if scrape_nodes and not nodes_finished:
-        if rosie.node_urls is None:
-            rosie.node_urls = []
-            rosie.generate_node_urls(all_pages=False,
-                                     dashboard=include_dashboard,
-                                     files=include_files,
-                                     wiki=include_wiki,
-                                     analytics=include_analytics,
-                                     registrations=include_registrations,
-                                     forks=include_forks)
         if milestone_url in rosie.node_urls:
             rosie.node_urls = rosie.node_urls[rosie.node_urls.index(milestone_url):]
         rosie.scrape_nodes(async=True)
         db['nodes_finished'] = True
 
     if scrape_registrations and not registrations_finished:
-        if rosie.registration_urls is None:
-            rosie.registration_urls = []
-            rosie.generate_registration_urls()
         if milestone_url in rosie.registration_urls:
             rosie.registration_urls = rosie.registration_urls[rosie.registration_urls.index(milestone_url):]
         rosie.scrape_registrations(async=True)
