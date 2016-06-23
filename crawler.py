@@ -445,6 +445,8 @@ class Crawler:
 
 def save_html(html, page):
     page = page.split('//', 1)[1]
+    # page = page.split('/',1)[1]
+    # page = 'mirror/' + page
     if page[-1] != '/':
         page += '/'
     make_dirs(page)
