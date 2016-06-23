@@ -33,11 +33,11 @@ def cli_entry_point(normal, resume, verify, dm, tf, registrations, users, instit
         click.echo('You have to choose a mode to run')
 
     if normal and dm is not None:
-        try:
-            test_connectivity()
-        except:
-            click.echo('Cannot connect to destinations')
-            return
+        # try:
+        #     test_connectivity()
+        # except:
+        #     click.echo('Cannot connect to destinations')
+        #     return
 
         click.echo('Starting normal scrape with date marker set to : ' + dm)
         now = datetime.datetime.now()
@@ -48,11 +48,11 @@ def cli_entry_point(normal, resume, verify, dm, tf, registrations, users, instit
         return
 
     if resume and tf is not None:
-        try:
-            test_connectivity()
-        except:
-            click.echo('Cannot connect to destinations')
-            return
+        # try:
+        #     test_connectivity()
+        # except:
+        #     click.echo('Cannot connect to destinations')
+        #     return
 
         click.echo('Resuming scrape withe the task file : ' + tf)
         try:
@@ -68,9 +68,9 @@ def cli_entry_point(normal, resume, verify, dm, tf, registrations, users, instit
 
     return
 
-def test_connectivity():
-    response = urllib.urlopen(crawler.base_urls[0], timeout=1)
-    response2 = urllib.urlopen(crawler.base_urls[1], timeout=1)
+# def test_connectivity():
+#     response = urllib.urlopen(crawler.base_urls[0], timeout=1)
+#     response2 = urllib.urlopen(crawler.base_urls[1], timeout=1)
 
 
 def normal_scrape(dm,
