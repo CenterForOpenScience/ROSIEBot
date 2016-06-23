@@ -439,8 +439,7 @@ class Crawler:
 
 # Method to record the milestone
     def record_milestone(self, url):
-        if datetime.datetime.now().minute % 5 == 0:
-            self.database['milestone'] = url
+        self.database['milestone'] = url
 
 
 def save_html(html, page):

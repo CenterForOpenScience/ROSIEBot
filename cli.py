@@ -2,7 +2,7 @@ import click
 import shelve
 import datetime
 import crawler
-import urllib
+import json
 
 @click.command()
 # Specify parameters that choose between different modes
@@ -33,12 +33,6 @@ def cli_entry_point(normal, resume, verify, dm, tf, registrations, users, instit
         click.echo('You have to choose a mode to run')
 
     if normal and dm is not None:
-        # try:
-        #     test_connectivity()
-        # except:
-        #     click.echo('Cannot connect to destinations')
-        #     return
-
         click.echo('Starting normal scrape with date marker set to : ' + dm)
         now = datetime.datetime.now()
         filename = now.strftime('%Y%m%d%H%M' + '.task')
@@ -48,12 +42,6 @@ def cli_entry_point(normal, resume, verify, dm, tf, registrations, users, instit
         return
 
     if resume and tf is not None:
-        # try:
-        #     test_connectivity()
-        # except:
-        #     click.echo('Cannot connect to destinations')
-        #     return
-
         click.echo('Resuming scrape withe the task file : ' + tf)
         try:
             with shelve.open(tf, writeback=False, flag='w') as db:
@@ -67,10 +55,6 @@ def cli_entry_point(normal, resume, verify, dm, tf, registrations, users, instit
         return
 
     return
-
-# def test_connectivity():
-#     response = urllib.urlopen(crawler.base_urls[0], timeout=1)
-#     response2 = urllib.urlopen(crawler.base_urls[1], timeout=1)
 
 
 def normal_scrape(dm,
@@ -110,10 +94,12 @@ def normal_scrape(dm,
     db['registration_url_tuples'] = None
     db['user_profile_page_urls'] = None
     db['institution_urls'] = None
+    db['error_list'] = None
 
     rosie = crawler.Crawler(date_modified=date_marker, db=db)
 
     _scrape_api(rosie, db, scrape_nodes, scrape_registrations, scrape_users, scrape_institutions)
+    print(json.JSONEncoder().encode(rosie.node_url_tuples))
 
     if scrape_nodes:
         if include_dashboard and include_files and include_analytics and \
@@ -127,14 +113,14 @@ def normal_scrape(dm,
                                      analytics=include_analytics,
                                      registrations=include_registrations,
                                      forks=include_forks)
-        db['nodes_url'] = rosie.node_urls
-        rosie.scrape_nodes(async=False)
+        db['node_urls'] = rosie.node_urls
+        rosie.scrape_nodes(async=True)
         db['nodes_finished'] = True
 
     if scrape_registrations:
         rosie.generate_registration_urls()
         db['registration_urls'] = rosie.registration_urls
-        rosie.scrape_registrations(async=False)
+        rosie.scrape_registrations(async=True)
         db['registrations_finished'] = True
 
     if scrape_users:
@@ -192,6 +178,7 @@ def resume_scrape(db):
         rosie.registration_urls = db['registration_urls']
         rosie.user_profile_page_urls = db['user_profile_page_urls']
         rosie.institution_urls = db['institution_urls']
+        rosie.error_list = db['error_list']
     except KeyError:
         click.echo('Cannot restore variables from file')
         return
