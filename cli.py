@@ -95,7 +95,7 @@ def normal_scrape(dm,
     store['error_list'] = None
     store['milestone'] = None
 
-    rosie = crawler.Crawler(date_modified=date_marker, db=db, dict=store)
+    rosie = crawler.Crawler(date_modified=date_marker, db=db, dictionary=store)
 
     # Crawling the respective API for this scrape
     if scrape_nodes:
@@ -174,7 +174,7 @@ def resume_scrape(db, tf):
     db.close()
 
     db = open(tf, 'w')
-    rosie = crawler.Crawler(db=db, dict=store)
+    rosie = crawler.Crawler(db=db, dictionary=store)
     # Restore variables from persistent file
     try:
         scrape_nodes = store['scrape_nodes']
