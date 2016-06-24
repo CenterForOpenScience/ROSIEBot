@@ -7,6 +7,7 @@ from settings import base_urls
 # TODO: put this in settings
 NUM_RETRIES = 2
 TASK_FILE = '201606231548.json'
+MIRROR = '127.0.0.1/'
 
 # This is the bad guy list! It's not page-specific.
 # Name of the game: put URLs on this list.
@@ -19,10 +20,13 @@ with codecs.open(TASK_FILE, mode='r', encoding='utf-8') as file:
 # Directly adds error_list from JSON to send_to_retry
 def handle_errors():
     """ Test that send_to_retry length has increased by length of error_list. """
+    for failed_url in run_info['error_list']:
+        print("Failed: handle_errors() ", failed_url)
+        send_to_retry.append(failed_url)
     return
 
 
-# Superclass for page-specific classses
+# Superclass for page-specific classes
 class Verifier:
     """
     Methods:
@@ -35,21 +39,32 @@ class Verifier:
      """
     def __init__(self):
         self.paths = {}
+        self.json_list = []
+        self.page = ''
         self.minimum_size = 0
         self.page_elements = {}
 
+    # Takes a URL and produces its relative file name.
     def get_path_from_url(self, url):
-        # 1. Method that produces path from URL
-        # a. URL .replace(http base, mirror path) + index.html
-        return ''
+        # Remove http://domain
+        tail = url.replace(base_urls[0], '') + 'index.html'
+        path = MIRROR + tail
+        return path
 
-    def generate_page_dictionary(self, page):
+    # Creates a dictionary with filename : URL for all the URLs found by the crawler in the API
+    def generate_page_dictionary(self):
+        for url in self.json_list:
+            if url.endswith(self.page + '/') and url not in run_info['error_list']:
+                key = self.get_path_from_url(url)
+                self.paths[key] = url
+        return
 
-        # 1. Take in URL list for each type
-        # 2. Construct URL/path dictionary
-        return {}
-
+    # Check that each file path in the dictionary actually exists
     def verify_files_exist(self):
+        for path in self.paths:
+            if not os.path.exists(path):
+                print('Failed: verify_files_exist(): ', path)
+
         # 3. Verify each path exists
         # a. Send_to_retry
         # b. sort by page
@@ -73,6 +88,15 @@ def rescrape():
 
 # Exectuion
 if run_info['scrape_finished']:
+    handle_errors()
+    v = Verifier()
+    v.page = 'files'
+    v.json_list = run_info['node_urls']
+    v.generate_page_dictionary()
+    v.verify_files_exist()
+    print(v.paths)
+
+
     for i in range(NUM_RETRIES):
         if run_info['scrape_nodes']:
             if run_info['include_dashboard']:

@@ -26,8 +26,8 @@ class TestVerifer(unittest.TestCase):
     def test_generate_page_dictionary(self):
         d1 = v.generate_page_dictionary('wiki/')
         self.assertGreater(len(d1), 0)
-        try:
-            
+
+
 
 
 if __name__ == '__main__':
