@@ -9,7 +9,6 @@ import math
 import collections
 import logging
 import urllib.parse
-import shelve
 
 # Configure for testing in settings.py
 base_urls = settings.base_urls
@@ -92,7 +91,7 @@ class Crawler:
 
         # File descriptor for persistent saving
         if db is None:
-            self.database = shelve.open("tmp.task", writeback=True)
+            self.database = codecs.open("tmp.json", mode="w", encoding="utf-8")
         else:
             self.database = db
 
