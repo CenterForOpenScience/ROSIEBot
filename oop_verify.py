@@ -74,6 +74,11 @@ class Verifier:
     # Check that specified elements are present and non-empty in each page
     def spot_check(self):
         for page in self.pages:
-            pass
+            soup = page.get_content()
+            for element in self.page_elements:
+                result = soup.select(element)
+                if len(result) == 0 or len(result[0].contents) == 0:    # No results or empty results
+                    print('Failed: spot_check(): ', page)
+                    self.failed_pages.append(page)
+                    self.pages.pop(page)
         return
-
