@@ -8,8 +8,10 @@ from settings import base_urls
 """
 Pages engineered to fail:
 
-verify_page_exists: 3tmge/files/index.html
-size_comparison: 5dewf/files/index.html should be 340 KB
+verify_page_exists: //3tmge/files/index.html
+size_comparison: //5dewf/files/index.html should be 340 KB
+no instance at all: //68fqs
+
 """
 
 # TODO: put this in settings
@@ -17,19 +19,38 @@ NUM_RETRIES = 2
 TASK_FILE = '201606231548.json'
 MIRROR = '127.0.0.1/'
 
-retry_list = []
 
 with codecs.open(TASK_FILE, mode='r', encoding='utf-8') as file:
     run_info = json.load(file)
 
 
+# Takes a URL and produces its relative file name.
+def get_path_from_url(self, url):
+    # Remove http://domain
+    tail = url.replace(base_urls[0], '') + 'index.html'
+    path = MIRROR + tail
+    return path
+
+
+# Creates a dictionary with filename : URL for all the URLs found by the crawler in the API
+def generate_page_dictionary(self):
+    for url in self.json_list:
+        if url.endswith(self.page + '/') and url not in run_info['error_list']:
+            key = self.get_path_from_url(url)
+            self.paths[key] = url
+            self.json_list.remove(url)
+    return
+
+
+# Superclass for page-specific page instances
+
 class Page:
     def __init__(self, url):
         self.url = url
         self.path = MIRROR + url.replace(base_urls[0], '') + 'index.html'
-        # Set size attribute, inherently checks if file exists
+        # Set size attribute in KB, inherently checks if file exists
         try:
-            self.file_size = os.path.getsize(self.path)
+            self.file_size = os.path.getsize(self.path) / 1000
         except FileNotFoundError:
             raise FileNotFoundError
 
@@ -40,6 +61,8 @@ class Page:
         soup = BeautifulSoup(open(self.path), 'html.parser')
         return soup
 
+
+# Page-specific subclasses
 
 class ProjectDashboardPage(Page):
     def __int__(self, url):
@@ -106,6 +129,8 @@ class InstitutionProfilePage(Page):
         super().__init__(url)
 
 
+# Verifier superclass
+
 class Verifier:
     def __init__(self):
         self.pages = []
@@ -126,24 +151,25 @@ class Verifier:
             if url.endswith(url_end):
                 print('rel: ', url)
                 if url in run_info['error_list']:
-                    retry_list.append(url)
+                    self.failed_pages.append(url)
                     print('eror: ', url)
                 else:
                     try:
                         obj = page_class(url)
                         self.pages.append(obj)
                     except FileNotFoundError:
-                        retry_list.append(url)
+                        self.failed_pages.append(url)
                 json_list.remove(url)
 
     # Second check
     # Compare page size to page-specific minimum that any fully-scraped page should have
     def size_comparison(self):
         for page in self.pages:
+            print(page)
+            print(page.file_size)
             if not page.file_size > self.minimum_size:
                 print('Failed: size_comparison(): ', page, ' has size: ', page.file_size)
-                self.failed_pages.append(page)
-                self.pages.pop(page)
+                self.failed_pages.append(page.url)
         return
 
     # Third check
@@ -155,6 +181,205 @@ class Verifier:
                 result = soup.select(element)
                 if len(result) == 0 or len(result[0].contents) == 0:    # No results or empty results
                     print('Failed: spot_check(): ', page)
-                    self.failed_pages.append(page)
-                    self.pages.pop(page)
+                    self.failed_pages.append(page.url)
         return
+
+
+# Verifier subclasses
+
+class ProjectDashboardVerifier(Verifier):
+    def __init__(self):
+        Verifier.__init__(self)
+        self.pages = []
+        self.minimum_size = 410
+        self.page_elements = [
+            '#nodeTitleEditable',                                # Title
+            '#contributors span.date.node-last-modified-date',   # Last modified
+            '#contributorsList > ol',                            # Contributor list
+            '#nodeDescriptionEditable',                          # Description
+            '#tb-tbody',                                         # File list
+            '#logScope > div > div > div.panel-body > span > dl' # Activity
+        ]
+        self.harvest_pages(run_info['node_urls'], '', ProjectDashboardPage)
+        self.size_comparison()
+        self.spot_check()
+
+
+class ProjectFilesVerifier(Verifier):
+    def __init__(self):
+        Verifier.__init__(self)
+        self.pages = []
+        self.minimum_size = 380
+        self.page_elements = [
+            '.fg-file-links',  # Links to files (names them)
+        ]
+        self.harvest_pages(run_info['node_urls'], 'files/', ProjectFilesPage)
+        self.size_comparison()
+        self.spot_check()
+
+
+class ProjectWikiVerifier(Verifier):
+    def __init__(self):
+        Verifier.__init__(self)
+        self.pages = []
+        self.minimum_size = 410
+        self.page_elements = [
+            '#wikiViewRender',  # Links to files (names them)
+            '#viewVersionSelect option',  # Current version date modified
+            '.fg-file-links'  # Links to other pages (names them)
+            ]
+        self.harvest_pages(run_info['node_urls'], 'wiki/', ProjectWikiPage)
+        self.size_comparison()
+        self.spot_check()
+
+
+class ProjectAnalyticsVerifier(Verifier):
+    def __init__(self):
+        Verifier.__init__(self)
+        self.pages = []
+        self.minimum_size = 380
+        self.page_elements = [
+            '#wikiViewRender',                              # Links to files (names them)
+            '#viewVersionSelect option:nth-child(2)',       # Current version date modified
+            '.fg-file-links'                                # Links to other pages (names them)
+        ]
+        self.harvest_pages(run_info['node_urls'], 'analytics/', ProjectAnalyticsPage)
+        self.size_comparison()
+        self.spot_check()
+
+
+class ProjectRegistrationsVerifier(Verifier):
+    def __init__(self):
+        Verifier.__init__(self)
+        self.pages = []
+        self.minimum_size = 390
+        self.page_elements = [
+            'body > div.watermarked > div > div.row > div.col-xs-9.col-sm-8' # List
+        ]
+        self.harvest_pages(run_info['node_urls'], 'registrations/', ProjectRegistrationsPage)
+        self.size_comparison()
+        self.spot_check()
+
+
+class ProjectForksVerifier(Verifier):
+    def __init__(self):
+        Verifier.__init__(self)
+        self.pages = []
+        self.minimum_size = 380
+        self.page_elements = [
+                'body > div.watermarked > div > div.row > div.col-xs-9.col-sm-8'  # List
+            ]
+        self.harvest_pages(run_info['node_urls'], 'forks/', ProjectForksPage)
+        self.size_comparison()
+        self.spot_check()
+
+
+class RegistrationDashboardVerifier(Verifier):
+    def __init__(self):
+        Verifier.__init__(self)
+        self.pages = []
+        self.minimum_size = 410
+        self.page_elements = [
+            '#nodeTitleEditable',                                # Title
+            '#contributors span.date.node-last-modified-date',   # Last modified
+            '#contributorsList > ol',                            # Contributor list
+            '#nodeDescriptionEditable',                          # Description
+            '#tb-tbody',                                         # File list
+            '#logScope > div > div > div.panel-body > span > dl' # Activity
+        ]
+        self.harvest_pages(run_info['registration_urls'], '', RegistrationDashboardPage)
+        self.size_comparison()
+        self.spot_check()
+
+
+class RegistrationFilesVerifier(Verifier):
+    def __init__(self):
+        Verifier.__init__(self)
+        self.pages = []
+        self.minimum_size = 380
+        self.page_elements = [
+            '.fg-file-links',                                   # Links to files (names them)
+            ]
+        self.harvest_pages(run_info['registration_urls'], 'files/', RegistrationFilesPage)
+        self.size_comparison()
+        self.spot_check()
+
+
+class RegistrationWikiVerifier(Verifier):
+    def __init__(self):
+        Verifier.__init__(self)
+        self.pages = []
+        self.minimum_size = 410
+        self.page_elements = [
+            '#wikiViewRender',                              # Links to files (names them)
+            '#viewVersionSelect option:nth-child(2)',       # Current version date modified
+            '.fg-file-links'                                # Links to other pages (names them)
+        ]
+        self.harvest_pages(run_info['registration_urls'], 'wiki/', RegistrationWikiPage)
+        self.size_comparison()
+        self.spot_check()
+
+
+class RegistrationAnalyticsVerifier(Verifier):
+    def __init__(self):
+        Verifier.__init__(self)
+        self.pages = []
+        self.minimum_size = 380
+        self.page_elements = [
+            '#wikiViewRender',                              # Links to files (names them)
+            '#viewVersionSelect option:nth-child(2)',       # Current version date modified
+            '.fg-file-links'                                # Links to other pages (names them)
+        ]
+        self.harvest_pages(run_info['registration_urls'], 'analytics/', RegistrationAnalyticsPage)
+        self.size_comparison()
+        self.spot_check()
+
+
+class RegistrationForksVerifier(Verifier):
+    def __init__(self):
+        Verifier.__init__(self)
+        self.pages = []
+        self.minimum_size = 380
+        self.page_elements = [
+            'body > div.watermarked > div > div.row > div.col-xs-9.col-sm-8' # List
+        ]
+        self.harvest_pages(run_info['registration_urls'], 'forks/', RegistrationForksPage)
+        self.size_comparison()
+        self.spot_check()
+
+
+class UserProfileVerifier(Verifier):
+    def __init__(self):
+        Verifier.__init__(self)
+        self.pages = []
+        self.minimum_size = 80
+        self.page_elements = [
+            '#projects',
+            '#projects li',                              # Specific project list item
+            'body div.panel-body',                       # Component list
+            'body h2'                                    # Activity points, project count
+        ]
+        self.harvest_pages(run_info['user_profile_page_urls'], '', UserProfilePage)
+        self.size_comparison()
+        self.spot_check()
+
+
+class InstitutionProfileVerifier(Verifier):
+    def __init__(self):
+        Verifier.__init__(self)
+        self.pages = []
+        self.minimum_size = 350
+        self.page_elements = [
+            '#fileBrowser > div.db-infobar > div > div',  # Project preview
+            '#tb-tbody'                                   # Project browser
+        ]
+        self.harvest_pages(run_info['institution_urls'], '', InstitutionProfilePage)
+        self.size_comparison()
+        self.spot_check()
+
+
+# Main execution
+
+RegistrationFiles = RegistrationFilesVerifier()
+
+print("Retry list: ", RegistrationFiles.failed_pages)
