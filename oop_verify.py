@@ -44,62 +44,62 @@ class Page:
 
 class ProjectDashboardPage(Page):
     def __int__(self, url, error=False):
-        Page.__init__(self, url, error)
+        super().__init__(url, error)
 
 
 class ProjectFilesPage(Page):
     def __int__(self, url, error=False):
-        Page.__init__(self, url, error)
+        super().__init__(url, error)
 
 
 class ProjectWikiPage(Page):
     def __int__(self, url, error=False):
-        Page.__init__(self, url, error)
+        super().__init__(url, error)
 
 
 class ProjectFilesPage(Page):
     def __int__(self, url, error=False):
-        Page.__init__(self, url, error)
+        super().__init__(url, error)
 
 
 class ProjectAnalyticsPage(Page):
     def __int__(self, url, error=False):
-        Page.__init__(self, url, error)
+        super().__init__(url, error)
 
 
 class ProjectRegistrationsPage(Page):
     def __int__(self, url, error=False):
-        Page.__init__(self, url, error)
+        super().__init__(url, error)
 
 
 class ProjectForksPage(Page):
     def __int__(self, url, error=False):
-        Page.__init__(self, url, error)
+        super().__init__(url, error)
 
 
 class RegistrationDashboardPage(Page):
     def __int__(self, url, error=False):
-        Page.__init__(self, url, error)
+        super().__init__(url, error)
 
 
 class RegistrationFilesPage(Page):
     def __int__(self, url, error=False):
-        Page.__init__(self, url, error)
+        super().__init__(url, error)
 
 
 class RegistrationWikiPage(Page):
     def __int__(self, url, error=False):
-        Page.__init__(self, url, error)
+        super().__init__(url, error)
 
 
 class RegistrationAnalyticsPage(Page):
     def __int__(self, url, error=False):
-        Page.__init__(self, url, error)
+        super().__init__(url, error)
 
 
 class RegistrationForksPage(Page):
     def __int__(self, url, error=False):
-        Page.__init__(self, url, error)
+        super().__init__(url, error)
 
 
 class Verifier:
