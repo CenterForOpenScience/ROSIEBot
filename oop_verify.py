@@ -56,12 +56,77 @@ class Page:
         return self.path
 
     def get_content(self):
-        name = file.split('/')[-3] + '/' + file.split('/')[-2]
-        soup = BeautifulSoup(open(file), 'html.parser')
+        soup = BeautifulSoup(open(self.path), 'html.parser')
         return soup
 
 
+
 # Superclass for page-specific verifiers
+class ProjectDashboardPage(Page):
+    def __int__(self, url, error=False):
+        super().__init__(url, error)
+
+
+class ProjectFilesPage(Page):
+    def __int__(self, url, error=False):
+        super().__init__(url, error)
+
+
+class ProjectWikiPage(Page):
+    def __int__(self, url, error=False):
+        super().__init__(url, error)
+
+
+class ProjectAnalyticsPage(Page):
+    def __int__(self, url, error=False):
+        super().__init__(url, error)
+
+
+class ProjectRegistrationsPage(Page):
+    def __int__(self, url, error=False):
+        super().__init__(url, error)
+
+
+class ProjectForksPage(Page):
+    def __int__(self, url, error=False):
+        super().__init__(url, error)
+
+
+class RegistrationDashboardPage(Page):
+    def __int__(self, url, error=False):
+        super().__init__(url, error)
+
+
+class RegistrationFilesPage(Page):
+    def __int__(self, url, error=False):
+        super().__init__(url, error)
+
+
+class RegistrationWikiPage(Page):
+    def __int__(self, url, error=False):
+        super().__init__(url, error)
+
+
+class RegistrationAnalyticsPage(Page):
+    def __int__(self, url, error=False):
+        super().__init__(url, error)
+
+
+class RegistrationForksPage(Page):
+    def __int__(self, url, error=False):
+        super().__init__(url, error)
+
+
+class UserProfilePage(Page):
+    def __int__(self, url, error=False):
+        super().__init__(url, error)
+
+
+class InstitutionProfilePage(Page):
+    def __init__(self, url, error=False):
+        super().__init__(url, error)
+
+
 class Verifier:
     def __init__(self):
         self.pages = []
@@ -267,3 +332,4 @@ class InstitutionProfileVerifier(Verifier):
             '#tb-tbody'                                   # Project browser
         ]
         self.failed_pages = []
+
