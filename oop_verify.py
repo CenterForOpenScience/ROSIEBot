@@ -57,11 +57,6 @@ class ProjectWikiPage(Page):
         super().__init__(url, error)
 
 
-class ProjectFilesPage(Page):
-    def __int__(self, url, error=False):
-        super().__init__(url, error)
-
-
 class ProjectAnalyticsPage(Page):
     def __int__(self, url, error=False):
         super().__init__(url, error)
@@ -99,6 +94,16 @@ class RegistrationAnalyticsPage(Page):
 
 class RegistrationForksPage(Page):
     def __int__(self, url, error=False):
+        super().__init__(url, error)
+
+
+class UserProfilePage(Page):
+    def __int__(self, url, error=False):
+        super().__init__(url, error)
+
+
+class InstitutionProfilePage(Page):
+    def __init__(self, url, error=False):
         super().__init__(url, error)
 
 
