@@ -37,8 +37,7 @@ class Page:
         return self.path
 
     def get_content(self):
-        name = file.split('/')[-3] + '/' + file.split('/')[-2]
-        soup = BeautifulSoup(open(file), 'html.parser')
+        soup = BeautifulSoup(open(self.path), 'html.parser')
         return soup
 
 
