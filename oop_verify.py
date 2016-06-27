@@ -27,7 +27,11 @@ class Page:
     def __init__(self, url):
         self.url = url
         self.path = MIRROR + url.replace(base_urls[0], '') + 'index.html'
-        self.file_size = os.path.getsize(self.path)
+        # Set size attribute, inherently checks if file exists
+        try:
+            self.file_size = os.path.getsize(self.path)
+        except FileNotFoundError:
+            raise FileNotFoundError
 
     def __str__(self):
         return self.path
@@ -109,16 +113,28 @@ class Verifier:
         self.page_elements = []
         self.failed_pages = []
 
-    # First actual check
-    # Check that each file path in the dictionary actually exists
-    def verify_files_exist(self):
-        for page in self.pages:
-            print(page.path)
-            if not os.path.exists(page.path):
-                print('Failed: verify_files_exist(): ', page)
-                self.failed_pages.append(page)                                  # Add to naughty list
-                self.pages.pop(page)                                            # Remove from nice list
-        return
+    # Populate self.pages with the relevant files
+    def harvest_pages(self, json_list, url_end, page_class):
+        """
+        :param json_list: The list in the task file of found URLs
+        :param url_end: The json_list is non segregated by page type
+        :param page_class: The subclass for the specific page type
+        :return: Null, but self.pages is populated.
+        """
+        for url in json_list:
+            print(url)
+            if url.endswith(url_end):
+                print('rel: ', url)
+                if url in run_info['error_list']:
+                    retry_list.append(url)
+                    print('eror: ', url)
+                else:
+                    try:
+                        obj = page_class(url)
+                        self.pages.append(obj)
+                    except FileNotFoundError:
+                        retry_list.append(url)
+                json_list.remove(url)
 
     # Second check
     # Compare page size to page-specific minimum that any fully-scraped page should have
@@ -142,4 +158,3 @@ class Verifier:
                     self.failed_pages.append(page)
                     self.pages.pop(page)
         return
-
