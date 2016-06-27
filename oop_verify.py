@@ -60,6 +60,7 @@ class Page:
         soup = BeautifulSoup(open(file), 'html.parser')
         return soup
 
+
 # Superclass for page-specific verifiers
 class Verifier:
     def __init__(self):
@@ -101,6 +102,7 @@ class Verifier:
                     self.failed_pages.append(page)
                     self.pages.pop(page)
         return
+
 
 class ProjectDashboardVerifier(Verifier):
     def __init__(self):
@@ -260,6 +262,7 @@ class RegistrationAnalyticsVerifier(Verifier):
             '#logScope > div > div > div.panel-body > span > dl' # Activity
         ]
         self.failed_pages = []
+
 
 class RegistrationForksVerifier(Verifier):
     def __init__(self):
