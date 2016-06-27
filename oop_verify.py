@@ -46,132 +46,60 @@ class ProjectDashboardPage(Page):
     def __int__(self, url, error=False):
         Page.__init__(self, url, error)
 
-    def __str__(self):
-        return Page.__str__(self)
-
-    def get_content(self):
-        return Page.get_content(self)
-
 
 class ProjectFilesPage(Page):
     def __int__(self, url, error=False):
         Page.__init__(self, url, error)
 
-    def __str__(self):
-        return Page.__str__(self)
 
-    def get_content(self):
-        return Page.get_content(self)
-
-
-class ProjectWikiage(Page):
+class ProjectWikiPage(Page):
     def __int__(self, url, error=False):
         Page.__init__(self, url, error)
-
-    def __str__(self):
-        return Page.__str__(self)
-
-    def get_content(self):
-        return Page.get_content(self)
 
 
 class ProjectFilesPage(Page):
     def __int__(self, url, error=False):
         Page.__init__(self, url, error)
-
-    def __str__(self):
-        return Page.__str__(self)
-
-    def get_content(self):
-        return Page.get_content(self)
 
 
 class ProjectAnalyticsPage(Page):
     def __int__(self, url, error=False):
         Page.__init__(self, url, error)
 
-    def __str__(self):
-        return Page.__str__(self)
-
-    def get_content(self):
-        return Page.get_content(self)
-
 
 class ProjectRegistrationsPage(Page):
     def __int__(self, url, error=False):
         Page.__init__(self, url, error)
-
-    def __str__(self):
-        return Page.__str__(self)
-
-    def get_content(self):
-        return Page.get_content(self)
 
 
 class ProjectForksPage(Page):
     def __int__(self, url, error=False):
         Page.__init__(self, url, error)
 
-    def __str__(self):
-        return Page.__str__(self)
-
-    def get_content(self):
-        return Page.get_content(self)
-
 
 class RegistrationDashboardPage(Page):
     def __int__(self, url, error=False):
         Page.__init__(self, url, error)
-
-    def __str__(self):
-        return Page.__str__(self)
-
-    def get_content(self):
-        return Page.get_content(self)
 
 
 class RegistrationFilesPage(Page):
     def __int__(self, url, error=False):
         Page.__init__(self, url, error)
 
-    def __str__(self):
-        return Page.__str__(self)
-
-    def get_content(self):
-        return Page.get_content(self)
-
 
 class RegistrationWikiPage(Page):
     def __int__(self, url, error=False):
         Page.__init__(self, url, error)
-
-    def __str__(self):
-        return Page.__str__(self)
-
-    def get_content(self):
-        return Page.get_content(self)
 
 
 class RegistrationAnalyticsPage(Page):
     def __int__(self, url, error=False):
         Page.__init__(self, url, error)
 
-    def __str__(self):
-        return Page.__str__(self)
-
-    def get_content(self):
-        return Page.get_content(self)
-
 
 class RegistrationForksPage(Page):
     def __int__(self, url, error=False):
         Page.__init__(self, url, error)
-
-    def __str__(self):
-        return Page.__str__(self)
-
-    def get_content(self):
-        return Page.get_content(self)
 
 
 class Verifier:
