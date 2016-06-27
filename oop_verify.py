@@ -280,7 +280,7 @@ class RegistrationForksVerifier(Verifier):
         self.failed_pages = []
 
 
-class UserDashboardVerifier(Verifier):
+class UserProfileVerifier(Verifier):
     def __init__(self):
         Verifier.__init__(self)
         self.pages = []
@@ -296,7 +296,7 @@ class UserDashboardVerifier(Verifier):
         self.failed_pages = []
 
 
-class InstitutionDashboardVerifier(Verifier):
+class InstitutionProfileVerifier(Verifier):
     def __init__(self):
         Verifier.__init__(self)
         self.pages = []
