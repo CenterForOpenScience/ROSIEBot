@@ -5,6 +5,7 @@ import sys
 
 absolute_python_root = sys.path[0]
 from settings import base_urls
+import verifier
 
 class Rescraper:
     def __init__(self):
