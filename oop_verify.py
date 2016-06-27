@@ -124,14 +124,9 @@ class ProjectFilesVerifier(Verifier):
     def __init__(self):
         Verifier.__init__(self)
         self.pages = []
-        self.minimum_size = 410
+        self.minimum_size = 380
         self.page_elements = [
-            '#nodeTitleEditable',                                # Title
-            '#contributors span.date.node-last-modified-date',   # Last modified
-            '#contributorsList > ol',                            # Contributor list
-            '#nodeDescriptionEditable',                          # Description
-            '#tb-tbody',                                         # File list
-            '#logScope > div > div > div.panel-body > span > dl' # Activity
+            '.fg-file-links',  # Links to files (names them)
         ]
         self.failed_pages = []
 
@@ -142,13 +137,10 @@ class ProjectWikiVerifier(Verifier):
         self.pages = []
         self.minimum_size = 410
         self.page_elements = [
-            '#nodeTitleEditable',                                # Title
-            '#contributors span.date.node-last-modified-date',   # Last modified
-            '#contributorsList > ol',                            # Contributor list
-            '#nodeDescriptionEditable',                          # Description
-            '#tb-tbody',                                         # File list
-            '#logScope > div > div > div.panel-body > span > dl' # Activity
-        ]
+            '#wikiViewRender',  # Links to files (names them)
+            '#viewVersionSelect option',  # Current version date modified
+            '.fg-file-links'  # Links to other pages (names them)
+            ]
         self.failed_pages = []
 
 
@@ -156,14 +148,11 @@ class ProjectAnalyticsVerifier(Verifier):
     def __init__(self):
         Verifier.__init__(self)
         self.pages = []
-        self.minimum_size = 410
+        self.minimum_size = 380
         self.page_elements = [
-            '#nodeTitleEditable',                                # Title
-            '#contributors span.date.node-last-modified-date',   # Last modified
-            '#contributorsList > ol',                            # Contributor list
-            '#nodeDescriptionEditable',                          # Description
-            '#tb-tbody',                                         # File list
-            '#logScope > div > div > div.panel-body > span > dl' # Activity
+            '#wikiViewRender',                              # Links to files (names them)
+            '#viewVersionSelect option:nth-child(2)',       # Current version date modified
+            '.fg-file-links'                                # Links to other pages (names them)
         ]
         self.failed_pages = []
 
@@ -172,14 +161,9 @@ class ProjectRegistrationsVerifier(Verifier):
     def __init__(self):
         Verifier.__init__(self)
         self.pages = []
-        self.minimum_size = 410
+        self.minimum_size = 390
         self.page_elements = [
-            '#nodeTitleEditable',                                # Title
-            '#contributors span.date.node-last-modified-date',   # Last modified
-            '#contributorsList > ol',                            # Contributor list
-            '#nodeDescriptionEditable',                          # Description
-            '#tb-tbody',                                         # File list
-            '#logScope > div > div > div.panel-body > span > dl' # Activity
+            'body > div.watermarked > div > div.row > div.col-xs-9.col-sm-8' # List
         ]
         self.failed_pages = []
 
@@ -188,15 +172,10 @@ class ProjectForksVerifier(Verifier):
     def __init__(self):
         Verifier.__init__(self)
         self.pages = []
-        self.minimum_size = 410
+        self.minimum_size = 380
         self.page_elements = [
-            '#nodeTitleEditable',                                # Title
-            '#contributors span.date.node-last-modified-date',   # Last modified
-            '#contributorsList > ol',                            # Contributor list
-            '#nodeDescriptionEditable',                          # Description
-            '#tb-tbody',                                         # File list
-            '#logScope > div > div > div.panel-body > span > dl' # Activity
-        ]
+                'body > div.watermarked > div > div.row > div.col-xs-9.col-sm-8'  # List
+            ]
         self.failed_pages = []
 
 
@@ -220,15 +199,10 @@ class RegistrationFilesVerifier(Verifier):
     def __init__(self):
         Verifier.__init__(self)
         self.pages = []
-        self.minimum_size = 410
+        self.minimum_size = 380
         self.page_elements = [
-            '#nodeTitleEditable',                                # Title
-            '#contributors span.date.node-last-modified-date',   # Last modified
-            '#contributorsList > ol',                            # Contributor list
-            '#nodeDescriptionEditable',                          # Description
-            '#tb-tbody',                                         # File list
-            '#logScope > div > div > div.panel-body > span > dl' # Activity
-        ]
+            '.fg-file-links',                                   # Links to files (names them)
+            ]
         self.failed_pages = []
 
 
@@ -238,12 +212,9 @@ class RegistrationWikiVerifier(Verifier):
         self.pages = []
         self.minimum_size = 410
         self.page_elements = [
-            '#nodeTitleEditable',                                # Title
-            '#contributors span.date.node-last-modified-date',   # Last modified
-            '#contributorsList > ol',                            # Contributor list
-            '#nodeDescriptionEditable',                          # Description
-            '#tb-tbody',                                         # File list
-            '#logScope > div > div > div.panel-body > span > dl' # Activity
+            '#wikiViewRender',                              # Links to files (names them)
+            '#viewVersionSelect option:nth-child(2)',       # Current version date modified
+            '.fg-file-links'                                # Links to other pages (names them)
         ]
         self.failed_pages = []
 
@@ -252,14 +223,11 @@ class RegistrationAnalyticsVerifier(Verifier):
     def __init__(self):
         Verifier.__init__(self)
         self.pages = []
-        self.minimum_size = 410
+        self.minimum_size = 380
         self.page_elements = [
-            '#nodeTitleEditable',                                # Title
-            '#contributors span.date.node-last-modified-date',   # Last modified
-            '#contributorsList > ol',                            # Contributor list
-            '#nodeDescriptionEditable',                          # Description
-            '#tb-tbody',                                         # File list
-            '#logScope > div > div > div.panel-body > span > dl' # Activity
+            '#wikiViewRender',                              # Links to files (names them)
+            '#viewVersionSelect option:nth-child(2)',       # Current version date modified
+            '.fg-file-links'                                # Links to other pages (names them)
         ]
         self.failed_pages = []
 
@@ -268,14 +236,9 @@ class RegistrationForksVerifier(Verifier):
     def __init__(self):
         Verifier.__init__(self)
         self.pages = []
-        self.minimum_size = 410
+        self.minimum_size = 380
         self.page_elements = [
-            '#nodeTitleEditable',                                # Title
-            '#contributors span.date.node-last-modified-date',   # Last modified
-            '#contributorsList > ol',                            # Contributor list
-            '#nodeDescriptionEditable',                          # Description
-            '#tb-tbody',                                         # File list
-            '#logScope > div > div > div.panel-body > span > dl' # Activity
+            'body > div.watermarked > div > div.row > div.col-xs-9.col-sm-8' # List
         ]
         self.failed_pages = []
 
@@ -284,14 +247,12 @@ class UserProfileVerifier(Verifier):
     def __init__(self):
         Verifier.__init__(self)
         self.pages = []
-        self.minimum_size = 410
+        self.minimum_size = 80
         self.page_elements = [
-            '#nodeTitleEditable',                                # Title
-            '#contributors span.date.node-last-modified-date',   # Last modified
-            '#contributorsList > ol',                            # Contributor list
-            '#nodeDescriptionEditable',                          # Description
-            '#tb-tbody',                                         # File list
-            '#logScope > div > div > div.panel-body > span > dl' # Activity
+            '#projects',
+            '#projects li',                              # Specific project list item
+            'body div.panel-body',                       # Component list
+            'body h2'                                    # Activity points, project count
         ]
         self.failed_pages = []
 
@@ -300,13 +261,9 @@ class InstitutionProfileVerifier(Verifier):
     def __init__(self):
         Verifier.__init__(self)
         self.pages = []
-        self.minimum_size = 410
+        self.minimum_size = 350
         self.page_elements = [
-            '#nodeTitleEditable',                                # Title
-            '#contributors span.date.node-last-modified-date',   # Last modified
-            '#contributorsList > ol',                            # Contributor list
-            '#nodeDescriptionEditable',                          # Description
-            '#tb-tbody',                                         # File list
-            '#logScope > div > div > div.panel-body > span > dl' # Activity
+            '#fileBrowser > div.db-infobar > div > div',  # Project preview
+            '#tb-tbody'                                   # Project browser
         ]
         self.failed_pages = []
