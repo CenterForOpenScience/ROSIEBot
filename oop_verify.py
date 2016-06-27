@@ -17,21 +17,17 @@ NUM_RETRIES = 2
 TASK_FILE = '201606231548.json'
 MIRROR = '127.0.0.1/'
 
+retry_list = []
 
 with codecs.open(TASK_FILE, mode='r', encoding='utf-8') as file:
     run_info = json.load(file)
 
 
 class Page:
-    def __init__(self, url, error=False):
+    def __init__(self, url):
         self.url = url
-        self.error = error
-        if not error:
-            self.path = MIRROR + url.replace(base_urls[0], '') + 'index.html'
-            self.file_size = os.path.getsize(self.path)
-        else:
-            self.path = ''
-            self.file_size = 0
+        self.path = MIRROR + url.replace(base_urls[0], '') + 'index.html'
+        self.file_size = os.path.getsize(self.path)
 
     def __str__(self):
         return self.path
@@ -42,68 +38,68 @@ class Page:
 
 
 class ProjectDashboardPage(Page):
-    def __int__(self, url, error=False):
-        super().__init__(url, error)
+    def __int__(self, url):
+        super().__init__(url)
 
 
 class ProjectFilesPage(Page):
-    def __int__(self, url, error=False):
-        super().__init__(url, error)
+    def __int__(self, url):
+        super().__init__(url)
 
 
 class ProjectWikiPage(Page):
-    def __int__(self, url, error=False):
-        super().__init__(url, error)
+    def __int__(self, url):
+        super().__init__(url)
 
 
 class ProjectAnalyticsPage(Page):
-    def __int__(self, url, error=False):
-        super().__init__(url, error)
+    def __int__(self, url):
+        super().__init__(url)
 
 
 class ProjectRegistrationsPage(Page):
-    def __int__(self, url, error=False):
-        super().__init__(url, error)
+    def __int__(self, url):
+        super().__init__(url)
 
 
 class ProjectForksPage(Page):
-    def __int__(self, url, error=False):
-        super().__init__(url, error)
+    def __int__(self, url):
+        super().__init__(url)
 
 
 class RegistrationDashboardPage(Page):
-    def __int__(self, url, error=False):
-        super().__init__(url, error)
+    def __int__(self, url):
+        super().__init__(url)
 
 
 class RegistrationFilesPage(Page):
-    def __int__(self, url, error=False):
-        super().__init__(url, error)
+    def __int__(self, url):
+        super().__init__(url)
 
 
 class RegistrationWikiPage(Page):
-    def __int__(self, url, error=False):
-        super().__init__(url, error)
+    def __int__(self, url):
+        super().__init__(url)
 
 
 class RegistrationAnalyticsPage(Page):
-    def __int__(self, url, error=False):
-        super().__init__(url, error)
+    def __int__(self, url):
+        super().__init__(url)
 
 
 class RegistrationForksPage(Page):
-    def __int__(self, url, error=False):
-        super().__init__(url, error)
+    def __int__(self, url):
+        super().__init__(url)
 
 
 class UserProfilePage(Page):
-    def __int__(self, url, error=False):
-        super().__init__(url, error)
+    def __int__(self, url):
+        super().__init__(url)
 
 
 class InstitutionProfilePage(Page):
-    def __init__(self, url, error=False):
-        super().__init__(url, error)
+    def __init__(self, url):
+        super().__init__(url)
 
 
 class Verifier:
