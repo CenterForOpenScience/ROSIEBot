@@ -380,43 +380,44 @@ class InstitutionDashboardVerifier(Verifier):
 
 def main():
     # for modularization and then concatenate lists
-    rescrape_list = []
-    for i in range(NUM_RETRIES):
-        if run_info['scrape_nodes']:
-            if run_info['include_files']:
-                project_files = ProjectFilesVerifier()
-                rescrape_list.append(project_files.failed_pages)
-            if run_info['include_wiki']:
-                project_wiki = ProjectWikiVerifier()
-                rescrape_list.append(project_wiki.failed_pages)
-            if run_info['include_analytics']:
-                project_analytics = ProjectAnalyticsVerifier()
-                rescrape_list.append(project_analytics.failed_pages)
-            if run_info['include_registrations']:
-                project_registrations = ProjectRegistrationsVerifier()
-                rescrape_list.append(project_registrations.failed_pages)
-            if run_info['include_forks']:
-                project_forks = ProjectForksVerifier()
-                rescrape_list.append(project_forks.failed_pages)
-            if run_info['include_dashboard']:  # This must go last because its URLs don't have a specific ending.
-                project_dashboards = ProjectDashboardVerifier()
-                rescrape_list.append(project_dashboards.failed_pages)
-        if run_info['scrape_registrations']:
-            # Must run all page types automatically
-            registration_files = RegistrationFilesVerifier()
-            registration_wiki = RegistrationWikiVerifier()
-            registration_analytics = RegistrationAnalyticsVerifier()
-            registration_forks = RegistrationForksVerifier()
-            registration_dashboards = RegistrationDashboardVerifier()
-            rescrape_list.extend((registration_files.failed_pages, registration_wiki.failed_pages,
-                                  registration_analytics.failed_pages, registration_forks.failed_pages,
-                                  registration_dashboards.failed_pages))
-        if run_info['scrape_users']:
-            user_profiles = UserProfileVerifier()
-            rescrape_list.append(user_profiles.failed_pages)
-        if run_info['scrape_institutions']:
-            institution_dashboards = InstitutionDashboardVerifier()
-            rescrape_list.append(institution_dashboards.failed_pages)
+    if run_info['scrape_finished']:
+        rescrape_list = []
+        for i in range(NUM_RETRIES):
+            if run_info['scrape_nodes']:
+                if run_info['include_files']:
+                    project_files = ProjectFilesVerifier()
+                    rescrape_list.extend(project_files.failed_pages)
+                if run_info['include_wiki']:
+                    project_wiki = ProjectWikiVerifier()
+                    rescrape_list.extend(project_wiki.failed_pages)
+                if run_info['include_analytics']:
+                    project_analytics = ProjectAnalyticsVerifier()
+                    rescrape_list.extend(project_analytics.failed_pages)
+                if run_info['include_registrations']:
+                    project_registrations = ProjectRegistrationsVerifier()
+                    rescrape_list.extend(project_registrations.failed_pages)
+                if run_info['include_forks']:
+                    project_forks = ProjectForksVerifier()
+                    rescrape_list.extend(project_forks.failed_pages)
+                if run_info['include_dashboard']:  # This must go last because its URLs don't have a specific ending.
+                    project_dashboards = ProjectDashboardVerifier()
+                    rescrape_list.extend(project_dashboards.failed_pages)
+            if run_info['scrape_registrations']:
+                # Must run all page types automatically
+                registration_files = RegistrationFilesVerifier()
+                registration_wiki = RegistrationWikiVerifier()
+                registration_analytics = RegistrationAnalyticsVerifier()
+                registration_forks = RegistrationForksVerifier()
+                registration_dashboards = RegistrationDashboardVerifier()
+                rescrape_list.extend((registration_files.failed_pages + registration_wiki.failed_pages +
+                                      registration_analytics.failed_pages + registration_forks.failed_pages +
+                                      registration_dashboards.failed_pages))
+            if run_info['scrape_users']:
+                user_profiles = UserProfileVerifier()
+                rescrape_list.extend(user_profiles.failed_pages)
+            if run_info['scrape_institutions']:
+                institution_dashboards = InstitutionDashboardVerifier()
+                rescrape_list.extend(institution_dashboards.failed_pages)
 
 
 if __name__ == "__main__": main()
