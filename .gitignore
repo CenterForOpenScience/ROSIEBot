@@ -9,4 +9,8 @@ osf.io/
 *.json
 settings.py
 !task_file_example.txt
+<<<<<<< HEAD
 archive
+=======
+archi/ve/
+>>>>>>> feature/verify
