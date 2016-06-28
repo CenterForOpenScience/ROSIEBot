@@ -65,62 +65,62 @@ class Page:
 # Page-specific subclasses
 
 class ProjectDashboardPage(Page):
-    def __int__(self, url):
+    def __init__(self, url):
         super().__init__(url)
 
 
 class ProjectFilesPage(Page):
-    def __int__(self, url):
+    def __init__(self, url):
         super().__init__(url)
 
 
 class ProjectWikiPage(Page):
-    def __int__(self, url):
+    def __init__(self, url):
         super().__init__(url)
 
 
 class ProjectAnalyticsPage(Page):
-    def __int__(self, url):
+    def __init__(self, url):
         super().__init__(url)
 
 
 class ProjectRegistrationsPage(Page):
-    def __int__(self, url):
+    def __init__(self, url):
         super().__init__(url)
 
 
 class ProjectForksPage(Page):
-    def __int__(self, url):
+    def __init__(self, url):
         super().__init__(url)
 
 
 class RegistrationDashboardPage(Page):
-    def __int__(self, url):
+    def __init__(self, url):
         super().__init__(url)
 
 
 class RegistrationFilesPage(Page):
-    def __int__(self, url):
+    def __init__(self, url):
         super().__init__(url)
 
 
 class RegistrationWikiPage(Page):
-    def __int__(self, url):
+    def __init__(self, url):
         super().__init__(url)
 
 
 class RegistrationAnalyticsPage(Page):
-    def __int__(self, url):
+    def __init__(self, url):
         super().__init__(url)
 
 
 class RegistrationForksPage(Page):
-    def __int__(self, url):
+    def __init__(self, url):
         super().__init__(url)
 
 
 class UserProfilePage(Page):
-    def __int__(self, url):
+    def __init__(self, url):
         super().__init__(url)
 
 
