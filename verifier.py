@@ -384,9 +384,8 @@ def main():
     for i in range(NUM_RETRIES):
         if run_info['scrape_nodes']:
             if run_info['include_files']:
-                registration_files = RegistrationFilesVerifier()
                 project_files = ProjectFilesVerifier()
-                rescrape_list.extend((registration_files.failed_pages, project_files.failed_pages))
+                rescrape_list.append(project_files.failed_pages)
             if run_info['include_wiki']:
                 registration_wiki = RegistrationWikiVerifier()
                 project_wiki = ProjectWikiVerifier()
