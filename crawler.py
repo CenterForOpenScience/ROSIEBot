@@ -66,7 +66,7 @@ class Crawler:
         self.node_url_tuples = []
         self.registration_url_tuples = []
 
-        # Utility lists for use by wiki-related api Cralws
+        # Utility lists for use by wiki-related api Crawls
         self._node_wikis_by_parent_guid = collections.defaultdict(list)  # private instance variable for wiki utils
         self._registration_wikis_by_parent_guid = collections.defaultdict(list)
 
@@ -564,12 +564,6 @@ class Crawler:
         loop.run_until_complete(asyncio.wait(tasks))
 
 # Async method for actual scraping
-    ":"
-
-
-
-
-    9
     async def scrape_url(self, url, sem):
         """
         Asynchronous method that scrape page. Calls save_html() to save scraped page to file.
@@ -593,7 +587,7 @@ class Crawler:
                     self.dictionary['error_list'] = self.error_list
                     self.database.seek(0)
                     self.database.truncate()
-                    json.dump(self.dictionary, self.database)
+                    json.dump(self.dictionary, self.database, indent=4)
                     self.database.flush()
 
 # Method to record the milestone
@@ -605,7 +599,7 @@ class Crawler:
         self.dictionary['milestone'] = url
         self.database.seek(0)
         self.database.truncate()
-        json.dump(self.dictionary, self.database)
+        json.dump(self.dictionary, self.database, indent=4)
         self.database.flush()
 
 

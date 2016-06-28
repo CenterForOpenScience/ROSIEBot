@@ -223,7 +223,8 @@ def resume_scrape(db, tf):
 
     if scrape_users and not users_finished:
         if milestone_url in rosie.user_profile_page_urls:
-            rosie.user_profile_page_urls = rosie.user_profile_page_urls[rosie.user_profile_page_urls.index(milestone_url):]
+            rosie.user_profile_page_urls = \
+                rosie.user_profile_page_urls[rosie.user_profile_page_urls.index(milestone_url):]
         rosie.scrape_users()
         store['users_finished'] = True
         db.seek(0)
