@@ -3,6 +3,7 @@ import os
 import sys
 from bs4 import BeautifulSoup
 from settings import base_urls
+
 # from rescraper import Rescraper
 
 """
@@ -18,7 +19,6 @@ no instance at all: //68fqs
 NUM_RETRIES = 2
 TASK_FILE = '201606231548.json'
 MIRROR = '127.0.0.1/'
-
 
 with codecs.open(TASK_FILE, mode='r', encoding='utf-8') as file:
     run_info = json.load(file)
@@ -124,7 +124,7 @@ class UserProfilePage(Page):
         super().__init__(url)
 
 
-class InstitutionProfilePage(Page):
+class InstitutionDashboardPage(Page):
     def __init__(self, url):
         super().__init__(url)
 
@@ -179,7 +179,7 @@ class Verifier:
             soup = page.get_content()
             for element in self.page_elements:
                 result = soup.select(element)
-                if len(result) == 0 or len(result[0].contents) == 0:    # No results or empty results
+                if len(result) == 0 or len(result[0].contents) == 0:  # No results or empty results
                     print('Failed: spot_check(): ', page)
                     self.failed_pages.append(page.url)
         return
@@ -193,12 +193,12 @@ class ProjectDashboardVerifier(Verifier):
         self.pages = []
         self.minimum_size = 410
         self.page_elements = [
-            '#nodeTitleEditable',                                # Title
-            '#contributors span.date.node-last-modified-date',   # Last modified
-            '#contributorsList > ol',                            # Contributor list
-            '#nodeDescriptionEditable',                          # Description
-            '#tb-tbody',                                         # File list
-            '#logScope > div > div > div.panel-body > span > dl' # Activity
+            '#nodeTitleEditable',  # Title
+            '#contributors span.date.node-last-modified-date',  # Last modified
+            '#contributorsList > ol',  # Contributor list
+            '#nodeDescriptionEditable',  # Description
+            '#tb-tbody',  # File list
+            '#logScope > div > div > div.panel-body > span > dl'  # Activity
         ]
         self.harvest_pages(run_info['node_urls'], '', ProjectDashboardPage)
         self.size_comparison()
@@ -227,7 +227,7 @@ class ProjectWikiVerifier(Verifier):
             '#wikiViewRender',  # Links to files (names them)
             '#viewVersionSelect option',  # Current version date modified
             '.fg-file-links'  # Links to other pages (names them)
-            ]
+        ]
         self.harvest_pages(run_info['node_urls'], 'wiki/', ProjectWikiPage)
         self.size_comparison()
         self.spot_check()
@@ -239,9 +239,9 @@ class ProjectAnalyticsVerifier(Verifier):
         self.pages = []
         self.minimum_size = 380
         self.page_elements = [
-            '#wikiViewRender',                              # Links to files (names them)
-            '#viewVersionSelect option:nth-child(2)',       # Current version date modified
-            '.fg-file-links'                                # Links to other pages (names them)
+            '#wikiViewRender',  # Links to files (names them)
+            '#viewVersionSelect option:nth-child(2)',  # Current version date modified
+            '.fg-file-links'  # Links to other pages (names them)
         ]
         self.harvest_pages(run_info['node_urls'], 'analytics/', ProjectAnalyticsPage)
         self.size_comparison()
@@ -254,7 +254,7 @@ class ProjectRegistrationsVerifier(Verifier):
         self.pages = []
         self.minimum_size = 390
         self.page_elements = [
-            'body > div.watermarked > div > div.row > div.col-xs-9.col-sm-8' # List
+            'body > div.watermarked > div > div.row > div.col-xs-9.col-sm-8'  # List
         ]
         self.harvest_pages(run_info['node_urls'], 'registrations/', ProjectRegistrationsPage)
         self.size_comparison()
@@ -267,8 +267,8 @@ class ProjectForksVerifier(Verifier):
         self.pages = []
         self.minimum_size = 380
         self.page_elements = [
-                'body > div.watermarked > div > div.row > div.col-xs-9.col-sm-8'  # List
-            ]
+            'body > div.watermarked > div > div.row > div.col-xs-9.col-sm-8'  # List
+        ]
         self.harvest_pages(run_info['node_urls'], 'forks/', ProjectForksPage)
         self.size_comparison()
         self.spot_check()
@@ -280,12 +280,12 @@ class RegistrationDashboardVerifier(Verifier):
         self.pages = []
         self.minimum_size = 410
         self.page_elements = [
-            '#nodeTitleEditable',                                # Title
-            '#contributors span.date.node-last-modified-date',   # Last modified
-            '#contributorsList > ol',                            # Contributor list
-            '#nodeDescriptionEditable',                          # Description
-            '#tb-tbody',                                         # File list
-            '#logScope > div > div > div.panel-body > span > dl' # Activity
+            '#nodeTitleEditable',  # Title
+            '#contributors span.date.node-last-modified-date',  # Last modified
+            '#contributorsList > ol',  # Contributor list
+            '#nodeDescriptionEditable',  # Description
+            '#tb-tbody',  # File list
+            '#logScope > div > div > div.panel-body > span > dl'  # Activity
         ]
         self.harvest_pages(run_info['registration_urls'], '', RegistrationDashboardPage)
         self.size_comparison()
@@ -298,8 +298,8 @@ class RegistrationFilesVerifier(Verifier):
         self.pages = []
         self.minimum_size = 380
         self.page_elements = [
-            '.fg-file-links',                                   # Links to files (names them)
-            ]
+            '.fg-file-links',  # Links to files (names them)
+        ]
         self.harvest_pages(run_info['registration_urls'], 'files/', RegistrationFilesPage)
         self.size_comparison()
         self.spot_check()
@@ -311,9 +311,9 @@ class RegistrationWikiVerifier(Verifier):
         self.pages = []
         self.minimum_size = 410
         self.page_elements = [
-            '#wikiViewRender',                              # Links to files (names them)
-            '#viewVersionSelect option:nth-child(2)',       # Current version date modified
-            '.fg-file-links'                                # Links to other pages (names them)
+            '#wikiViewRender',  # Links to files (names them)
+            '#viewVersionSelect option:nth-child(2)',  # Current version date modified
+            '.fg-file-links'  # Links to other pages (names them)
         ]
         self.harvest_pages(run_info['registration_urls'], 'wiki/', RegistrationWikiPage)
         self.size_comparison()
@@ -326,9 +326,9 @@ class RegistrationAnalyticsVerifier(Verifier):
         self.pages = []
         self.minimum_size = 380
         self.page_elements = [
-            '#wikiViewRender',                              # Links to files (names them)
-            '#viewVersionSelect option:nth-child(2)',       # Current version date modified
-            '.fg-file-links'                                # Links to other pages (names them)
+            '#wikiViewRender',  # Links to files (names them)
+            '#viewVersionSelect option:nth-child(2)',  # Current version date modified
+            '.fg-file-links'  # Links to other pages (names them)
         ]
         self.harvest_pages(run_info['registration_urls'], 'analytics/', RegistrationAnalyticsPage)
         self.size_comparison()
@@ -341,7 +341,7 @@ class RegistrationForksVerifier(Verifier):
         self.pages = []
         self.minimum_size = 380
         self.page_elements = [
-            'body > div.watermarked > div > div.row > div.col-xs-9.col-sm-8' # List
+            'body > div.watermarked > div > div.row > div.col-xs-9.col-sm-8'  # List
         ]
         self.harvest_pages(run_info['registration_urls'], 'forks/', RegistrationForksPage)
         self.size_comparison()
@@ -355,31 +355,69 @@ class UserProfileVerifier(Verifier):
         self.minimum_size = 80
         self.page_elements = [
             '#projects',
-            '#projects li',                              # Specific project list item
-            'body div.panel-body',                       # Component list
-            'body h2'                                    # Activity points, project count
+            '#projects li',  # Specific project list item
+            'body div.panel-body',  # Component list
+            'body h2'  # Activity points, project count
         ]
         self.harvest_pages(run_info['user_profile_page_urls'], '', UserProfilePage)
         self.size_comparison()
         self.spot_check()
 
 
-class InstitutionProfileVerifier(Verifier):
+class InstitutionDashboardVerifier(Verifier):
     def __init__(self):
         Verifier.__init__(self)
         self.pages = []
         self.minimum_size = 350
         self.page_elements = [
             '#fileBrowser > div.db-infobar > div > div',  # Project preview
-            '#tb-tbody'                                   # Project browser
+            '#tb-tbody'  # Project browser
         ]
         self.harvest_pages(run_info['institution_urls'], '', InstitutionProfilePage)
         self.size_comparison()
         self.spot_check()
 
 
-# Main execution
+def main():
+    # for modularization and then concatenate lists
+    if run_info['scrape_finished']:
+        rescrape_list = []
+        for i in range(NUM_RETRIES):
+            if run_info['scrape_nodes']:
+                if run_info['include_files']:
+                    project_files = ProjectFilesVerifier()
+                    rescrape_list.extend(project_files.failed_pages)
+                if run_info['include_wiki']:
+                    project_wiki = ProjectWikiVerifier()
+                    rescrape_list.extend(project_wiki.failed_pages)
+                if run_info['include_analytics']:
+                    project_analytics = ProjectAnalyticsVerifier()
+                    rescrape_list.extend(project_analytics.failed_pages)
+                if run_info['include_registrations']:
+                    project_registrations = ProjectRegistrationsVerifier()
+                    rescrape_list.extend(project_registrations.failed_pages)
+                if run_info['include_forks']:
+                    project_forks = ProjectForksVerifier()
+                    rescrape_list.extend(project_forks.failed_pages)
+                if run_info['include_dashboard']:  # This must go last because its URLs don't have a specific ending.
+                    project_dashboards = ProjectDashboardVerifier()
+                    rescrape_list.extend(project_dashboards.failed_pages)
+            if run_info['scrape_registrations']:
+                # Must run all page types automatically
+                registration_files = RegistrationFilesVerifier()
+                registration_wiki = RegistrationWikiVerifier()
+                registration_analytics = RegistrationAnalyticsVerifier()
+                registration_forks = RegistrationForksVerifier()
+                registration_dashboards = RegistrationDashboardVerifier()
+                rescrape_list.extend((registration_files.failed_pages + registration_wiki.failed_pages +
+                                      registration_analytics.failed_pages + registration_forks.failed_pages +
+                                      registration_dashboards.failed_pages))
+            if run_info['scrape_users']:
+                user_profiles = UserProfileVerifier()
+                rescrape_list.extend(user_profiles.failed_pages)
+            if run_info['scrape_institutions']:
+                institution_dashboards = InstitutionDashboardVerifier()
+                rescrape_list.extend(institution_dashboards.failed_pages)
 
-RegistrationFiles = RegistrationFilesVerifier()
 
-print("Retry list: ", RegistrationFiles.failed_pages)
+if __name__ == "__main__": main()
