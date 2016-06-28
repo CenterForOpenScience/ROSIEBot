@@ -3,6 +3,7 @@ import os
 import sys
 from bs4 import BeautifulSoup
 from settings import base_urls
+from crawler import Crawler
 
 # from rescraper import Rescraper
 
@@ -22,7 +23,6 @@ MIRROR = 'archive/'
 
 with codecs.open(TASK_FILE, mode='r', encoding='utf-8') as file:
     run_info = json.load(file)
-
 
 # Takes a URL and produces its relative file name.
 def get_path_from_url(self, url):
@@ -379,6 +379,8 @@ class InstitutionDashboardVerifier(Verifier):
 
 
 def main():
+    # Identifying problems
+
     # for modularization and then concatenate lists
     if run_info['scrape_finished']:
         rescrape_list = []
@@ -419,5 +421,18 @@ def main():
                 institution_dashboards = InstitutionDashboardVerifier()
                 rescrape_list.extend(institution_dashboards.failed_pages)
 
+    # Rescraping
+
+        second_chance = Crawler()
+
+        if run_info['scrape_nodes']:
+            second_chance.node_urls = run_info['node_urls']
+            second_chance.scrape_nodes()
+        if run_info['scrape_registrations']:
+            second_chance.registration_urls = run_info['registration_urls']
+        if run_info['scrape_users']:
+            second_chance.user_profile_page_urls = run_info['user_profile_page_urls']
+        if run_info['scrape_institutions']:
+            second_chance.institution_urls = run_info['institution_urls']
 
 if __name__ == "__main__": main()
