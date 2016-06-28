@@ -400,11 +400,7 @@ def main():
                 rescrape_list.append(project_forks.failed_pages)
             if run_info['include_dashboard']:  # This must go last because its URLs don't have a specific ending.
                 project_dashboards = ProjectDashboardVerifier()
-                registration_dashboards = RegistrationDashboardVerifier()
-                user_profiles = UserProfileVerifier()
-                institution_dashboards = InstitutionDashboardVerifier()
-                rescrape_list.extend((registration_dashboards.failed_pages, project_dashboards.failed_pages,
-                                      user_profiles.failed_pages, institution_dashboards.failed_pages))
+                rescrape_list.append(project_dashboards.failed_pages)
         if run_info['scrape_registrations']:
             # Must run all page types automatically
             registration_files = RegistrationFilesVerifier()
