@@ -387,20 +387,17 @@ def main():
                 project_files = ProjectFilesVerifier()
                 rescrape_list.append(project_files.failed_pages)
             if run_info['include_wiki']:
-                registration_wiki = RegistrationWikiVerifier()
                 project_wiki = ProjectWikiVerifier()
-                rescrape_list.extend((registration_wiki.failed_pages, project_wiki.failed_pages))
+                rescrape_list.append(project_wiki.failed_pages)
             if run_info['include_analytics']:
-                registration_analytics = RegistrationAnalyticsVerifier()
                 project_analytics = ProjectAnalyticsVerifier()
-                rescrape_list.extend((registration_analytics.failed_pages, project_analytics.failed_pages))
+                rescrape_list.append(project_analytics.failed_pages)
             if run_info['include_registrations']:
                 project_registrations = ProjectRegistrationsVerifier()
                 rescrape_list.append(project_registrations.failed_pages)
             if run_info['include_forks']:
-                registration_forks = RegistrationForksVerifier()
                 project_forks = ProjectForksVerifier()
-                rescrape_list.extend((registration_forks.failed_pages, project_forks.failed_pages))
+                rescrape_list.append(project_forks.failed_pages)
             if run_info['include_dashboard']:  # This must go last because its URLs don't have a specific ending.
                 project_dashboards = ProjectDashboardVerifier()
                 registration_dashboards = RegistrationDashboardVerifier()
