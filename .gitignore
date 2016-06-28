@@ -9,4 +9,4 @@ osf.io/
 *.json
 settings.py
 !task_file_example.txt
-archive/
+archi/ve/
