@@ -1,8 +1,8 @@
 import click
-import shelve
 import datetime
 import crawler
-import urllib
+import json
+import codecs
 
 @click.command()
 # Specify parameters that choose between different modes
@@ -33,31 +33,19 @@ def cli_entry_point(normal, resume, verify, dm, tf, registrations, users, instit
         click.echo('You have to choose a mode to run')
 
     if normal and dm is not None:
-        # try:
-        #     test_connectivity()
-        # except:
-        #     click.echo('Cannot connect to destinations')
-        #     return
-
         click.echo('Starting normal scrape with date marker set to : ' + dm)
         now = datetime.datetime.now()
-        filename = now.strftime('%Y%m%d%H%M' + '.task')
+        filename = now.strftime('%Y%m%d%H%M' + '.json')
         click.echo('Creating a task file named : ' + filename)
-        with shelve.open(filename, writeback=True, flag='n') as db:
+        with open(filename, 'w') as db:
             normal_scrape(dm, registrations, users, institutions, nodes, d, f, w, a, r, fr, db)
         return
 
     if resume and tf is not None:
-        # try:
-        #     test_connectivity()
-        # except:
-        #     click.echo('Cannot connect to destinations')
-        #     return
-
         click.echo('Resuming scrape withe the task file : ' + tf)
         try:
-            with shelve.open(tf, writeback=False, flag='w') as db:
-                resume_scrape(db)
+            with codecs.open(tf, 'r', encoding='utf-8') as db:
+                resume_scrape(db, tf)
         except FileNotFoundError:
             click.echo('File Not Found for the task.')
         return
@@ -67,10 +55,6 @@ def cli_entry_point(normal, resume, verify, dm, tf, registrations, users, instit
         return
 
     return
-
-# def test_connectivity():
-#     response = urllib.urlopen(crawler.base_urls[0], timeout=1)
-#     response2 = urllib.urlopen(crawler.base_urls[1], timeout=1)
 
 
 def normal_scrape(dm,
@@ -88,34 +72,34 @@ def normal_scrape(dm,
         click.echo("Date marker is not specified or specified date marker cannot be parsed")
         return
 
-    # Store/initialize variables into persistent file
-    db['scrape_registrations'] = scrape_registrations
-    db['scrape_users'] = scrape_users
-    db['scrape_institutions'] = scrape_institutions
-    db['scrape_nodes'] = scrape_nodes
-    db['include_dashboard'] = include_dashboard
-    db['include_files'] = include_files
-    db['include_wiki'] = include_wiki
-    db['include_analytics'] = include_analytics
-    db['include_registrations'] = include_registrations
-    db['include_forks'] = include_forks
-    db['nodes_finished'] = False
-    db['registrations_finished'] = False
-    db['users_finished'] = False
-    db['institutions_finished'] = False
-    db['scrape_finished'] = False
-    db['node_urls'] = None
-    db['node_url_tuples'] = None
-    db['registration_urls'] = None
-    db['registration_url_tuples'] = None
-    db['user_profile_page_urls'] = None
-    db['institution_urls'] = None
+    store = {}
+    store['scrape_registrations'] = scrape_registrations
+    store['scrape_users'] = scrape_users
+    store['scrape_institutions'] = scrape_institutions
+    store['scrape_nodes'] = scrape_nodes
+    store['include_dashboard'] = include_dashboard
+    store['include_files'] = include_files
+    store['include_wiki'] = include_wiki
+    store['include_analytics'] = include_analytics
+    store['include_registrations'] = include_registrations
+    store['include_forks'] = include_forks
+    store['nodes_finished'] = False
+    store['registrations_finished'] = False
+    store['users_finished'] = False
+    store['institutions_finished'] = False
+    store['scrape_finished'] = False
+    store['node_urls'] = None
+    store['registration_urls'] = None
+    store['user_profile_page_urls'] = None
+    store['institution_urls'] = None
+    store['error_list'] = None
+    store['milestone'] = None
 
-    rosie = crawler.Crawler(date_modified=date_marker, db=db)
+    rosie = crawler.Crawler(date_modified=date_marker, db=db, dictionary=store)
 
-    _scrape_api(rosie, db, scrape_nodes, scrape_registrations, scrape_users, scrape_institutions)
-
+    # Crawling the respective API for this scrape
     if scrape_nodes:
+        rosie.crawl_nodes_api()
         if include_dashboard and include_files and include_analytics and \
                 include_forks and include_registrations and include_wiki:
             rosie.generate_node_urls(all_pages=True)
@@ -127,71 +111,88 @@ def normal_scrape(dm,
                                      analytics=include_analytics,
                                      registrations=include_registrations,
                                      forks=include_forks)
-        db['nodes_url'] = rosie.node_urls
-        rosie.scrape_nodes(async=False)
-        db['nodes_finished'] = True
+        store['node_urls'] = rosie.node_urls
 
     if scrape_registrations:
+        rosie.crawl_registrations_api()
         rosie.generate_registration_urls()
-        db['registration_urls'] = rosie.registration_urls
-        rosie.scrape_registrations(async=False)
-        db['registrations_finished'] = True
+        store['registration_urls'] = rosie.registration_urls
+
+    if scrape_users:
+        rosie.crawl_users_api()
+        store['user_profile_page_urls'] = rosie.user_profile_page_urls
+
+    if scrape_institutions:
+        rosie.crawl_institutions_api()
+        store['institution_urls'] = rosie.institution_urls
+
+    json.dump(store, db, indent=4)
+    db.flush()
+
+    # Actual Scraping of the pages
+    if scrape_nodes:
+        rosie.scrape_nodes(async=True)
+        store['nodes_finished'] = True
+        db.seek(0)
+        db.truncate()
+        json.dump(store, db, indent=4)
+        db.flush()
+
+    if scrape_registrations:
+        rosie.scrape_registrations(async=True)
+        store['registrations_finished'] = True
+        db.seek(0)
+        db.truncate()
+        json.dump(store, db, indent=4)
+        db.flush()
 
     if scrape_users:
         rosie.scrape_users()
-        db['users_finished'] = True
+        store['users_finished'] = True
+        db.seek(0)
+        db.truncate()
+        json.dump(store, db, indent=4)
+        db.flush()
 
     if scrape_institutions:
         rosie.scrape_institutions()
-        db['institutions_finished'] = True
+        store['institutions_finished'] = True
+        db.seek(0)
+        db.truncate()
+        json.dump(store, db, indent=4)
+        db.flush()
 
-    db['scrape_finished'] = True
-
-
-def _scrape_api(cr, db, scrape_nodes, scrape_registrations, scrape_users, scrape_institutions):
-    if scrape_nodes:
-        cr.crawl_nodes_api()
-        db['node_url_tuples'] = cr.node_url_tuples
-
-    if scrape_registrations:
-        cr.crawl_registrations_api()
-        db['registration_url_tuples'] = cr.registration_url_tuples
-
-    if scrape_users:
-        cr.crawl_users_api()
-        db['user_profile_page_urls'] = cr.user_profile_page_urls
-
-    if scrape_institutions:
-        cr.crawl_institutions_api()
-        db['institution_urls'] = cr.institution_urls
+    store['scrape_finished'] = True
+    db.seek(0)
+    db.truncate()
+    json.dump(store, db, indent=4)
+    db.flush()
 
 
-def resume_scrape(db):
-    rosie = crawler.Crawler(db=db)
+def resume_scrape(db, tf):
+    store = json.load(db)
+    db.close()
+
+    db = open(tf, 'w')
+    rosie = crawler.Crawler(db=db, dictionary=store)
     # Restore variables from persistent file
     try:
-        scrape_nodes = db['scrape_nodes']
-        scrape_registrations = db['scrape_registrations']
-        scrape_users = db['scrape_users']
-        scrape_institutions = db['scrape_institutions']
-        include_dashboard = db['include_dashboard']
-        include_files = db['include_files']
-        include_wiki = db['include_wiki']
-        include_analytics = db['include_analytics']
-        include_registrations = db['include_registrations']
-        include_forks = db['include_forks']
-        nodes_finished = db['nodes_finished']
-        registrations_finished = db['registrations_finished']
-        users_finished = db['users_finished']
-        institutions_finished = db['institutions_finished']
-        scrape_finished = db['scrape_finished']
-        milestone_url = db['milestone']
-        rosie.node_url_tuples = db['node_url_tuples']
-        rosie.node_urls = db['node_urls']
-        rosie.registration_url_tuples = db['registration_url_tuples']
-        rosie.registration_urls = db['registration_urls']
-        rosie.user_profile_page_urls = db['user_profile_page_urls']
-        rosie.institution_urls = db['institution_urls']
+        scrape_nodes = store['scrape_nodes']
+        scrape_registrations = store['scrape_registrations']
+        scrape_users = store['scrape_users']
+        scrape_institutions = store['scrape_institutions']
+        nodes_finished = store['nodes_finished']
+        registrations_finished = store['registrations_finished']
+        users_finished = store['users_finished']
+        institutions_finished = store['institutions_finished']
+        scrape_finished = store['scrape_finished']
+        milestone_url = store['milestone']
+        rosie.node_urls = store['node_urls']
+        rosie.registration_urls = store['registration_urls']
+        rosie.user_profile_page_urls = store['user_profile_page_urls']
+        rosie.institution_urls = store['institution_urls']
+        if store['error_list'] is not None:
+            rosie.error_list = store['error_list']
     except KeyError:
         click.echo('Cannot restore variables from file')
         return
@@ -201,42 +202,51 @@ def resume_scrape(db):
         return
 
     if scrape_nodes and not nodes_finished:
-        if rosie.node_urls is None:
-            rosie.node_urls = []
-            rosie.generate_node_urls(all_pages=False,
-                                     dashboard=include_dashboard,
-                                     files=include_files,
-                                     wiki=include_wiki,
-                                     analytics=include_analytics,
-                                     registrations=include_registrations,
-                                     forks=include_forks)
         if milestone_url in rosie.node_urls:
             rosie.node_urls = rosie.node_urls[rosie.node_urls.index(milestone_url):]
         rosie.scrape_nodes(async=True)
-        db['nodes_finished'] = True
+        store['nodes_finished'] = True
+        db.seek(0)
+        db.truncate()
+        json.dump(store, db, indent=4)
+        db.flush()
 
     if scrape_registrations and not registrations_finished:
-        if rosie.registration_urls is None:
-            rosie.registration_urls = []
-            rosie.generate_registration_urls()
         if milestone_url in rosie.registration_urls:
             rosie.registration_urls = rosie.registration_urls[rosie.registration_urls.index(milestone_url):]
         rosie.scrape_registrations(async=True)
-        db['registrations_finished'] = True
+        store['registrations_finished'] = True
+        db.seek(0)
+        db.truncate()
+        json.dump(store, db, indent=4)
+        db.flush()
 
     if scrape_users and not users_finished:
         if milestone_url in rosie.user_profile_page_urls:
-            rosie.user_profile_page_urls = rosie.user_profile_page_urls[rosie.user_profile_page_urls.index(milestone_url):]
+            rosie.user_profile_page_urls = \
+                rosie.user_profile_page_urls[rosie.user_profile_page_urls.index(milestone_url):]
         rosie.scrape_users()
-        db['users_finished'] = True
+        store['users_finished'] = True
+        db.seek(0)
+        db.truncate()
+        json.dump(store, db, indent=4)
+        db.flush()
 
     if scrape_institutions and not institutions_finished:
         if milestone_url in rosie.institution_urls:
             rosie.institution_urls = rosie.institution_urls[rosie.institution_urls.index(milestone_url):]
         rosie.scrape_institutions()
-        db['institutions_finished'] = True
+        store['institutions_finished'] = True
+        db.seek(0)
+        db.truncate()
+        json.dump(store, db, indent=4)
+        db.flush()
 
-    db['scrape_finished'] = True
+    store['scrape_finished'] = True
+    db.seek(0)
+    db.truncate()
+    json.dump(store, db, indent=4)
+    db.flush()
 
 if __name__ == '__main__':
     cli_entry_point()
