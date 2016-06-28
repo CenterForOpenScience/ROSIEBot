@@ -373,7 +373,7 @@ class InstitutionDashboardVerifier(Verifier):
             '#fileBrowser > div.db-infobar > div > div',  # Project preview
             '#tb-tbody'  # Project browser
         ]
-        self.harvest_pages(run_info['institution_urls'], '', InstitutionProfilePage)
+        self.harvest_pages(run_info['institution_urls'], '', InstitutionDashboardPage)
         self.size_comparison()
         self.spot_check()
 
