@@ -18,7 +18,7 @@ no instance at all: //68fqs
 # TODO: put this in settings
 NUM_RETRIES = 2
 TASK_FILE = '201606231548.json'
-MIRROR = '127.0.0.1/'
+MIRROR = 'archive/'
 
 with codecs.open(TASK_FILE, mode='r', encoding='utf-8') as file:
     run_info = json.load(file)
