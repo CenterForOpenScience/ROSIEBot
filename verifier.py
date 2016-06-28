@@ -27,30 +27,12 @@ with codecs.open(TASK_FILE, mode='r', encoding='utf-8') as file:
     run_info = json.load(file)
 
 
-# Takes a URL and produces its relative file name.
-def get_path_from_url(url):
-    # Remove http://domain
-    tail = url.replace(base_urls[0], '') + 'index.html'
-    path = MIRROR + tail
-    return path
-
-
-# Creates a dictionary with filename : URL for all the URLs found by the crawler in the API
-def generate_page_dictionary(self):
-    for url in self.json_list:
-        if url.endswith(self.page + '/') and url not in run_info['error_list']:
-            key = self.get_path_from_url(url)
-            self.paths[key] = url
-            self.json_list.remove(url)
-    return
-
-
 # Superclass for page-specific page instances
 
 class Page:
     def __init__(self, url):
         self.url = url
-        self.path = get_path_from_url(url)
+        self.path = self.get_path_from_url(url)
         # Set size attribute in KB, inherently checks if file exists
         try:
             self.file_size = os.path.getsize(self.path) / 1000
@@ -59,6 +41,13 @@ class Page:
 
     def __str__(self):
         return self.path
+
+    # Takes a URL and produces its relative file name.
+    def get_path_from_url(self, url):
+        # Remove http://domain
+        tail = url.replace(base_urls[0], '') + 'index.html'
+        path = MIRROR + tail
+        return path
 
     def get_content(self):
         soup = BeautifulSoup(open(self.path), 'html.parser')
