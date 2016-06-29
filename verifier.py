@@ -17,7 +17,7 @@ wiki contains backup: //3tmge/wiki/home.html
 
 """
 
-# TODO: put this in settings
+# TODO: Put this in settings
 NUM_RETRIES = 2
 TASK_FILE = '201606231548.json'
 MIRROR = '127.0.0.1/'
