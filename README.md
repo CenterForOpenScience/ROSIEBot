@@ -1,4 +1,4 @@
-# ROSIEBot:
+# ROSIEBot
 # The Robotic Open Science Indexing Engine
 
 
@@ -7,7 +7,7 @@ Crawling, enduring, facing,
 Despite childish fears!"  - Unknown')
 
 
-- ##### Static mirroring utility for the [Open Science Framework](osf.io), maintained by     the [Center for Open Science](cos.io).
+##### Static mirroring utility for the [Open Science Framework](osf.io), maintained by     the [Center for Open Science](cos.io).
   Visit the [COS Github](https://github.com/CenterForOpenScience/) for more innovations in   the *openness*, *integrity*, and *reproducibility* of scientific research.
 
 
@@ -113,10 +113,7 @@ Verify the completeness of the mirror. See below for steps. This process also re
 ## Authenticating your mirror
 - The mirror warns users that they are on a static copy of the OSF.
 - Sign up with the Center for Open Science to be an official mirror (Future)
-- -
-- -
-- -
--
+
 
 -----------
 
