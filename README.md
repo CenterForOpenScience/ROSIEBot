@@ -1,225 +1,130 @@
-# ROSIE (Robotic Open Science Indexing Engine)
-###Static mirroring utility for the Open Science Framework:
-  [OSF Home](osf.io)<br>
-  [Center for Open Science Home](cos.io) | [COS Github](https://github.com/CenterForOpenScience/)
+# ROSIEBot
+# The Robotic Open Science Indexing Engine
 
-## Prerender
 
-### Configuring a Local Prerender Server for Development
-#### Overview
-The ROSIE bot relies on a Prerender server to "take a snapshot" of the crawled pages after AJAX calls of those pages are returned. In order to test and develop an effective crawler/scraper, a local Prerender server should be set up to work with the app server in order to generate the aforementioned snapshots.
+![rosie alt](https://cloud.githubusercontent.com/assets/15851093/16431535/109ac052-3d4f-11e6-9218-e7a457898492.png '"Eight legged wonder: 
+Crawling, enduring, facing,
+Despite childish fears!"  - Unknown')
 
-The app server for osf.io runs on `localhost:5000` by default and the Prerender server runs on `localhost:3000` by default. In order for Prerender server to work with the app server, a middleware shall be configured. In case of developing for osf.io, since there are currently no drop-in middleware for Flask (the web app framework on which osf.io is built), Nginx shall be installed and configured to act as the middleware.
 
-A simple illustration can be used to show how the Nginx middleware, app server and the Prerender server shall be configured to work together.
+##### Static mirroring utility for the [Open Science Framework](osf.io), maintained by     the [Center for Open Science](cos.io).
+  Visit the [COS Github](https://github.com/CenterForOpenScience/) for more innovations in   the *openness*, *integrity*, and *reproducibility* of scientific research.
 
 
-											  |----> Prerender (localhost:3000)
-	HTTP Requests --> Nginx (localhost:80) ---
-							  				  |----> osf.io (localhost:5000)
 
-As seen in the graph, HTTP requests are made to the Nginx server, which would be dispatched to either the Prerender server or the app server, depending on the user agent string included in the header of each request. If the request includes a user agent string corresponding to a known spider, the request will be dispatched to the Prerender server. Otherwise, the request will be handled as a normal request by the osf.io server. Configurations could be made to Nginx to include different user agent strings for prerendering.
+## ROSIEisms
 
-#### Steps for Configuration (for OS X)
-##### Step I : Download Prerender
-Prerender is an open-source app that renders the page with response of (some) AJAX calls on the page . It was originially designed for seach engine optimization and you can download it from its [GitHub repo](https://github.com/prerender/prerender). If you are using terminal, you may
+##### Site Hierarchy
+|                   |                                                                   |
+|-------------------|-------------------------------------------------------------------|
+| Type              | An type of content hosted on the OSF, with its own GUID.          |
+| Page              | One of the pages associated with a type (see below)               |
+| File              | A page instance / specific URL                                    |
 
-	$ git clone https://github.com/prerender/prerender.git
-	$ cd prerender
-	$ npm install
 
-The steps above will download the Prerender server source code from GitHub and install required dependencies. Under the same directory, you may start the server by
+##### OSF Content Types
 
-	$ node server.js
+- Projects
+- Registrations
+- Users
+- Institutions
 
-And in the terminal window you should see outputs showing the thread number of each instances and the port to which Prerender is listening (3000 by default)
+##### Pages for each type
 
-	2016-06-01T13:10:46.891Z starting worker thread #0
-	2016-06-01T13:10:46.903Z starting worker thread #1
-	2016-06-01T13:10:46.906Z starting worker thread #2
-	2016-06-01T13:10:46.909Z starting worker thread #3
-	2016-06-01T13:10:47.641Z starting phantom...
-	2016-06-01T13:10:47.659Z Server running on port 3000
-	2016-06-01T13:10:47.664Z starting phantom...
-	2016-06-01T13:10:47.683Z Server running on port 3000
-	2016-06-01T13:10:47.690Z starting phantom...
-	2016-06-01T13:10:47.729Z Server running on port 3000
-	2016-06-01T13:10:47.747Z starting phantom...
-	2016-06-01T13:10:47.761Z Server running on port 3000
+| Project       | Registration | User    | Institution |
+|---------------|--------------|---------|-------------|
+|Dashboard      | Dashboard    | Profile | Profile     |
+| Files         | Files        |
+| Wiki          | Wiki         |
+| Analytics     | Analytics    |
+| Registrations |              |
+| Forks         | Forks        |
 
-To verify that Prerender works, you may open a browser and go to
+For projects and registration types, the catchy acronym `FWARF` (Files, wiki, analytics, registrations, forks) lists the correct page order.
 
-	http://localhost:3000/http://localhost:5000
+##### Our Process
+- Crawling: getting lists of all the URLs to visit
 
-If Prerender is successfully installed and services for local osf.io development server are running, you should see an osf.io landing page without any static assets (e.g. pictures, css) loaded, along with many 504s in the output of the terminal of the Prerender server. This is because the domain of this particular request is `localhost:3000` instead of `localhost:5000`, causing the browser loading from urls that resolve to non-existent static assets. This problem will be solved once Nginx is installed and configured correctly.
 
-Finally, type in the terminal
+- Scraping: visiting all those URLs and saving their content to the mirror
 
-	export PRERENDER_SERVICE_URL=127.0.0.1:3000
 
-to set the environment variable.
+- Resuming: continuing the crawl/scrape process if it stops in the middle
 
 
-##### Step II : Download and Configure Nginx
-Nginx is an HTTP server that may also serve as a reverse proxy server. We have mentioned that Nginx acts as a handler for HTTP requests. This is also true for HTTP responses.
+- Verifying: making sure all the files are present and in acceptable condition
 
 
-									   |<---- Prerender (localhost:3000)
-	Client <-- Nginx (localhost:80) --- HTTP Response
-							  		   |<---- osf.io (localhost:5000)
+## Using the Command Line Interface
 
+There are various options for what areas of the OSF are preserved in a mirror. All or any content types can be included in the mirror, and all or any project pages can be included. Specifying pages of registrations is not available.
 
-As shown in the graph above, response from either the Prerender server or the osf.io app server will be handled by Nginx, who then return the response to the client. In other words, Nginx as a reverse proxy masks the distinction between a Prerender server and an osf.io app server. It serves as both a MUX and a DeMUX between clients (in this case, browsers and spiders) and app server(s).
+### Running cli.py
 
-To install Nginx, type in the terminal
+The python file cli.py needs to be run in the command line. This project was developed on Mac, so Terminal on OS X is preferred. 
 
-	$ brew install nginx
+```bash
+python3 cli.py
+```
 
-Upon successful installation, `cd` to the directory where nginx is installed. On OS X, it is usually `/usr/local/etc/nginx`. Within this directory, open the `nginx.conf` file using a txt editor, you will see
+Flags:
 
-	#Only showing content in "http" block without comments
-	http {
-	    include       mime.types;
-	    default_type  application/octet-stream;
+**`--scrape`**
 
-    	sendfile        on;
-    	keepalive_timeout  65;
-    	server {
-    		listen       8080;
-			server_name  localhost;
+Crawl and scrape the site. Must include date marker `--dm=<DATE>`, where `<DATE>` is the date of last scrape in the form **YYYY-MM-DDTHH:MM:SS.000**, ex. 1970-06-15T00:00:00.000
 
-        	location / {
-          	root   html;
-            	index  index.html index.htm;
-        	}
+This is where specifying `--nodes` (projects), `--registrations`, `--users`, `--institutions` is possible. If none are specified, all are included by default.
 
-        	error_page   500 502 503 504  /50x.html;
-        	location = /50x.html {
-        		root   html;
-        	}
+When projects are included, whether explicitly or by default, the following flags may be used to include project pages:
 
-    	}
-    	include servers/*;
-	}
+- `-d` : dashboard
+- `-f` : files page
+- `-w` : wiki pages
+- `-a` : analytics
+- `-r` : list of registrations of the project
+- `-k`: list of forks of the project
 
-Delete the entire "server" block which configures the default Nginx server, so that the file becomes
+**`--resume`**
 
-	#Only showing content in "http" block without comments
-	http {
-	    include       mime.types;
-	    default_type  application/octet-stream;
+Pick up where a normal process left off in case of an unfortunate halt. The normal process creates and updates a .json task file with its status, and this must be included with the flag `--tf=<FILENAME>`. The filename will be of the form **YYYYMMDDHHMM.json** and should be visible in the ROSIEBot directory. 
 
-    	sendfile        on;
-    	keepalive_timeout  65;
+**`--verify`**
 
-    	include servers/*;
-	}
+Verify the completeness of the mirror. See below for steps. This process also requires the .json file described for the resume process.
 
-Add the line `include /usr/local/etc/nginx/sites-enabled/*;` to the "http block" so that the configuration file will include files under the `/usr/local/etc/nginx/sites-enabled/` directory. The file becomes
 
-	#Only showing content in "http" block without comments
-	http {
-	    include       mime.types;
-	    include /usr/local/etc/nginx/sites-enabled/*;
-	    default_type  application/octet-stream;
+## Verification Steps
 
-    	sendfile        on;
-    	keepalive_timeout  65;
+1. Verify that each URL found by the crawler has a corresponding file on the mirror.
 
-    	include servers/*;
-	}
 
-Save the file and exit. Within the same directory, type in the terminal
+2. Compare the size of each file to the minimum possible size for a complete page.
 
-	$ mkdir sites-enabled
-	$ cd sites-enabled
 
-to create and enter the `/usr/local/etc/nginx/sites-enabled/` directory. Create a new file named `osf` in the directory. Copy and paste the following to the file
+3. Check that certain spots in each file that contain important information are present.
 
-	server {
-	    listen 80;
-	    server_name 127.0.0.1;
 
-	    proxy_buffering off;
+4. Rescrape failed pages and try again.
 
-	    root   /path/to/your/osf.io/root;
-	    index  index.html;
+## Hosting a Mirror (Future)
+- Mirror search tools
+- Nginx configurations
 
-	    location / {
-	        try_files $uri @prerender;
-	    }
+## Authenticating your mirror
+- The mirror warns users that they are on a static copy of the OSF.
+- Sign up with the Center for Open Science to be an official mirror (Future)
 
-	    location @prerender {
-	        #proxy_set_header X-Prerender-Token YOUR_TOKEN;
 
-	        set $prerender 0;
-	        if ($http_user_agent ~* "rosiebot|baiduspider|twitterbot|facebookexternalhit|rogerbot|linkedinbot|embedly|quora link preview|showyoubot|outbrain|pinterest|slackbot|vkShare|W3C_Validator") {
-	            set $prerender 1;
-	        }
-	        if ($args ~ "_escaped_fragment_") {
-	            set $prerender 1;
-	        }
-	        if ($http_user_agent ~ "Prerender") {
-	            set $prerender 0;
-	        }
-	        if ($uri ~ "\.(js|css|xml|less|png|jpg|jpeg|gif|pdf|doc|txt|ico|rss|zip|mp3|rar|exe|wmv|doc|avi|ppt|mpg|mpeg|tif|wav|mov|psd|ai|xls|mp4|m4a|swf|dat|dmg|iso|flv|m4v|torrent|ttf|woff)") {
-	            set $prerender 0;
-	        }
+-----------
 
-	        #resolve using Google's DNS server to force DNS resolution and prevent caching of IPs
-	        resolver 8.8.8.8;
+### Acknowledgements:
 
-	        if ($prerender = 1) {
+Chris Seto ( @chrisseto ) , Nan Chen ( @chennan47 ), Matt Frazier ( @mfraezz ), 
 
-	            #setting prerender as a variable forces DNS resolution since nginx caches IPs and doesnt play well with load balancing
-	            set $prerender "127.0.0.1:3000";
-	            rewrite .* /$scheme://$host$request_uri? break;
-	            proxy_pass http://$prerender;
-	        }
-	        if ($prerender = 0) {
-	            proxy_pass http://127.0.0.1:5000;
-	        }
-	    }
-	}
+and the COS Product Team.
 
-For the line that says `root   /path/to/your/osf.io/root;`, change the path to the absolute path of your local osf.io repo, then save and exit.
-Finally, `cd ..` to go back to the previous directory and type in the terminal
+-----------
 
-	$ sudo nginx -t
 
-to test for errors in the configuration files. If no error exists,
+![logo alt](https://cloud.githubusercontent.com/assets/15851093/16454893/79287ad8-3de0-11e6-9080-b90ac6ea16d4.png "'Beep boop', says Rosie.")
 
-	$ sudo nginx
-
-Open the browser and go to `http://localhost` and you should be able to see the osf.io landing page and the development site is fully functional.
-
-##### Step III : Make Sure Prerender Works
-Recall that in the last step, we have set the configuration files for Nginx to include this snippet
-
-	if ($http_user_agent ~* "rosiebot|baiduspider|twitterbot|facebookexternalhit|rogerbot|linkedinbot|embedly|quora link preview|showyoubot|outbrain|pinterest|slackbot|vkShare|W3C_Validator") {
-	            set $prerender 1;
-	        }
-
-That means Nginx will dispatch the request to the Prerender server if the user agent included in the header of each HTTP request is one of
-
-	rosiebot|baiduspider|twitterbot|facebookexternalhit|rogerbot|linkedinbot|embedly|quora link preview|showyoubot|outbrain|pinterest|slackbot|vkShare|W3C_Validator
-
-To test that Prerender works for these user agent strings, install the Chrome plugin "User-Agent Switcher for Google Chrome". In the options menu, you may add the user agent string of "LinkedInBot", which is
-
-	LinkedInBot/1.0 (compatible; Mozilla/5.0; Jakarta Commons-HttpClient/3.1 +http://www.linkedin.com)
-
-to create a new user agent. Switch to the newly created user agent and then visit any public project pages of `localhost` and you will get a static page in your browser if Nginx is configured correctly. You may also use the Chrome developer tools to see that the sources included are all static.
-Note: ROSIEBot, whose user string is 'ROSIEBot/1.0 (+http://github.com/zamattiac/ROSIEBot)', may replace LinkedInBot
-
-## Crawling and Scraping
-
-- Crawler.py produces a list of pages on the domain to visit
-- Run scraper.py to produce a mirror directory in website/
-
-## Hosting
-
-### On your localhost:
-
-- MAMP recommended (or WAMP)
-- Include the static content in website/
-- Set the mirror directory as the document root 

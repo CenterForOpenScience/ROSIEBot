@@ -11,8 +11,7 @@ import logging
 import urllib.parse
 
 # Configure for testing in settings.py
-base_urls = settings.base_urls
-# limit = settings.limit
+from settings import base_urls
 
 
 class Crawler:
@@ -574,9 +573,11 @@ class Crawler:
         """
         async with sem:
             async with aiohttp.ClientSession() as s:
+                print("Sending url request to : " + url)
                 response = await s.get(url, headers=self.headers)
                 body = await response.read()
                 response.close()
+                print(response.status)
                 if response.status == 200:
                     self.debug_logger.debug("Finished : " + url)
                     self.record_milestone(url)
