@@ -150,7 +150,6 @@ class Verifier:
         self.failed_pages = []
         # self.forjason = {}
 
-
     # Populate self.pages with the relevant files
     def harvest_pages(self, json_list, url_end, page_class):
         """
@@ -160,7 +159,7 @@ class Verifier:
         :return: Null, but self.pages is populated.
         """
         for url in json_list:
-            if url.endswith("fail") == False and url.endswith(url_end):
+            if not url.endswith("fail"):
                 if url_end in url:
                     print('rel: ', url)
                     if url in run_info['error_list']:
@@ -180,7 +179,7 @@ class Verifier:
     # Compare page size to page-specific minimum that any fully-scraped page should have
     def size_comparison(self, json_list):
         for page in self.pages:
-            if page.url.endswith("fail") == False:
+            if not url.endswith("fail"):
                 # print(page)
                 # print(page.file_size)
                 if not page.file_size > self.minimum_size:
@@ -196,7 +195,7 @@ class Verifier:
     # Format: Filled-in : Alternate
     def spot_check(self, json_list):
         for page in self.pages:
-            if page.url.endswith("fail") == False:
+            if not url.endswith("fail"):
                 soup = page.get_content()
                 for element in self.page_elements:
                     alt = self.page_elements[element]
@@ -424,37 +423,37 @@ def main():
                 if run_info['include_files']:
                     project_files = ProjectFilesVerifier()
                     for url in run_info['node_urls']:
-                        if url.endswith("fail") == False:
+                        if not url.endswith("fail"):
                             run_info['node_urls'].remove(url)
                     rescrape_list.extend(project_files.failed_pages)
                 if run_info['include_wiki']:
                     project_wiki = ProjectWikiVerifier()
                     for url in run_info['node_urls']:
-                        if url.endswith("fail") == False:
+                        if not url.endswith("fail"):
                             run_info['node_urls'].remove(url)
                     rescrape_list.extend(project_wiki.failed_pages)
                 if run_info['include_analytics']:
                     project_analytics = ProjectAnalyticsVerifier()
                     for url in run_info['node_urls']:
-                        if url.endswith("fail") == False:
+                        if not url.endswith("fail"):
                             run_info['node_urls'].remove(url)
                     rescrape_list.extend(project_analytics.failed_pages)
                 if run_info['include_registrations']:
                     project_registrations = ProjectRegistrationsVerifier()
                     for url in run_info['node_urls']:
-                        if url.endswith("fail") == False:
+                        if not url.endswith("fail"):
                             run_info['node_urls'].remove(url)
                     rescrape_list.extend(project_registrations.failed_pages)
                 if run_info['include_forks']:
                     project_forks = ProjectForksVerifier()
                     for url in run_info['node_urls']:
-                        if url.endswith("fail") == False:
+                        if not url.endswith("fail"):
                             run_info['node_urls'].remove(url)
                     rescrape_list.extend(project_forks.failed_pages)
                 if run_info['include_dashboard']:  # This must go last because its URLs don't have a specific ending.
                     project_dashboards = ProjectDashboardVerifier()
                     for url in run_info['node_urls']:
-                        if url.endswith("fail") == False:
+                        if not url.endswith("fail"):
                             run_info['node_urls'].remove(url)
                     rescrape_list.extend(project_dashboards.failed_pages)
             if run_info['scrape_registrations']:
@@ -465,7 +464,7 @@ def main():
                 registration_forks = RegistrationForksVerifier()
                 registration_dashboards = RegistrationDashboardVerifier()
                 for url in run_info['registration_urls']:
-                    if url.endswith("fail") == False:
+                    if not url.endswith("fail"):
                         run_info['registration_urls'].remove(url)
                 rescrape_list.extend((registration_files.failed_pages + registration_wiki.failed_pages +
                                       registration_analytics.failed_pages + registration_forks.failed_pages +
@@ -473,13 +472,13 @@ def main():
             if run_info['scrape_users']:
                 user_profiles = UserProfileVerifier()
                 for url in run_info['user_profile_page_urls']:
-                    if url.endswith("fail") == False:
+                    if not url.endswith("fail"):
                         run_info['user_profile_page_urls'].remove(url)
                 rescrape_list.extend(user_profiles.failed_pages)
             if run_info['scrape_institutions']:
                 institution_dashboards = InstitutionDashboardVerifier()
                 for url in run_info['institution_urls']:
-                    if url.endswith("fail") == False:
+                    if not url.endswith("fail"):
                         run_info['institution_urls'].remove(url)
                 rescrape_list.extend(institution_dashboards.failed_pages)
     # json.dump[run_info]   ??????
