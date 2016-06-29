@@ -415,10 +415,10 @@ def main():
                 institution_dashboards_verified = InstitutionDashboardVerifier().failed_pages
 
             # clearing json file and dumping in new lists
-            run_info['node_urls'] = nodes_list_verified
-            run_info['registration_urls'] = registrations_list_verified
-            run_info['user_profile_page_urls'] = user_profiles_verified
-            run_info['institution_urls'] = institution_dashboards_verified
+            run_info['node_urls_verified'] = nodes_list_verified
+            run_info['registration_urls_verified'] = registrations_list_verified
+            run_info['user_profile_page_urls_verified'] = user_profiles_verified
+            run_info['institution_urls_verified'] = institution_dashboards_verified
             with codecs.open(TASK_FILE, mode='w', encoding='utf-8') as file:
                 json.dump(run_info, file)
 
