@@ -26,6 +26,7 @@ MIRROR = 'archive/'
 
 with codecs.open(TASK_FILE, mode='r', encoding='utf-8') as file:
     run_info = json.load(file)
+    run_copy = json.load(file)
 
 
 # Superclass for page-specific page instances
@@ -400,7 +401,7 @@ def main():
                 if run_info['include_dashboard']:  # This must go last because its URLs don't have a specific ending.
                     project_dashboards = ProjectDashboardVerifier().failed_pages
                     nodes_list_verified += project_dashboards
-                run_info['node_urls_verified'] = nodes_list_verified
+                run_copy['node_urls_verified'] = nodes_list_verified
             if run_info['scrape_registrations']:
                 # Must run all page types automatically
                 registration_files = RegistrationFilesVerifier().failed_pages
@@ -410,17 +411,17 @@ def main():
                 registration_dashboards = RegistrationDashboardVerifier().failed_pages
                 registrations_list_verified = registration_files + registration_wiki + registration_analytics + \
                     registration_forks + registration_dashboards
-                run_info['registration_urls_verified'] = registrations_list_verified
+                run_copy['registration_urls_verified'] = registrations_list_verified
             if run_info['scrape_users']:
                 user_profiles_verified = UserProfileVerifier().failed_pages
-                run_info['user_profile_page_urls_verified'] = user_profiles_verified
+                run_copy['user_profile_page_urls_verified'] = user_profiles_verified
             if run_info['scrape_institutions']:
                 institution_dashboards_verified = InstitutionDashboardVerifier().failed_pages
-                run_info['institution_urls_verified'] = institution_dashboards_verified
+                run_copy['institution_urls_verified'] = institution_dashboards_verified
 
             # truncates json and dumps new lists
             with codecs.open(TASK_FILE, mode='w', encoding='utf-8') as file:
-                json.dump(run_info, file)
+                json.dump(run_copy, file)
 
         # Rescraping
 
