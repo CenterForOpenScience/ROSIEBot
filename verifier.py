@@ -418,7 +418,7 @@ def main():
                 institution_dashboards_verified = InstitutionDashboardVerifier().failed_pages
                 run_info['institution_urls_verified'] = institution_dashboards_verified
 
-            # clearing json file and dumping in new lists
+            # truncates json and dumps new lists
             with codecs.open(TASK_FILE, mode='w', encoding='utf-8') as file:
                 json.dump(run_info, file)
 
