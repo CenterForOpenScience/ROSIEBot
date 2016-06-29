@@ -28,26 +28,7 @@ with codecs.open(TASK_FILE, mode='r', encoding='utf-8') as file:
     run_info = json.load(file)
 
 
-# # Takes a URL and produces its relative file name.
-# def get_path_from_url(self, url):
-#     # Remove http://domain
-#     tail = url.replace(base_urls[0], '') + 'index.html'
-#     path = MIRROR + tail
-#     return path
-#
-#
-# # Creates a dictionary with filename : URL for all the URLs found by the crawler in the API
-# def generate_page_dictionary(self):
-#     for url in self.json_list:
-#         if url.endswith(self.page + '/') and url not in run_info['error_list']:
-#             key = self.get_path_from_url(url)
-#             self.paths[key] = url
-#             self.json_list.remove(url)
-#     return
-
-
 # Superclass for page-specific page instances
-
 class Page:
     def __init__(self, url):
         self.url = url
@@ -148,7 +129,6 @@ class Verifier:
         self.minimum_size = 0
         self.page_elements = {}
         self.failed_pages = []
-        # self.forjason = {}
 
     # Populate self.pages with the relevant files
     def harvest_pages(self, json_list, url_end, page_class):
@@ -159,63 +139,58 @@ class Verifier:
         :return: Null, but self.pages is populated.
         """
         for url in json_list:
-            if not url.endswith("fail"):
-                if url_end in url:
-                    print('rel: ', url)
-                    if url in run_info['error_list']:
+            if url_end in url:
+                print('rel: ', url)
+                if url in run_info['error_list']:
+                    self.failed_pages.append(url)
+                    print('error: ', url)
+                else:
+                    try:
+                        obj = page_class(url)
+                        self.pages.append(obj)
+                    except FileNotFoundError:
                         self.failed_pages.append(url)
-                        json_list[json_list.index(url)] = url + "fail"
-                        print('eror: ', url)
-                    else:
-                        try:
-                            obj = page_class(url)
-                            self.pages.append(obj)
-                        except FileNotFoundError:
-                            self.failed_pages.append(url)
-                            json_list[json_list.index(url)] = url+"fail"
-                    # json_list.remove(url)
+                json_list.remove(url)
 
-# First check
+            # First check
+
     # Compare page size to page-specific minimum that any fully-scraped page should have
-    def size_comparison(self, json_list):
+    def size_comparison(self):
         for page in self.pages:
-            if not url.endswith("fail"):
-                # print(page)
-                # print(page.file_size)
-                if not page.file_size > self.minimum_size:
-                    print('Failed: size_comparison(): ', page, ' has size: ', page.file_size)
-                    self.failed_pages.append(page.url)
-                    json_list[json_list.index(page.url)] = page.url + "fail"
-            return
+            # print(page)
+            # print(page.file_size)
+            if not page.file_size > self.minimum_size:
+                print('Failed: size_comparison(): ', page, ' has size: ', page.file_size)
+                self.failed_pages.append(page.url)
+        return
 
     # Second check
     # Check that specified elements are present and non-empty in each page
     # Check that specified elements or their alternates are present and non-empty in each page
     # Alternate: different elements appear if there isn't supposed to be content, so it has to check both
     # Format: Filled-in : Alternate
-    def spot_check(self, json_list):
+    def spot_check(self):
         for page in self.pages:
-            if not url.endswith("fail"):
-                soup = page.get_content()
-                for element in self.page_elements:
-                    alt = self.page_elements[element]
-                    result = soup.select(element)
-                    # No results or empty results
-                    if (len(result) == 0 or len(result[0].contents) == 0) and alt != '':
-                        print("Failed: first spot_check(): ", page, element, "Retrying with alt.")
-                        result = soup.select(self.page_elements[element])
+            soup = page.get_content()
+            for element in self.page_elements:
+                alt = self.page_elements[element]
+                result = soup.select(element)
+                # No results or empty results
+                if (len(result) == 0 or len(result[0].contents) == 0) and alt != '':
+                    print("Failed: first spot_check(): ", page, element, "Retrying with alt.")
+                    result = soup.select(self.page_elements[element])
 
-                        # Element's alternate has no or empty results
-                        if len(result) == 0 or len(result[0].contents) == 0:
-                            print("Failed: alternate spot_check(): ", page, alt)
-                            self.failed_pages.append(page.url)
-
-                    elif len(result) == 0 or len(result[0].contents) == 0 and alt == '':
-                        print('Failed: spot_check(): ', page, "No alt.")
-                    if len(result) == 0 or len(result[0].contents) == 0:  # No results or empty results
-                        print('Failed: spot_check(): ', page)
+                    # Element's alternate has no or empty results
+                    if len(result) == 0 or len(result[0].contents) == 0:
+                        print("Failed: alternate spot_check(): ", page, alt)
                         self.failed_pages.append(page.url)
-            return
+
+                elif len(result) == 0 or len(result[0].contents) == 0 and alt == '':
+                    print('Failed: spot_check(): ', page, "No alt.")
+                if len(result) == 0 or len(result[0].contents) == 0:  # No results or empty results
+                    print('Failed: spot_check(): ', page)
+                    self.failed_pages.append(page.url)
+        return
 
 
 # Verifier subclasses
@@ -223,7 +198,6 @@ class Verifier:
 class ProjectDashboardVerifier(Verifier):
     def __init__(self):
         Verifier.__init__(self)
-        self.pages = []
         self.minimum_size = 410
         self.page_elements = {
             '#nodeTitleEditable': '',  # Title
@@ -241,7 +215,6 @@ class ProjectDashboardVerifier(Verifier):
 class ProjectFilesVerifier(Verifier):
     def __init__(self):
         Verifier.__init__(self)
-        self.pages = []
         self.minimum_size = 380
         self.page_elements = {
             '.fg-file-links': '',  # Links to files (names them)
@@ -254,7 +227,6 @@ class ProjectFilesVerifier(Verifier):
 class ProjectWikiVerifier(Verifier):
     def __init__(self):
         Verifier.__init__(self)
-        self.pages = []
         self.minimum_size = 410
         self.page_elements = {
             'pre': '#wikiViewRender > p > em',  # Wiki content / `No wiki content`
@@ -269,7 +241,6 @@ class ProjectWikiVerifier(Verifier):
 class ProjectAnalyticsVerifier(Verifier):
     def __init__(self):
         Verifier.__init__(self)
-        self.pages = []
         self.minimum_size = 380
         self.page_elements = {
             '#adBlock': 'body > div.watermarked > div > div.m-b-md.p-md.osf-box-lt.box-round.text-center',
@@ -285,7 +256,6 @@ class ProjectAnalyticsVerifier(Verifier):
 class ProjectRegistrationsVerifier(Verifier):
     def __init__(self):
         Verifier.__init__(self)
-        self.pages = []
         self.minimum_size = 390
         self.page_elements = {
             '#renderNode': '#registrations > div > div > p'  # List of nodes
@@ -298,7 +268,6 @@ class ProjectRegistrationsVerifier(Verifier):
 class ProjectForksVerifier(Verifier):
     def __init__(self):
         Verifier.__init__(self)
-        self.pages = []
         self.minimum_size = 380
         self.page_elements = {
             '#renderNode': 'body > div.watermarked > div > div.row > div.col-xs-9.col-sm-8 > p'  # List
@@ -311,7 +280,6 @@ class ProjectForksVerifier(Verifier):
 class RegistrationDashboardVerifier(Verifier):
     def __init__(self):
         Verifier.__init__(self)
-        self.pages = []
         self.minimum_size = 410
         self.page_elements = {
             '#nodeTitleEditable': '',  # Title
@@ -329,7 +297,6 @@ class RegistrationDashboardVerifier(Verifier):
 class RegistrationFilesVerifier(Verifier):
     def __init__(self):
         Verifier.__init__(self)
-        self.pages = []
         self.minimum_size = 380
         self.page_elements = {
             '.fg-file-links': '',  # Links to files (names them)
@@ -342,7 +309,6 @@ class RegistrationFilesVerifier(Verifier):
 class RegistrationWikiVerifier(Verifier):
     def __init__(self):
         Verifier.__init__(self)
-        self.pages = []
         self.minimum_size = 410
         self.page_elements = {
             'pre': '#wikiViewRender > p > em',  # Wiki content / `No wiki content`
@@ -357,7 +323,6 @@ class RegistrationWikiVerifier(Verifier):
 class RegistrationAnalyticsVerifier(Verifier):
     def __init__(self):
         Verifier.__init__(self)
-        self.pages = []
         self.minimum_size = 380
         self.page_elements = {
             '#adBlock': 'body > div.watermarked > div > div.m-b-md.p-md.osf-box-lt.box-round.text-center',
@@ -373,7 +338,6 @@ class RegistrationAnalyticsVerifier(Verifier):
 class RegistrationForksVerifier(Verifier):
     def __init__(self):
         Verifier.__init__(self)
-        self.pages = []
         self.minimum_size = 380
         self.page_elements = {
             '#renderNode': 'body > div.watermarked > div > div.row > div.col-xs-9.col-sm-8 > p'  # List
@@ -386,7 +350,6 @@ class RegistrationForksVerifier(Verifier):
 class UserProfileVerifier(Verifier):
     def __init__(self):
         Verifier.__init__(self)
-        self.pages = []
         self.minimum_size = 80
         self.page_elements = {
             '#projects': 'div.help-block > p',  # Project list / "You have no projects"
@@ -401,7 +364,6 @@ class UserProfileVerifier(Verifier):
 class InstitutionDashboardVerifier(Verifier):
     def __init__(self):
         Verifier.__init__(self)
-        self.pages = []
         self.minimum_size = 350
         self.page_elements = {
             '#fileBrowser > div.db-infobar > div > div': '#fileBrowser > div.db-infobar > div > div',  # Project preview
@@ -417,73 +379,50 @@ def main():
 
     # for modularization and then concatenate lists
     if run_info['scrape_finished']:
-        rescrape_list = []
         for i in range(NUM_RETRIES):
             if run_info['scrape_nodes']:
+                nodes_list_verified = []
                 if run_info['include_files']:
-                    project_files = ProjectFilesVerifier()
-                    for url in run_info['node_urls']:
-                        if not url.endswith("fail"):
-                            run_info['node_urls'].remove(url)
-                    rescrape_list.extend(project_files.failed_pages)
+                    project_files = ProjectFilesVerifier().failed_pages
+                    nodes_list_verified += project_files
                 if run_info['include_wiki']:
-                    project_wiki = ProjectWikiVerifier()
-                    for url in run_info['node_urls']:
-                        if not url.endswith("fail"):
-                            run_info['node_urls'].remove(url)
-                    rescrape_list.extend(project_wiki.failed_pages)
+                    project_wiki = ProjectWikiVerifier().failed_pages
+                    nodes_list_verified += project_wiki
                 if run_info['include_analytics']:
-                    project_analytics = ProjectAnalyticsVerifier()
-                    for url in run_info['node_urls']:
-                        if not url.endswith("fail"):
-                            run_info['node_urls'].remove(url)
-                    rescrape_list.extend(project_analytics.failed_pages)
+                    project_analytics = ProjectAnalyticsVerifier().failed_pages
+                    nodes_list_verified += project_analytics
                 if run_info['include_registrations']:
-                    project_registrations = ProjectRegistrationsVerifier()
-                    for url in run_info['node_urls']:
-                        if not url.endswith("fail"):
-                            run_info['node_urls'].remove(url)
-                    rescrape_list.extend(project_registrations.failed_pages)
+                    project_registrations = ProjectRegistrationsVerifier().failed_pages
+                    nodes_list_verified += project_registrations
                 if run_info['include_forks']:
-                    project_forks = ProjectForksVerifier()
-                    for url in run_info['node_urls']:
-                        if not url.endswith("fail"):
-                            run_info['node_urls'].remove(url)
-                    rescrape_list.extend(project_forks.failed_pages)
+                    project_forks = ProjectForksVerifier().failed_pages
+                    nodes_list_verified += project_forks
                 if run_info['include_dashboard']:  # This must go last because its URLs don't have a specific ending.
-                    project_dashboards = ProjectDashboardVerifier()
-                    for url in run_info['node_urls']:
-                        if not url.endswith("fail"):
-                            run_info['node_urls'].remove(url)
-                    rescrape_list.extend(project_dashboards.failed_pages)
+                    project_dashboards = ProjectDashboardVerifier().failed_pages
+                    nodes_list_verified += project_dashboards
             if run_info['scrape_registrations']:
                 # Must run all page types automatically
-                registration_files = RegistrationFilesVerifier()
-                registration_wiki = RegistrationWikiVerifier()
-                registration_analytics = RegistrationAnalyticsVerifier()
-                registration_forks = RegistrationForksVerifier()
-                registration_dashboards = RegistrationDashboardVerifier()
-                for url in run_info['registration_urls']:
-                    if not url.endswith("fail"):
-                        run_info['registration_urls'].remove(url)
-                rescrape_list.extend((registration_files.failed_pages + registration_wiki.failed_pages +
-                                      registration_analytics.failed_pages + registration_forks.failed_pages +
-                                      registration_dashboards.failed_pages))
+                registration_files = RegistrationFilesVerifier().failed_pages
+                registration_wiki = RegistrationWikiVerifier().failed_pages
+                registration_analytics = RegistrationAnalyticsVerifier().failed_pages
+                registration_forks = RegistrationForksVerifier().failed_pages
+                registration_dashboards = RegistrationDashboardVerifier().failed_pages
+                registrations_list_verified = registration_files + registration_wiki + registration_analytics + \
+                    registration_forks + registration_dashboards
             if run_info['scrape_users']:
-                user_profiles = UserProfileVerifier()
-                for url in run_info['user_profile_page_urls']:
-                    if not url.endswith("fail"):
-                        run_info['user_profile_page_urls'].remove(url)
-                rescrape_list.extend(user_profiles.failed_pages)
+                user_profiles_verified = UserProfileVerifier().failed_pages
             if run_info['scrape_institutions']:
-                institution_dashboards = InstitutionDashboardVerifier()
-                for url in run_info['institution_urls']:
-                    if not url.endswith("fail"):
-                        run_info['institution_urls'].remove(url)
-                rescrape_list.extend(institution_dashboards.failed_pages)
-    # json.dump[run_info]   ??????
+                institution_dashboards_verified = InstitutionDashboardVerifier().failed_pages
 
-    # Rescraping
+            # clearing json file and dumping in new lists
+            run_info['node_urls'] = nodes_list_verified
+            run_info['registration_urls'] = registrations_list_verified
+            run_info['user_profile_page_urls'] = user_profiles_verified
+            run_info['institution_urls'] = institution_dashboards_verified
+            with codecs.open(TASK_FILE, mode='w', encoding='utf-8') as file:
+                json.dump(run_info, file)
+
+        # Rescraping
 
         second_chance = Crawler()
 
@@ -496,5 +435,6 @@ def main():
             second_chance.user_profile_page_urls = run_info['user_profile_page_urls']
         if run_info['scrape_institutions']:
             second_chance.institution_urls = run_info['institution_urls']
+
 
 if __name__ == "__main__": main()
