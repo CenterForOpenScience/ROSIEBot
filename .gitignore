@@ -11,3 +11,4 @@ osf.io/
 settings.py
 !task_file_example.txt
 *.json
+archive/
