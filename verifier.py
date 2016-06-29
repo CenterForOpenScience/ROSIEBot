@@ -149,6 +149,7 @@ class Verifier:
                         obj = page_class(url)
                         self.pages.append(obj)
                     except FileNotFoundError:
+                        print("Failed: existance", url)
                         self.failed_pages.append(url)
                 json_list.remove(url)
 
