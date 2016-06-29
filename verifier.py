@@ -10,18 +10,18 @@ from crawler import Crawler
 """
 Pages engineered to fail:
 
-verify_page_exists: //3tmge/files/index.html
-size_comparison: //5dewf/files/index.html should be 340 KB
-no instance at all: //68fqs
-no file div: //aegqh/files/index.html
-empty file div: //bkfxs/files/index.html
-wiki contains backup: //3tmge/wiki/home.html
+verify_page_exists: //2aqxv/files/index.html
+size_comparison: //4cs6x/files/index.html should be 340 KB
+no instance at all: //5ney2
+no file div: 
+empty file div:
+wiki contains backup:
 
 """
 
 # TODO: put this in settings
 NUM_RETRIES = 2
-TASK_FILE = '201606231548.json'
+TASK_FILE = '201606291542.json'
 MIRROR = 'archive/'
 
 with codecs.open(TASK_FILE, mode='r', encoding='utf-8') as file:
@@ -420,21 +420,21 @@ def main():
 
             # truncates json and dumps new lists
             with codecs.open(TASK_FILE, mode='w', encoding='utf-8') as file:
-                json.dump(run_info, file)
+                json.dump(run_info, file, indent=4)
 
         # Rescraping
 
-        second_chance = Crawler()
-
-        if run_info['scrape_nodes']:
-            second_chance.node_urls = run_info['node_urls_verified']
-            second_chance.scrape_nodes()
-        if run_info['scrape_registrations']:
-            second_chance.registration_urls = run_info['registration_urls_verified']
-        if run_info['scrape_users']:
-            second_chance.user_profile_page_urls = run_info['user_profile_page_urls_verified']
-        if run_info['scrape_institutions']:
-            second_chance.institution_urls = run_info['institution_urls_verified']
+        # second_chance = Crawler()
+        #
+        # if run_info['scrape_nodes']:
+        #     second_chance.node_urls = run_info['node_urls_verified']
+        #     second_chance.scrape_nodes()
+        # if run_info['scrape_registrations']:
+        #     second_chance.registration_urls = run_info['registration_urls_verified']
+        # if run_info['scrape_users']:
+        #     second_chance.user_profile_page_urls = run_info['user_profile_page_urls_verified']
+        # if run_info['scrape_institutions']:
+        #     second_chance.institution_urls = run_info['institution_urls_verified']
 
 
 if __name__ == "__main__": main()
