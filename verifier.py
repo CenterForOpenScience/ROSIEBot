@@ -24,22 +24,13 @@ MIRROR = 'archive/'
 with codecs.open(TASK_FILE, mode='r', encoding='utf-8') as file:
     run_info = json.load(file)
 
+
 # Takes a URL and produces its relative file name.
 def get_path_from_url(self, url):
     # Remove http://domain
     tail = url.replace(base_urls[0], '') + 'index.html'
     path = MIRROR + tail
     return path
-
-
-# Creates a dictionary with filename : URL for all the URLs found by the crawler in the API
-def generate_page_dictionary(self):
-    for url in self.json_list:
-        if url.endswith(self.page + '/') and url not in run_info['error_list']:
-            key = self.get_path_from_url(url)
-            self.paths[key] = url
-            self.json_list.remove(url)
-    return
 
 
 # Superclass for page-specific page instances
@@ -192,14 +183,14 @@ class ProjectDashboardVerifier(Verifier):
         Verifier.__init__(self)
         self.pages = []
         self.minimum_size = 410
-        self.page_elements = [
-            '#nodeTitleEditable',  # Title
-            '#contributors span.date.node-last-modified-date',  # Last modified
-            '#contributorsList > ol',  # Contributor list
-            '#nodeDescriptionEditable',  # Description
-            '#tb-tbody',  # File list
-            '#logScope > div > div > div.panel-body > span > dl'  # Activity
-        ]
+        self.page_elements = {
+            '#nodeTitleEditable': '',                                # Title
+            '#contributors span.date.node-last-modified-date': '',   # Last modified
+            '#contributorsList > ol': '',                            # Contributor list
+            '#nodeDescriptionEditable': '',                          # Description
+            '#tb-tbody': '',                                         # File list
+            '#logScope > div > div > div.panel-body > span > dl': '' # Activity
+        }
         self.harvest_pages(run_info['node_urls'], '', ProjectDashboardPage)
         self.size_comparison()
         self.spot_check()
@@ -210,9 +201,9 @@ class ProjectFilesVerifier(Verifier):
         Verifier.__init__(self)
         self.pages = []
         self.minimum_size = 380
-        self.page_elements = [
-            '.fg-file-links',  # Links to files (names them)
-        ]
+        self.page_elements = {
+            '.fg-file-links': '',  # Links to files (names them)
+        }
         self.harvest_pages(run_info['node_urls'], 'files/', ProjectFilesPage)
         self.size_comparison()
         self.spot_check()
@@ -223,11 +214,11 @@ class ProjectWikiVerifier(Verifier):
         Verifier.__init__(self)
         self.pages = []
         self.minimum_size = 410
-        self.page_elements = [
-            '#wikiViewRender',  # Links to files (names them)
-            '#viewVersionSelect option',  # Current version date modified
-            '.fg-file-links'  # Links to other pages (names them)
-        ]
+        self.page_elements = {
+            'pre': '#wikiViewRender > p > em',             # Wiki content / `No wiki content`
+            '#viewVersionSelect option': '',               # Current version date modified
+            '.fg-file-links': ''                           # Links to other pages (names them)
+        }
         self.harvest_pages(run_info['node_urls'], 'wiki/', ProjectWikiPage)
         self.size_comparison()
         self.spot_check()
@@ -238,11 +229,10 @@ class ProjectAnalyticsVerifier(Verifier):
         Verifier.__init__(self)
         self.pages = []
         self.minimum_size = 380
-        self.page_elements = [
-            '#wikiViewRender',  # Links to files (names them)
-            '#viewVersionSelect option:nth-child(2)',  # Current version date modified
-            '.fg-file-links'  # Links to other pages (names them)
-        ]
+        self.page_elements = {
+            '#adBlock': 'body > div.watermarked > div > div.m-b-md.p-md.osf-box-lt.box-round.text-center',  # Warning about AdBlock
+            'iframe': 'body > div.watermarked > div > div.m-b-md.p-md.osf-box-lt.box-round.text-center',  # External frame for analytics
+        }
         self.harvest_pages(run_info['node_urls'], 'analytics/', ProjectAnalyticsPage)
         self.size_comparison()
         self.spot_check()
@@ -253,9 +243,9 @@ class ProjectRegistrationsVerifier(Verifier):
         Verifier.__init__(self)
         self.pages = []
         self.minimum_size = 390
-        self.page_elements = [
-            'body > div.watermarked > div > div.row > div.col-xs-9.col-sm-8'  # List
-        ]
+        self.page_elements = {
+            '#renderNode': '#registrations > div > div > p'  # List of nodes
+        }
         self.harvest_pages(run_info['node_urls'], 'registrations/', ProjectRegistrationsPage)
         self.size_comparison()
         self.spot_check()
@@ -266,9 +256,9 @@ class ProjectForksVerifier(Verifier):
         Verifier.__init__(self)
         self.pages = []
         self.minimum_size = 380
-        self.page_elements = [
-            'body > div.watermarked > div > div.row > div.col-xs-9.col-sm-8'  # List
-        ]
+        self.page_elements = {
+                '#renderNode': 'body > div.watermarked > div > div.row > div.col-xs-9.col-sm-8 > p'  # List
+        }
         self.harvest_pages(run_info['node_urls'], 'forks/', ProjectForksPage)
         self.size_comparison()
         self.spot_check()
@@ -279,14 +269,14 @@ class RegistrationDashboardVerifier(Verifier):
         Verifier.__init__(self)
         self.pages = []
         self.minimum_size = 410
-        self.page_elements = [
-            '#nodeTitleEditable',  # Title
-            '#contributors span.date.node-last-modified-date',  # Last modified
-            '#contributorsList > ol',  # Contributor list
-            '#nodeDescriptionEditable',  # Description
-            '#tb-tbody',  # File list
-            '#logScope > div > div > div.panel-body > span > dl'  # Activity
-        ]
+        self.page_elements = {
+            '#nodeTitleEditable': '',                                # Title
+            '#contributors span.date.node-last-modified-date': '',   # Last modified
+            '#contributorsList > ol': '',                            # Contributor list
+            '#nodeDescriptionEditable': '',                          # Description
+            '#tb-tbody': '',                                         # File list
+            '#logScope > div > div > div.panel-body > span > dl': '' # Activity
+        }
         self.harvest_pages(run_info['registration_urls'], '', RegistrationDashboardPage)
         self.size_comparison()
         self.spot_check()
@@ -297,9 +287,9 @@ class RegistrationFilesVerifier(Verifier):
         Verifier.__init__(self)
         self.pages = []
         self.minimum_size = 380
-        self.page_elements = [
-            '.fg-file-links',  # Links to files (names them)
-        ]
+        self.page_elements = {
+            '.fg-file-links': '',  # Links to files (names them)
+        }
         self.harvest_pages(run_info['registration_urls'], 'files/', RegistrationFilesPage)
         self.size_comparison()
         self.spot_check()
@@ -310,11 +300,11 @@ class RegistrationWikiVerifier(Verifier):
         Verifier.__init__(self)
         self.pages = []
         self.minimum_size = 410
-        self.page_elements = [
-            '#wikiViewRender',  # Links to files (names them)
-            '#viewVersionSelect option:nth-child(2)',  # Current version date modified
-            '.fg-file-links'  # Links to other pages (names them)
-        ]
+        self.page_elements = {
+            'pre': '#wikiViewRender > p > em',             # Wiki content / `No wiki content`
+            '#viewVersionSelect option': '',               # Current version date modified
+            '.fg-file-links': ''                           # Links to other pages (names them)
+        }
         self.harvest_pages(run_info['registration_urls'], 'wiki/', RegistrationWikiPage)
         self.size_comparison()
         self.spot_check()
@@ -325,11 +315,10 @@ class RegistrationAnalyticsVerifier(Verifier):
         Verifier.__init__(self)
         self.pages = []
         self.minimum_size = 380
-        self.page_elements = [
-            '#wikiViewRender',  # Links to files (names them)
-            '#viewVersionSelect option:nth-child(2)',  # Current version date modified
-            '.fg-file-links'  # Links to other pages (names them)
-        ]
+        self.page_elements = {
+            '#adBlock': 'body > div.watermarked > div > div.m-b-md.p-md.osf-box-lt.box-round.text-center',  # Warning about AdBlock
+            'iframe': 'body > div.watermarked > div > div.m-b-md.p-md.osf-box-lt.box-round.text-center',  # External frame for analytics
+        }
         self.harvest_pages(run_info['registration_urls'], 'analytics/', RegistrationAnalyticsPage)
         self.size_comparison()
         self.spot_check()
@@ -340,9 +329,9 @@ class RegistrationForksVerifier(Verifier):
         Verifier.__init__(self)
         self.pages = []
         self.minimum_size = 380
-        self.page_elements = [
-            'body > div.watermarked > div > div.row > div.col-xs-9.col-sm-8'  # List
-        ]
+        self.page_elements = {
+                '#renderNode': 'body > div.watermarked > div > div.row > div.col-xs-9.col-sm-8 > p'  # List
+        }
         self.harvest_pages(run_info['registration_urls'], 'forks/', RegistrationForksPage)
         self.size_comparison()
         self.spot_check()
@@ -353,12 +342,11 @@ class UserProfileVerifier(Verifier):
         Verifier.__init__(self)
         self.pages = []
         self.minimum_size = 80
-        self.page_elements = [
-            '#projects',
-            '#projects li',  # Specific project list item
-            'body div.panel-body',  # Component list
-            'body h2'  # Activity points, project count
-        ]
+        self.page_elements = {
+            '#projects': 'div.help-block > p',  # Project list / "You have no projects"
+            'body div.panel-body': 'div.help-block > p',  # Component list / "You have no components"
+            'body h2': ''  # Activity points, project count
+        }
         self.harvest_pages(run_info['user_profile_page_urls'], '', UserProfilePage)
         self.size_comparison()
         self.spot_check()
@@ -369,10 +357,10 @@ class InstitutionDashboardVerifier(Verifier):
         Verifier.__init__(self)
         self.pages = []
         self.minimum_size = 350
-        self.page_elements = [
-            '#fileBrowser > div.db-infobar > div > div',  # Project preview
-            '#tb-tbody'  # Project browser
-        ]
+        self.page_elements = {
+            '#fileBrowser > div.db-infobar > div > div': '#fileBrowser > div.db-infobar > div > div',  # Project preview
+            '#tb-tbody': '#fileBrowser > div.db-main > div.db-non-load-template.m-md.p-md.osf-box'  # Project browser
+        }
         self.harvest_pages(run_info['institution_urls'], '', InstitutionDashboardPage)
         self.size_comparison()
         self.spot_check()
