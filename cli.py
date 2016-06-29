@@ -24,21 +24,21 @@ import codecs
 @click.option('-a', is_flag=True, help="Add this flag if you want to include analytics page for nodes")
 @click.option('-r', is_flag=True, help="Add this flag if you want to include registrations page for nodes")
 @click.option('-k', is_flag=True, help="Add this flag if you want to include forks page for nodes")
-def cli_entry_point(normal, resume, verify, dm, tf, registrations, users, institutions, nodes, d, f, w, a, r, fr):
-    if normal and resume and verify:
+def cli_entry_point(scrape, resume, verify, dm, tf, registrations, users, institutions, nodes, d, f, w, a, r, k):
+    if scrape and resume and verify:
         click.echo('Invalid parameters.')
         return
 
-    if not normal and not resume and not verify:
+    if not scrape and not resume and not verify:
         click.echo('You have to choose a mode to run')
 
-    if normal and dm is not None:
+    if scrape and dm is not None:
         click.echo('Starting normal scrape with date marker set to : ' + dm)
         now = datetime.datetime.now()
         filename = now.strftime('%Y%m%d%H%M' + '.json')
         click.echo('Creating a task file named : ' + filename)
         with open(filename, 'w') as db:
-            normal_scrape(dm, registrations, users, institutions, nodes, d, f, w, a, r, fr, db)
+            normal_scrape(dm, registrations, users, institutions, nodes, d, f, w, a, r, k, db)
         return
 
     if resume and tf is not None:
