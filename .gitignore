@@ -7,8 +7,9 @@ staging.osf.io/
 osf.io/
 *.txt
 .env
-*.task
+*.json
 settings.py
 !task_file_example.txt
 *.json
 archive/
+
