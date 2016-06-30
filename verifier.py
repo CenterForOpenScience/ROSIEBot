@@ -20,12 +20,12 @@ wiki contains backup: //3tmge/wiki/home.html
 """
 
 # TODO: put this in settings
-NUM_RETRIES = 2
+#NUM_RETRIES = 2
 TASK_FILE = '201606231548.json'
 MIRROR = 'archive/'
 
-with codecs.open(TASK_FILE, mode='r', encoding='utf-8') as file:
-    run_info = json.load(file)
+# with codecs.open(TASK_FILE, mode='r', encoding='utf-8') as file:
+#     run_info = json.load(file)
 
 
 # Superclass for page-specific page instances
@@ -131,7 +131,7 @@ class Verifier:
         self.failed_pages = []
 
     # Populate self.pages with the relevant files
-    def harvest_pages(self, json_list, url_end, page_class):
+    def harvest_pages(self, json_filename, json_list, url_end, page_class):
         """
         :param json_list: The list in the json file of found URLs
         :param url_end: The json_list is non segregated by page type
@@ -141,7 +141,7 @@ class Verifier:
         for url in json_list:
             if url_end in url:
                 print('rel: ', url)
-                if url in run_info['error_list']:
+                if url in json_filename['error_list']:
                     self.failed_pages.append(url)
                     print('error: ', url)
                 else:
@@ -207,7 +207,12 @@ class ProjectDashboardVerifier(Verifier):
             '#tb-tbody': '',  # File list
             '#logScope > div > div > div.panel-body > span > dl': ''  # Activity
         }
-        self.harvest_pages(run_info['node_urls'], '', ProjectDashboardPage)
+        # self.harvest_pages(run_info['node_urls'], '', ProjectDashboardPage)
+        # self.size_comparison()
+        # self.spot_check()
+
+    def run_verifier(self,json_filename, json_list, url_end, page_class):
+        self.harvest_pages(json_filename, json_list, url_end, page_class)
         self.size_comparison()
         self.spot_check()
 
@@ -219,7 +224,12 @@ class ProjectFilesVerifier(Verifier):
         self.page_elements = {
             '.fg-file-links': '',  # Links to files (names them)
         }
-        self.harvest_pages(run_info['node_urls'], 'files/', ProjectFilesPage)
+        # self.harvest_pages(run_info['node_urls'], 'files/', ProjectFilesPage)
+        # self.size_comparison()
+        # self.spot_check()
+
+    def run_verifier(self, json_filename, json_list, url_end, page_class):
+        self.harvest_pages(json_filename, json_list, url_end, page_class)
         self.size_comparison()
         self.spot_check()
 
@@ -233,7 +243,12 @@ class ProjectWikiVerifier(Verifier):
             '#viewVersionSelect option': '',  # Current version date modified
             '.fg-file-links': ''  # Links to other pages (names them)
         }
-        self.harvest_pages(run_info['node_urls'], 'wiki/', ProjectWikiPage)
+        # self.harvest_pages(run_info['node_urls'], 'wiki/', ProjectWikiPage)
+        # self.size_comparison()
+        # self.spot_check()
+
+    def run_verifier(self, json_filename, json_list, url_end, page_class):
+        self.harvest_pages(json_filename, json_list, url_end, page_class)
         self.size_comparison()
         self.spot_check()
 
@@ -248,7 +263,12 @@ class ProjectAnalyticsVerifier(Verifier):
             'iframe': 'body > div.watermarked > div > div.m-b-md.p-md.osf-box-lt.box-round.text-center',
             # External frame for analytics
         }
-        self.harvest_pages(run_info['node_urls'], 'analytics/', ProjectAnalyticsPage)
+        # self.harvest_pages(run_info['node_urls'], 'analytics/', ProjectAnalyticsPage)
+        # self.size_comparison()
+        # self.spot_check()
+
+    def run_verifier(self, json_filename, json_list, url_end, page_class):
+        self.harvest_pages(json_filename, json_list, url_end, page_class)
         self.size_comparison()
         self.spot_check()
 
@@ -260,7 +280,12 @@ class ProjectRegistrationsVerifier(Verifier):
         self.page_elements = {
             '#renderNode': '#registrations > div > div > p'  # List of nodes
         }
-        self.harvest_pages(run_info['node_urls'], 'registrations/', ProjectRegistrationsPage)
+        # self.harvest_pages(run_info['node_urls'], 'registrations/', ProjectRegistrationsPage)
+        # self.size_comparison()
+        # self.spot_check()
+
+    def run_verifier(self, json_filename, json_list, url_end, page_class):
+        self.harvest_pages(json_filename, json_list, url_end, page_class)
         self.size_comparison()
         self.spot_check()
 
@@ -272,7 +297,12 @@ class ProjectForksVerifier(Verifier):
         self.page_elements = {
             '#renderNode': 'body > div.watermarked > div > div.row > div.col-xs-9.col-sm-8 > p'  # List
         }
-        self.harvest_pages(run_info['node_urls'], 'forks/', ProjectForksPage)
+        # self.harvest_pages(run_info['node_urls'], 'forks/', ProjectForksPage)
+        # self.size_comparison()
+        # self.spot_check()
+
+    def run_verifier(self, json_filename, json_list, url_end, page_class):
+        self.harvest_pages(json_filename, json_list, url_end, page_class)
         self.size_comparison()
         self.spot_check()
 
@@ -289,7 +319,12 @@ class RegistrationDashboardVerifier(Verifier):
             '#tb-tbody': '',  # File list
             '#logScope > div > div > div.panel-body > span > dl': ''  # Activity
         }
-        self.harvest_pages(run_info['registration_urls'], '', RegistrationDashboardPage)
+        # self.harvest_pages(run_info['registration_urls'], '', RegistrationDashboardPage)
+        # self.size_comparison()
+        # self.spot_check()
+
+    def run_verifier(self, json_filename, json_list, url_end, page_class):
+        self.harvest_pages(json_filename, json_list, url_end, page_class)
         self.size_comparison()
         self.spot_check()
 
@@ -301,7 +336,12 @@ class RegistrationFilesVerifier(Verifier):
         self.page_elements = {
             '.fg-file-links': '',  # Links to files (names them)
         }
-        self.harvest_pages(run_info['registration_urls'], 'files/', RegistrationFilesPage)
+        # self.harvest_pages(run_info['registration_urls'], 'files/', RegistrationFilesPage)
+        # self.size_comparison()
+        # self.spot_check()
+
+    def run_verifier(self, json_filename, json_list, url_end, page_class):
+        self.harvest_pages(json_filename, json_list, url_end, page_class)
         self.size_comparison()
         self.spot_check()
 
@@ -315,7 +355,12 @@ class RegistrationWikiVerifier(Verifier):
             '#viewVersionSelect option': '',  # Current version date modified
             '.fg-file-links': ''  # Links to other pages (names them)
         }
-        self.harvest_pages(run_info['registration_urls'], 'wiki/', RegistrationWikiPage)
+        # self.harvest_pages(run_info['registration_urls'], 'wiki/', RegistrationWikiPage)
+        # self.size_comparison()
+        # self.spot_check()
+
+    def run_verifier(self, json_filename, json_list, url_end, page_class):
+        self.harvest_pages(json_filename, json_list, url_end, page_class)
         self.size_comparison()
         self.spot_check()
 
@@ -330,7 +375,12 @@ class RegistrationAnalyticsVerifier(Verifier):
             'iframe': 'body > div.watermarked > div > div.m-b-md.p-md.osf-box-lt.box-round.text-center',
             # External frame for analytics
         }
-        self.harvest_pages(run_info['registration_urls'], 'analytics/', RegistrationAnalyticsPage)
+        # self.harvest_pages(run_info['registration_urls'], 'analytics/', RegistrationAnalyticsPage)
+        # self.size_comparison()
+        # self.spot_check()
+
+    def run_verifier(self, json_filename, json_list, url_end, page_class):
+        self.harvest_pages(json_filename, json_list, url_end, page_class)
         self.size_comparison()
         self.spot_check()
 
@@ -342,7 +392,12 @@ class RegistrationForksVerifier(Verifier):
         self.page_elements = {
             '#renderNode': 'body > div.watermarked > div > div.row > div.col-xs-9.col-sm-8 > p'  # List
         }
-        self.harvest_pages(run_info['registration_urls'], 'forks/', RegistrationForksPage)
+        # self.harvest_pages(run_info['registration_urls'], 'forks/', RegistrationForksPage)
+        # self.size_comparison()
+        # self.spot_check()
+
+    def run_verifier(self, json_filename, json_list, url_end, page_class):
+        self.harvest_pages(json_filename, json_list, url_end, page_class)
         self.size_comparison()
         self.spot_check()
 
@@ -356,7 +411,12 @@ class UserProfileVerifier(Verifier):
             'body div.panel-body': 'div.help-block > p',  # Component list / "You have no components"
             'body h2': ''  # Activity points, project count
         }
-        self.harvest_pages(run_info['user_profile_page_urls'], '', UserProfilePage)
+        # self.harvest_pages(run_info['user_profile_page_urls'], '', UserProfilePage)
+        # self.size_comparison()
+        # self.spot_check()
+
+    def run_verifier(self, json_filename, json_list, url_end, page_class):
+        self.harvest_pages(json_filename, json_list, url_end, page_class)
         self.size_comparison()
         self.spot_check()
 
@@ -369,72 +429,233 @@ class InstitutionDashboardVerifier(Verifier):
             '#fileBrowser > div.db-infobar > div > div': '#fileBrowser > div.db-infobar > div > div',  # Project preview
             '#tb-tbody': '#fileBrowser > div.db-main > div.db-non-load-template.m-md.p-md.osf-box'  # Project browser
         }
-        self.harvest_pages(run_info['institution_urls'], '', InstitutionDashboardPage)
+        # self.harvest_pages(run_info['institution_urls'], '', InstitutionDashboardPage)
+        # self.size_comparison()
+        # self.spot_check()
+
+    def run_verifier(self, json_filename, json_list, url_end, page_class):
+        self.harvest_pages(json_filename, json_list, url_end, page_class)
         self.size_comparison()
         self.spot_check()
 
 
-def main():
-    # Identifying problems
-
-    # for modularization and then concatenate lists
+# first verification and then scraping the failed pages
+def initial_verification(json_file, num_retries: object) -> object:
+    with codecs.open(json_file, mode='r', encoding='utf-8') as failure_file:
+        run_info = json.load(failure_file)
+    with codecs.open(json_file, mode='r', encoding='utf-8') as failure_file:
+        run_copy = json.load(failure_file)
     if run_info['scrape_finished']:
-        for i in range(NUM_RETRIES):
-            if run_info['scrape_nodes']:
-                nodes_list_verified = []
-                if run_info['include_files']:
-                    project_files = ProjectFilesVerifier().failed_pages
-                    nodes_list_verified += project_files
-                if run_info['include_wiki']:
-                    project_wiki = ProjectWikiVerifier().failed_pages
-                    nodes_list_verified += project_wiki
-                if run_info['include_analytics']:
-                    project_analytics = ProjectAnalyticsVerifier().failed_pages
-                    nodes_list_verified += project_analytics
-                if run_info['include_registrations']:
-                    project_registrations = ProjectRegistrationsVerifier().failed_pages
-                    nodes_list_verified += project_registrations
-                if run_info['include_forks']:
-                    project_forks = ProjectForksVerifier().failed_pages
-                    nodes_list_verified += project_forks
-                if run_info['include_dashboard']:  # This must go last because its URLs don't have a specific ending.
-                    project_dashboards = ProjectDashboardVerifier().failed_pages
-                    nodes_list_verified += project_dashboards
-                run_info['node_urls_verified'] = nodes_list_verified
-            if run_info['scrape_registrations']:
-                # Must run all page types automatically
-                registration_files = RegistrationFilesVerifier().failed_pages
-                registration_wiki = RegistrationWikiVerifier().failed_pages
-                registration_analytics = RegistrationAnalyticsVerifier().failed_pages
-                registration_forks = RegistrationForksVerifier().failed_pages
-                registration_dashboards = RegistrationDashboardVerifier().failed_pages
-                registrations_list_verified = registration_files + registration_wiki + registration_analytics + \
-                    registration_forks + registration_dashboards
-                run_info['registration_urls_verified'] = registrations_list_verified
-            if run_info['scrape_users']:
-                user_profiles_verified = UserProfileVerifier().failed_pages
-                run_info['user_profile_page_urls_verified'] = user_profiles_verified
-            if run_info['scrape_institutions']:
-                institution_dashboards_verified = InstitutionDashboardVerifier().failed_pages
-                run_info['institution_urls_verified'] = institution_dashboards_verified
+        if run_info['scrape_nodes']:
+            nodes_list_verified = []
+            if run_info['include_files']:
+                project_files_verifier = ProjectFilesVerifier()
+                project_files_verifier.run_verifier(run_info,run_info['node_urls'], 'files/', ProjectFilesPage)
+                project_files = project_files_verifier.failed_pages
+                nodes_list_verified += project_files
+            if run_info['include_wiki']:
+                project_wiki_verifier = ProjectWikiVerifier()
+                project_wiki_verifier.run_verifier(run_info, run_info['node_urls'], 'wiki/', ProjectWikiPage)
+                project_wiki = project_wiki_verifier.failed_pages
+                nodes_list_verified += project_wiki
+            if run_info['include_analytics']:
+                project_analytics_verifier = ProjectAnalyticsVerifier()
+                project_analytics_verifier.run_verifier(run_info, run_info['node_urls'], 'analytics/', ProjectAnalyticsPage)
+                project_analytics = project_analytics_verifier.failed_pages
+                nodes_list_verified += project_analytics
+            if run_info['include_registrations']:
+                project_registrations_verifier = ProjectRegistrationsVerifier()
+                project_registrations_verifier.run_verifier(run_info, run_info['node_urls'], 'registrations/',
+                                                            ProjectRegistrationsPage)
+                project_registrations = project_registrations_verifier.failed_pages
+                nodes_list_verified += project_registrations
+            if run_info['include_forks']:
+                project_forks_verifier = ProjectForksVerifier()
+                project_forks_verifier.run_verifier(run_info, run_info['node_urls'], 'forks/', ProjectForksPage)
+                project_forks = project_forks_verifier.failed_pages
+                nodes_list_verified += project_forks
+            if run_info['include_dashboard']:  # This must go last because its URLs don't have a specific ending.
+                project_dashboards_verifier = ProjectDashboardVerifier()
+                project_dashboards_verifier.run_verifier(run_info, run_info['node_urls'], '', ProjectDashboardPage)
+                project_dashboards = project_dashboards_verifier.failed_pages
+                nodes_list_verified += project_dashboards
+            run_copy['node_urls_verified'] = nodes_list_verified
+        if run_info['scrape_registrations']:
+            # Must run all page types automatically
+            registration_files_verifier = RegistrationFilesVerifier()
+            registration_files_verifier.run_verifier(run_info, run_info['registration_urls'], 'files/',
+                                                     RegistrationFilesPage)
+            registration_files = registration_files_verifier.failed_pages
 
-            # truncates json and dumps new lists
-            with codecs.open(TASK_FILE, mode='w', encoding='utf-8') as file:
-                json.dump(run_info, file)
+            registration_wiki_verifier = RegistrationWikiVerifier()
+            registration_wiki_verifier.run_verifier(run_info, run_info['registration_urls'], 'wiki/',
+                                                    RegistrationWikiPage)
+            registration_wiki = registration_wiki_verifier.failed_pages
+
+            registration_analytics_verifier = RegistrationAnalyticsVerifier()
+            registration_analytics_verifier.run_verifier(run_info, run_info['registration_urls'], 'analytics/',
+                                                         RegistrationAnalyticsPage)
+            registration_analytics = registration_analytics_verifier.failed_pages
+
+            registration_forks_verifier = RegistrationForksVerifier()
+            registration_forks_verifier.run_verifier(run_info, run_info['registration_urls'], 'forks/',
+                                                     RegistrationForksPage)
+            registration_forks = registration_forks_verifier.failed_pages
+
+            registration_dashboards_verifier = RegistrationDashboardVerifier()
+            registration_dashboards_verifier.run_verifier(run_info, run_info['registration_urls'], '',
+                                                          RegistrationDashboardPage)
+            registration_dashboards = registration_dashboards_verifier.failed_pages
+
+            registrations_list_verified = registration_files + registration_wiki + registration_analytics + \
+                registration_forks + registration_dashboards
+            run_copy['registration_urls_verified'] = registrations_list_verified
+        if run_info['scrape_users']:
+            user_profiles_verifier = UserProfileVerifier()
+            user_profiles_verifier.run_verifier(run_info, run_info['user_profile_page_urls'], '', UserProfilePage)
+            user_profiles = user_profiles_verifier.failed_pages
+            run_copy['user_profile_page_urls_verified'] = user_profiles
+        if run_info['scrape_institutions']:
+            institution_dashboards_verifier = InstitutionDashboardVerifier()
+            institution_dashboards_verifier.run_verifier(run_info, run_info['institution_urls'], '',
+                                                         InstitutionDashboardPage)
+            institution_dashboards = institution_dashboards_verifier.failed_pages
+            run_copy['institution_urls_verified'] = institution_dashboards
+
+        # truncates json and dumps new lists
+        with codecs.open(TASK_FILE, mode='w', encoding='utf-8') as file:
+            json.dump(run_copy, file, indent=4)
 
         # Rescraping
 
         second_chance = Crawler()
 
-        if run_info['scrape_nodes']:
-            second_chance.node_urls = run_info['node_urls_verified']
-            second_chance.scrape_nodes()
-        if run_info['scrape_registrations']:
-            second_chance.registration_urls = run_info['registration_urls_verified']
-        if run_info['scrape_users']:
-            second_chance.user_profile_page_urls = run_info['user_profile_page_urls_verified']
-        if run_info['scrape_institutions']:
-            second_chance.institution_urls = run_info['institution_urls_verified']
+    if run_info['scrape_nodes']:
+        second_chance.node_urls = run_copy['node_urls_verified']
+        second_chance.scrape_nodes()
+    if run_info['scrape_registrations']:
+        second_chance.registration_urls = run_copy['registration_urls_verified']
+    if run_info['scrape_users']:
+        second_chance.user_profile_page_urls = run_copy['user_profile_page_urls_verified']
+    if run_info['scrape_institutions']:
+        second_chance.institution_urls = run_copy['institution_urls_verified']
+    return run_copy
+
+
+def subsequent_verifications(dict_file, num_retries):
+    if dict_file['scrape_finished']:
+        for i in range(num_retries):
+            if dict_file['scrape_nodes']:
+                nodes_list_verified = []
+                if dict_file['include_files']:
+                    project_files_verifier = ProjectFilesVerifier()
+                    project_files_verifier.run_verifier(dict_file, dict_file['node_urls_verified'], 'files/',
+                                                        ProjectFilesPage)
+                    project_files = project_files_verifier.failed_pages
+                    nodes_list_verified += project_files
+                if dict_file['include_wiki']:
+                    project_wiki_verifier = ProjectWikiVerifier()
+                    project_wiki_verifier.run_verifier(dict_file, dict_file['node_urls_verified'], 'wiki/',
+                                                       ProjectWikiPage)
+                    project_wiki = project_wiki_verifier.failed_pages
+                    nodes_list_verified += project_wiki
+                if dict_file['include_analytics']:
+                    project_analytics_verifier = ProjectAnalyticsVerifier()
+                    project_analytics_verifier.run_verifier(dict_file, dict_file['node_urls_verified'], 'analytics/',
+                                                            ProjectAnalyticsPage)
+                    project_analytics = project_analytics_verifier.failed_pages
+                    nodes_list_verified += project_analytics
+                if dict_file['include_registrations']:
+                    project_registrations_verifier = ProjectRegistrationsVerifier()
+                    project_registrations_verifier.run_verifier(dict_file, dict_file['node_urls_verified'],
+                                                                'registrations/', ProjectRegistrationsPage)
+                    project_registrations = project_registrations_verifier.failed_pages
+                    nodes_list_verified += project_registrations
+                if dict_file['include_forks']:
+                    project_forks_verifier = ProjectForksVerifier()
+                    project_forks_verifier.run_verifier(dict_file, dict_file['node_urls_verified'], 'forks/',
+                                                        ProjectForksPage)
+                    project_forks = project_forks_verifier.failed_pages
+                    nodes_list_verified += project_forks
+                if dict_file['include_dashboard']:  # This must go last because its URLs don't have a specific ending.
+                    project_dashboards_verifier = ProjectDashboardVerifier()
+                    project_dashboards_verifier.run_verifier(dict_file, dict_file['node_urls_verified'], '',
+                                                             ProjectDashboardPage)
+                    project_dashboards = project_dashboards_verifier.failed_pages
+                    nodes_list_verified += project_dashboards
+                dict_file['node_urls_verified'] = nodes_list_verified
+            if dict_file['scrape_registrations']:
+                # Must run all page types automatically
+                registration_files_verifier = RegistrationFilesVerifier()
+                registration_files_verifier.run_verifier(dict_file, dict_file['registration_urls_verified'], 'files/',
+                                                         RegistrationFilesPage)
+                registration_files = registration_files_verifier.failed_pages
+
+                registration_wiki_verifier = RegistrationWikiVerifier()
+                registration_wiki_verifier.run_verifier(dict_file, dict_file['registration_urls_verified'], 'wiki/',
+                                                        RegistrationWikiPage)
+                registration_wiki = registration_wiki_verifier.failed_pages
+
+                registration_analytics_verifier = RegistrationAnalyticsVerifier()
+                registration_analytics_verifier.run_verifier(dict_file, dict_file['registration_urls_verified'],
+                                                             'analytics/', RegistrationAnalyticsPage)
+                registration_analytics = registration_analytics_verifier.failed_pages
+
+                registration_forks_verifier = RegistrationForksVerifier()
+                registration_forks_verifier.run_verifier(dict_file, dict_file['registration_urls_verified'], 'forks/',
+                                                         RegistrationForksPage)
+                registration_forks = registration_forks_verifier.failed_pages
+
+                registration_dashboards_verifier = RegistrationDashboardVerifier()
+                registration_dashboards_verifier.run_verifier(dict_file, dict_file['registration_urls_verified'], '',
+                                                              RegistrationDashboardPage)
+                registration_dashboards = registration_dashboards_verifier.failed_pages
+
+                registrations_list_verified = registration_files + registration_wiki + registration_analytics + \
+                    registration_forks + registration_dashboards
+                dict_file['registration_urls_verified'] = registrations_list_verified
+            if dict_file['scrape_users']:
+                user_profiles_verifier = UserProfileVerifier()
+                user_profiles_verifier.run_verifier(dict_file, dict_file['user_profile_page_urls_verified'], '',
+                                                    UserProfilePage)
+                user_profiles = user_profiles_verifier.failed_pages
+                dict_file['user_profile_page_urls_verified'] = user_profiles
+            if dict_file['scrape_institutions']:
+                institution_dashboards_verifier = InstitutionDashboardVerifier()
+                institution_dashboards_verifier.run_verifier(dict_file, dict_file['institution_urls_verified'], '',
+                                                             InstitutionDashboardPage)
+                institution_dashboards = institution_dashboards_verifier.failed_pages
+                dict_file['institution_urls_verified'] = institution_dashboards
+
+            # truncates json and dumps new lists
+            with codecs.open(TASK_FILE, mode='w', encoding='utf-8') as file:
+                json.dump(dict_file, file, indent=4)
+
+            # Rescraping
+
+            second_chance = Crawler()
+
+            if dict_file['scrape_nodes']:
+                second_chance.node_urls = dict_file['node_urls_verified']
+                second_chance.scrape_nodes()
+            if dict_file['scrape_registrations']:
+                second_chance.registration_urls = dict_file['registration_urls_verified']
+            if dict_file['scrape_users']:
+                second_chance.user_profile_page_urls = dict_file['user_profile_page_urls_verified']
+            if dict_file['scrape_institutions']:
+                second_chance.institution_urls = dict_file['institution_urls_verified']
+
+
+def main():
+    # FOR TESTING
+    json_filename = '201606231548.json'
+    num_retries = 2
+    # call two verification/scraping methods depending on num retries
+    if num_retries > 1:
+        run_file = initial_verification(json_filename, num_retries)
+        subsequent_verifications(run_file, num_retries)
+    else:
+        initial_verification(json_filename, num_retries)
 
 
 if __name__ == "__main__": main()
