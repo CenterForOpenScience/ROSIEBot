@@ -10,6 +10,27 @@ Despite childish fears!"  - Unknown')
 ##### Static mirroring utility for the [Open Science Framework](osf.io), maintained by     the [Center for Open Science](cos.io).
   Visit the [COS Github](https://github.com/CenterForOpenScience/) for more innovations in   the *openness*, *integrity*, and *reproducibility* of scientific research.
 
+## Installation
+
+This software requires Python 3.5 for the aiohttp library. If desired, create a virtualenv:
+
+##### From scratch:
+
+`pip install virtualenv`
+
+##### Create virtualenv 'rosie':
+
+`mkvirtualenv rosie --python=python3.5`
+
+##### Switch into the rosie environment for the first time:
+
+`workon rosie`
+
+`pip install -r requirements.txt` to install dependency libraries.
+
+##### Enter/exit the virtual environment:
+
+`workon rosie`/`deactivate`
 
 
 ## ROSIEisms
@@ -64,7 +85,7 @@ There are various options for what areas of the OSF are preserved in a mirror. A
 The python file cli.py needs to be run in the command line. This project was developed on Mac, so Terminal on OS X is preferred. 
 
 ```bash
-python3 cli.py
+python cli.py
 ```
 
 Flags:
