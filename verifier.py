@@ -440,7 +440,7 @@ class InstitutionDashboardVerifier(Verifier):
 
 
 # first verification and then scraping the failed pages
-def initial_verification(json_file, num_retries: object) -> object:
+def initial_verification(json_file):
     with codecs.open(json_file, mode='r', encoding='utf-8') as failure_file:
         run_info = json.load(failure_file)
     with codecs.open(json_file, mode='r', encoding='utf-8') as failure_file:
@@ -632,10 +632,10 @@ def main():
     num_retries = 2
     # call two verification/scraping methods depending on num retries
     if num_retries > 1:
-        run_file = initial_verification(json_filename, num_retries)
+        run_file = initial_verification(json_filename)
         subsequent_verifications(run_file, num_retries)
-    else:
-        initial_verification(json_filename, num_retries)
+    if num_retries == 1:
+        initial_verification(json_filename)
 
 
 if __name__ == "__main__": main()
