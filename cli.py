@@ -6,7 +6,7 @@ import urllib
 
 @click.command()
 # Specify parameters that choose between different modes
-@click.option('--normal', is_flag=True, help="Do a normal scrape, need date marker specified")
+@click.option('--scrape', is_flag=True, help="Do a normal scrape, need date marker specified")
 @click.option('--resume', is_flag=True, help="Resume last unfinished scrape, need to import task file")
 @click.option('--verify', is_flag=True, help="Verify the existing OSF static mirror, need to import task file")
 # Specify parameters for other needed values
@@ -18,13 +18,13 @@ import urllib
 @click.option('--institutions', is_flag=True, help="Add this flag if you want to scrape for institutions")
 @click.option('--nodes', is_flag=True, help="Add this flag if you want to scrape for nodes")
 # Specify types of node pages needed to scrape, only works for scraping nodes; if none are include, scrape all types
-@click.option('--d', is_flag=True, help="Add this flag if you want to include dashboard page for nodes")
-@click.option('--f', is_flag=True, help="Add this flag if you want to include files page for nodes")
-@click.option('--w', is_flag=True, help="Add this flag if you want to include wiki page for nodes")
-@click.option('--a', is_flag=True, help="Add this flag if you want to include analytics page for nodes")
-@click.option('--r', is_flag=True, help="Add this flag if you want to include registrations page for nodes")
-@click.option('--fr', is_flag=True, help="Add this flag if you want to include forks page for nodes")
-def cli_entry_point(normal, resume, verify, dm, tf, registrations, users, institutions, nodes, d, f, w, a, r, fr):
+@click.option('-d', is_flag=True, help="Add this flag if you want to include dashboard page for nodes")
+@click.option('-f', is_flag=True, help="Add this flag if you want to include files page for nodes")
+@click.option('-w', is_flag=True, help="Add this flag if you want to include wiki page for nodes")
+@click.option('-a', is_flag=True, help="Add this flag if you want to include analytics page for nodes")
+@click.option('-r', is_flag=True, help="Add this flag if you want to include registrations page for nodes")
+@click.option('-k', is_flag=True, help="Add this flag if you want to include forks page for nodes")
+def cli_entry_point(normal, resume, verify, dm, tf, registrations, users, institutions, nodes, d, f, w, a, r, k):
     if normal and resume and verify:
         click.echo('Invalid parameters.')
         return
@@ -44,7 +44,7 @@ def cli_entry_point(normal, resume, verify, dm, tf, registrations, users, instit
         filename = now.strftime('%Y%m%d%H%M' + '.task')
         click.echo('Creating a task file named : ' + filename)
         with shelve.open(filename, writeback=True, flag='n') as db:
-            normal_scrape(dm, registrations, users, institutions, nodes, d, f, w, a, r, fr, db)
+            normal_scrape(dm, registrations, users, institutions, nodes, d, f, w, a, r, k, db)
         return
 
     if resume and tf is not None:
