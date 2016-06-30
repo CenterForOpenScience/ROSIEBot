@@ -282,7 +282,6 @@ class RegistrationDashboardVerifier(Verifier):
             '#nodeTitleEditable': '',  # Title
             '#contributors > div > p:nth-of-type(5) > span': '',  # Last modified
             '#contributorsList > ol': '',  # Contributor list
-            '#nodeDescriptionEditable': 'body',  # Description (Will display nothing if purposefully empty)
             '#tb-tbody': '',  # File list
             '#render-node': 'div.row > div:nth-of-type(2) > div.components.panel.panel-default > div.panel-body > p',  # Nodes list
             '#logScope > div > div > div.panel-body > span > dl': '#logFeed > div > p'  # Activity / "Unable to retrieve at this time"
