@@ -349,10 +349,8 @@ class UserProfileVerifier(Verifier):
         Verifier.__init__(self)
         self.minimum_size = 80
         self.page_elements = {
-            '#projects': 'body > div.watermarked > div > div:nth-of-type(4) > div:nth-of-type(1) > '
-                          'div > div.panel-body > div',  # Project list / "This user has no projects"
-            'body div.panel-body': 'body > div.watermarked > div > div:nth-of-type(4) > div:nth-of-type(2) '
-                                   'div > div.panel-body > div',  # Component list / "This users has no components"
+            '#projects': 'body',  # Project list / "This user has no projects"
+            'body div.panel-body': 'body',  # Component list / "This users has no components"
             'body h2': ''  # Activity points, project count
         }
         self.harvest_pages(run_info['user_profile_page_urls'], '', UserProfilePage)
