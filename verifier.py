@@ -200,8 +200,8 @@ class ProjectDashboardVerifier(Verifier):
             '#nodeTitleEditable': '',  # Title
             '#contributors span.date.node-last-modified-date': '',  # Last modified
             '#contributorsList > ol': '',  # Contributor list
-            '#nodeDescriptionEditable': 'body',  # Description (Will display nothing if purposefully empty)
             '#tb-tbody': '',  # File list
+            '#render-node': 'div.row > div:nth-of-type(2) > div.components.panel.panel-default > div.panel-body > p',  # Nodes list
             '#logScope > div > div > div.panel-body > span > dl': '#logFeed > div > p'  # Activity / "Unable to retrieve at this time"
         }
         self.harvest_pages(run_info['node_urls'], '', ProjectDashboardPage)
@@ -284,6 +284,7 @@ class RegistrationDashboardVerifier(Verifier):
             '#contributorsList > ol': '',  # Contributor list
             '#nodeDescriptionEditable': 'body',  # Description (Will display nothing if purposefully empty)
             '#tb-tbody': '',  # File list
+            '#render-node': 'div.row > div:nth-of-type(2) > div.components.panel.panel-default > div.panel-body > p',  # Nodes list
             '#logScope > div > div > div.panel-body > span > dl': '#logFeed > div > p'  # Activity / "Unable to retrieve at this time"
         }
         self.harvest_pages(run_info['registration_urls'], '', RegistrationDashboardPage)
@@ -349,8 +350,8 @@ class UserProfileVerifier(Verifier):
         Verifier.__init__(self)
         self.minimum_size = 80
         self.page_elements = {
-            '#projects': 'body',  # Project list / "This user has no projects"
-            'body div.panel-body': 'body',  # Component list / "This users has no components"
+            '#projects': 'div > div:nth-of-type(1) > div > div.panel-body > div',  # Project list / "No projects"
+            '#components': 'div > div:nth-of-type(2) > div > div.panel-body > div',  # Component list / "No components"
             'body h2': ''  # Activity points, project count
         }
         self.harvest_pages(run_info['user_profile_page_urls'], '', UserProfilePage)
