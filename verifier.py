@@ -18,9 +18,6 @@ empty file div:
 wiki contains backup:
 
 """
-
-# TODO: put this in settings
-#NUM_RETRIES = 2
 TASK_FILE = '201606291542.json'
 MIRROR = 'archive/'
 
@@ -177,19 +174,17 @@ class Verifier:
                 result = soup.select(element)
                 # No results or empty results
                 if (len(result) == 0 or len(result[0].contents) == 0) and alt != '':
-                    print("Failed: first spot_check(): ", page, element, "Retrying with alt.")
-                    result = soup.select(self.page_elements[element])
+                    # print("Failed: first spot_check(): ", page, element, "Retrying with alt: ", alt)
+                    alt_result = soup.select(alt)
 
                     # Element's alternate has no or empty results
-                    if len(result) == 0 or len(result[0].contents) == 0:
-                        print("Failed: alternate spot_check(): ", page, alt)
+                    if len(alt_result) == 0 or len(alt_result[0].contents) == 0:
+                        print("Failed: alternate spot_check(): ", page, alt, '\n')
                         self.failed_pages.append(page.url)
 
-                elif len(result) == 0 or len(result[0].contents) == 0 and alt == '':
-                    print('Failed: spot_check(): ', page, "No alt.")
-                if len(result) == 0 or len(result[0].contents) == 0:  # No results or empty results
-                    print('Failed: spot_check(): ', page)
-                    self.failed_pages.append(page.url)
+                elif (len(result) == 0 or len(result[0].contents) == 0) and alt == '':
+                    print('Failed: spot_check(): ', page, element, "No alt.", '\n')
+
         return
 
 
@@ -203,9 +198,9 @@ class ProjectDashboardVerifier(Verifier):
             '#nodeTitleEditable': '',  # Title
             '#contributors span.date.node-last-modified-date': '',  # Last modified
             '#contributorsList > ol': '',  # Contributor list
-            '#nodeDescriptionEditable': '',  # Description
             '#tb-tbody': '',  # File list
-            '#logScope > div > div > div.panel-body > span > dl': ''  # Activity
+            '#render-node': 'div.row > div:nth-of-type(2) > div.components.panel.panel-default > div.panel-body > p',  # Nodes list
+            '#logScope > div > div > div.panel-body > span > dl': '#logFeed > div > p'  # Activity / "Unable to retrieve at this time"
         }
         # self.harvest_pages(run_info['node_urls'], '', ProjectDashboardPage)
         # self.size_comparison()
@@ -258,9 +253,9 @@ class ProjectAnalyticsVerifier(Verifier):
         Verifier.__init__(self)
         self.minimum_size = 380
         self.page_elements = {
-            '#adBlock': 'body > div.watermarked > div > div.m-b-md.p-md.osf-box-lt.box-round.text-center',
+            '#adBlock': 'div.watermarked > div > div.m-b-md.p-md.osf-box-lt.box-round.text-center',
             # Warning about AdBlock
-            'iframe': 'body > div.watermarked > div > div.m-b-md.p-md.osf-box-lt.box-round.text-center',
+            'iframe': 'div.watermarked > div > div.m-b-md.p-md.osf-box-lt.box-round.text-center',
             # External frame for analytics
         }
         # self.harvest_pages(run_info['node_urls'], 'analytics/', ProjectAnalyticsPage)
@@ -295,7 +290,7 @@ class ProjectForksVerifier(Verifier):
         Verifier.__init__(self)
         self.minimum_size = 380
         self.page_elements = {
-            '#renderNode': 'body > div.watermarked > div > div.row > div.col-xs-9.col-sm-8 > p'  # List
+            '#renderNode': 'div.watermarked > div > div.row > div.col-xs-9.col-sm-8 > p'  # List
         }
         # self.harvest_pages(run_info['node_urls'], 'forks/', ProjectForksPage)
         # self.size_comparison()
@@ -313,11 +308,11 @@ class RegistrationDashboardVerifier(Verifier):
         self.minimum_size = 410
         self.page_elements = {
             '#nodeTitleEditable': '',  # Title
-            '#contributors span.date.node-last-modified-date': '',  # Last modified
+            '#contributors > div > p:nth-of-type(5) > span': '',  # Last modified
             '#contributorsList > ol': '',  # Contributor list
-            '#nodeDescriptionEditable': '',  # Description
             '#tb-tbody': '',  # File list
-            '#logScope > div > div > div.panel-body > span > dl': ''  # Activity
+            '#render-node': 'div.row > div:nth-of-type(2) > div.components.panel.panel-default > div.panel-body > p',  # Nodes list
+            '#logScope > div > div > div.panel-body > span > dl': '#logFeed > div > p'  # Activity / "Unable to retrieve at this time"
         }
         # self.harvest_pages(run_info['registration_urls'], '', RegistrationDashboardPage)
         # self.size_comparison()
@@ -370,9 +365,9 @@ class RegistrationAnalyticsVerifier(Verifier):
         Verifier.__init__(self)
         self.minimum_size = 380
         self.page_elements = {
-            '#adBlock': 'body > div.watermarked > div > div.m-b-md.p-md.osf-box-lt.box-round.text-center',
+            '#adBlock': 'div.watermarked > div > div.m-b-md.p-md.osf-box-lt.box-round.text-center',
             # Warning about AdBlock
-            'iframe': 'body > div.watermarked > div > div.m-b-md.p-md.osf-box-lt.box-round.text-center',
+            'iframe': 'div.watermarked > div > div.m-b-md.p-md.osf-box-lt.box-round.text-center',
             # External frame for analytics
         }
         # self.harvest_pages(run_info['registration_urls'], 'analytics/', RegistrationAnalyticsPage)
@@ -390,7 +385,7 @@ class RegistrationForksVerifier(Verifier):
         Verifier.__init__(self)
         self.minimum_size = 380
         self.page_elements = {
-            '#renderNode': 'body > div.watermarked > div > div.row > div.col-xs-9.col-sm-8 > p'  # List
+            '#renderNode': 'div.watermarked > div > div.row > div.col-xs-9.col-sm-8 > p'  # List
         }
         # self.harvest_pages(run_info['registration_urls'], 'forks/', RegistrationForksPage)
         # self.size_comparison()
@@ -407,8 +402,8 @@ class UserProfileVerifier(Verifier):
         Verifier.__init__(self)
         self.minimum_size = 80
         self.page_elements = {
-            '#projects': 'div.help-block > p',  # Project list / "You have no projects"
-            'body div.panel-body': 'div.help-block > p',  # Component list / "You have no components"
+            '#projects': 'div > div:nth-of-type(1) > div > div.panel-body > div',  # Project list / "No projects"
+            '#components': 'div > div:nth-of-type(2) > div > div.panel-body > div',  # Component list / "No components"
             'body h2': ''  # Activity points, project count
         }
         # self.harvest_pages(run_info['user_profile_page_urls'], '', UserProfilePage)
@@ -515,13 +510,30 @@ def initial_verification(json_file):
             institution_dashboards = institution_dashboards_verifier.failed_pages
             run_copy['institution_urls_verified'] = institution_dashboards
 
+        #     # truncates json and dumps new lists
+        #     with codecs.open(TASK_FILE, mode='w', encoding='utf-8') as file:
+        #         json.dump(run_info, file)
+        #
+        # # Rescraping
+        #
+        # second_chance = Crawler()
+        #
+        # if run_info['scrape_nodes']:
+        #     second_chance.node_urls = run_info['node_urls_verified']
+        #     second_chance.scrape_nodes()
+        # if run_info['scrape_registrations']:
+        #     second_chance.registration_urls = run_info['registration_urls_verified']
+        # if run_info['scrape_users']:
+        #     second_chance.user_profile_page_urls = run_info['user_profile_page_urls_verified']
+        # if run_info['scrape_institutions']:
+        #     second_chance.institution_urls = run_info['institution_urls_verified']
         # truncates json and dumps new lists
         with codecs.open(TASK_FILE, mode='w', encoding='utf-8') as file:
             json.dump(run_copy, file, indent=4)
 
         # Rescraping
 
-        second_chance = Crawler()
+    second_chance = Crawler()
 
     if run_info['scrape_nodes']:
         second_chance.node_urls = run_copy['node_urls_verified']
@@ -628,7 +640,7 @@ def subsequent_verifications(dict_file, num_retries):
 
 def main():
     # FOR TESTING
-    json_filename = '201606291542.json'
+    json_filename = TASK_FILE
     num_retries = 2
     # call two verification/scraping methods depending on num retries
     if num_retries > 1:

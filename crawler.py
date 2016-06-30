@@ -9,6 +9,7 @@ import math
 import collections
 import logging
 import urllib.parse
+import codecs
 
 # Configure for testing in settings.py
 from settings import base_urls
