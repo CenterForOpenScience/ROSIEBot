@@ -426,7 +426,7 @@ class Crawler:
         async with sem:
             async with aiohttp.ClientSession() as s:
                 response = await s.get(url, headers=self.headers)
-                body = await response.read()
+                body = await response.text()
                 response.close()
                 if response.status == 200:
                     self.debug_logger.debug("Finished : " + url)
@@ -444,13 +444,28 @@ class Crawler:
 
 
 def save_html(html, page):
+    # Mirror warning
+    mirror_warning = """
+        <div style="position:fixed;    bottom:0;left:0;    border-top-right-radius: 8px;    color:  white;
+        background-color: red;  padding: .5em;">
+            This is a read-only mirror of the OSF. Some features may not be available.
+        </div>
+        """
+
+    # Remove the footer
+    old_footer = """<div id="footerSlideIn" style="display: block;">"""
+    new_footer = """<div id="footerSlideIn" style="display: none;">"""
+
     page = page.split('//', 1)[1]
-    # page = page.split('/',1)[1]
-    # page = 'mirror/' + page
+    page = page.split('/',1)[1]
+    page = 'archive/' + page
     if page[-1] != '/':
         page += '/'
     make_dirs(page)
-    f = open(page + 'index.html', 'wb+')
+
+    html = html.replace(old_footer, new_footer) + mirror_warning
+
+    f = open(page + 'index.html', 'w')
     f.write(html)
     f.close()
     os.chdir(sys.path[0])
