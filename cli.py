@@ -3,6 +3,7 @@ import datetime
 import crawler
 import json
 import verifier
+import codecs
 
 @click.command()
 # Specify parameters that choose between different modes
