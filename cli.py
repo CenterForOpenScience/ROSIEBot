@@ -66,7 +66,7 @@ def cli_entry_point(scrape, resume, verify, compile_active, dm, tf, rn, registra
         try:
             verify_mirror(tf, rn)
         except FileNotFoundError:
-            click('File Not Found for the task.')
+            click.echo('File Not Found for the task.')
         return
 
     return
