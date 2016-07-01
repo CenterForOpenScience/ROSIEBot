@@ -638,16 +638,12 @@ def subsequent_verifications(dict_file, num_retries):
                 second_chance.institution_urls = dict_file['institution_urls_verified']
 
 
-def main():
-    # FOR TESTING
-    json_filename = TASK_FILE
-    num_retries = 2
+def main(json_filename, num_retries):
     # call two verification/scraping methods depending on num retries
+    if not os.path.exists(json_filename):
+        raise FileNotFoundError
     if num_retries > 1:
         run_file = initial_verification(json_filename)
         subsequent_verifications(run_file, num_retries)
     if num_retries == 1:
         initial_verification(json_filename)
-
-
-if __name__ == "__main__": main()

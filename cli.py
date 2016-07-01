@@ -2,7 +2,7 @@ import click
 import datetime
 import crawler
 import json
-import codecs
+import verifier
 
 @click.command()
 # Specify parameters that choose between different modes
@@ -12,6 +12,7 @@ import codecs
 # Specify parameters for other needed values
 @click.option('--dm', default=None, type=click.STRING, help="Date marker needed for normal scrape")
 @click.option('--tf', default=None, type=click.STRING, help="filename of the task file")
+@click.option('--rt', default=2, type=click.INT, help="Number of times to retry scraping")
 # Specify areas of scraping; if none of these are included in the command, then do a full scrape
 @click.option('--registrations', is_flag=True, help="Add this flag if you want to scrape for registrations")
 @click.option('--users', is_flag=True, help="Add this flag if you want to scrape for users")
@@ -24,7 +25,7 @@ import codecs
 @click.option('-a', is_flag=True, help="Add this flag if you want to include analytics page for nodes")
 @click.option('-r', is_flag=True, help="Add this flag if you want to include registrations page for nodes")
 @click.option('-k', is_flag=True, help="Add this flag if you want to include forks page for nodes")
-def cli_entry_point(scrape, resume, verify, dm, tf, registrations, users, institutions, nodes, d, f, w, a, r, k):
+def cli_entry_point(scrape, resume, verify, dm, tf, rt, registrations, users, institutions, nodes, d, f, w, a, r, k):
     if scrape and resume and verify:
         click.echo('Invalid parameters.')
         return
@@ -42,7 +43,7 @@ def cli_entry_point(scrape, resume, verify, dm, tf, registrations, users, instit
         return
 
     if resume and tf is not None:
-        click.echo('Resuming scrape withe the task file : ' + tf)
+        click.echo('Resuming scrape with the task file : ' + tf)
         try:
             with codecs.open(tf, 'r', encoding='utf-8') as db:
                 resume_scrape(db, tf)
@@ -50,8 +51,12 @@ def cli_entry_point(scrape, resume, verify, dm, tf, registrations, users, instit
             click.echo('File Not Found for the task.')
         return
 
-    if verify and tf is not None:
-        # verify_mirror(tf)
+    if verify and tf is not None and rt is not None:
+        click.echo('Verification commenced.')
+        try:
+            verifier.main(tf, rt)
+        except FileNotFoundError:
+            click.echo("File not found for this task.")
         return
 
     return
