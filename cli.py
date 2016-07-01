@@ -3,9 +3,11 @@ import datetime
 import crawler
 import json
 import codecs
+import verifier
 
 @click.command()
 # Specify parameters that choose between different modes
+@click.option('--compile_active', is_flag=True, help="Compile a list of active nodes")
 @click.option('--scrape', is_flag=True, help="Do a normal scrape, need date marker specified")
 @click.option('--resume', is_flag=True, help="Resume last unfinished scrape, need to import task file")
 @click.option('--verify', is_flag=True, help="Verify the existing OSF static mirror, need to import task file")
@@ -24,13 +26,22 @@ import codecs
 @click.option('-a', is_flag=True, help="Add this flag if you want to include analytics page for nodes")
 @click.option('-r', is_flag=True, help="Add this flag if you want to include registrations page for nodes")
 @click.option('-k', is_flag=True, help="Add this flag if you want to include forks page for nodes")
-def cli_entry_point(scrape, resume, verify, dm, tf, registrations, users, institutions, nodes, d, f, w, a, r, k):
-    if scrape and resume and verify:
+def cli_entry_point(scrape, resume, verify, compile_active, dm, tf, registrations, users, institutions, nodes, d, f, w, a, r, k):
+    if scrape and resume and verify and compile_active:
         click.echo('Invalid parameters.')
         return
 
-    if not scrape and not resume and not verify:
+    if not scrape and not resume and not verify and not compile_active:
         click.echo('You have to choose a mode to run')
+
+    if compile_active:
+        now = datetime.datetime.now()
+        click.echo('Starting to compile a list of active nodes as of ' + str(now))
+        filename = 'activelist-' + now.strftime('%Y%m%d%H%M' + '.json')
+        click.echo('Creating a active node list file named : ' + filename)
+        with open(filename, 'w') as file:
+            compile_active_list(file)
+        return
 
     if scrape and dm is not None:
         click.echo('Starting normal scrape with date marker set to : ' + dm)
@@ -42,7 +53,7 @@ def cli_entry_point(scrape, resume, verify, dm, tf, registrations, users, instit
         return
 
     if resume and tf is not None:
-        click.echo('Resuming scrape withe the task file : ' + tf)
+        click.echo('Resuming scrape with the task file : ' + tf)
         try:
             with codecs.open(tf, 'r', encoding='utf-8') as db:
                 resume_scrape(db, tf)
@@ -51,10 +62,25 @@ def cli_entry_point(scrape, resume, verify, dm, tf, registrations, users, instit
         return
 
     if verify and tf is not None:
-        # verify_mirror(tf)
+        verify_mirror(tf)
         return
 
     return
+
+
+def compile_active_list(file):
+    dict = {}
+    rosie = crawler.Crawler()
+    rosie.crawl_nodes_api(page_limit=10)
+    list_of_active_nodes = [x[0].split('/')[4] for x in rosie.node_url_tuples]
+    dict['list_of_active_nodes'] = list_of_active_nodes
+    rosie.crawl_users_api(page_limit=10)
+    list_of_active_users = [x.split('/')[4] for x in rosie.user_profile_page_urls]
+    dict['list_of_active_users'] = list_of_active_users
+    rosie.crawl_registrations_api(page_limit=10)
+    list_of_active_registrations = [x[0].split('/')[3] for x in rosie.registration_url_tuples]
+    dict['list_of_active_registrations'] = list_of_active_registrations
+    json.dump(dict, file, indent=4)
 
 
 def normal_scrape(dm,
@@ -247,6 +273,11 @@ def resume_scrape(db, tf):
     db.truncate()
     json.dump(store, db, indent=4)
     db.flush()
+
+
+def verify_mirror(tf):
+    verifier.main(tf)
+
 
 if __name__ == '__main__':
     cli_entry_point()
