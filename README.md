@@ -94,9 +94,9 @@ Flags:
 
 Crawl and scrape the site. Must include date marker `--dm=<DATE>`, where `<DATE>` is the date of last scrape in the form **YYYY-MM-DDTHH:MM:SS.000**, ex. 1970-06-15T00:00:00.000
 
-This is where specifying `--nodes` (projects), `--registrations`, `--users`, `--institutions` is possible. If none are specified, all are included by default.
+This is where specifying `--nodes` (projects), `--registrations`, `--users`, `--institutions` is necessary.
 
-When projects are included, whether explicitly or by default, the following flags may be used to include project pages:
+When projects are included, the following flags may be used to include project pages:
 
 - `-d` : dashboard
 - `-f` : files page
@@ -111,7 +111,7 @@ Pick up where a normal process left off in case of an unfortunate halt. The norm
 
 **`--verify`**
 
-Verify the completeness of the mirror. See below for steps. This process also requires a .json file in the form described in the resume step, and `--rt=<INT>`, where `<INT>` is the desired number of retries. 
+Verify the completeness of the mirror. See below for steps. This process also requires a .json file in the form described in the resume step, and `--rn=<INT>`, where `<INT>` is the desired number of retries. 
 
 
 ## Verification Steps

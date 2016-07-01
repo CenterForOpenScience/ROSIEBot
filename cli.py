@@ -15,12 +15,12 @@ import verifier
 @click.option('--dm', default=None, type=click.STRING, help="Date marker needed for normal scrape")
 @click.option('--tf', default=None, type=click.STRING, help="filename of the task file")
 @click.option('--rn', default=3, type=click.INT, help="Number of times to retry")
-# Specify areas of scraping; if none of these are included in the command, then do a full scrape
+# Specify areas of scraping
 @click.option('--registrations', is_flag=True, help="Add this flag if you want to scrape for registrations")
 @click.option('--users', is_flag=True, help="Add this flag if you want to scrape for users")
 @click.option('--institutions', is_flag=True, help="Add this flag if you want to scrape for institutions")
 @click.option('--nodes', is_flag=True, help="Add this flag if you want to scrape for nodes")
-# Specify types of node pages needed to scrape, only works for scraping nodes; if none are include, scrape all types
+# Specify types of node pages needed to scrape, only works for scraping nodes;
 @click.option('-d', is_flag=True, help="Add this flag if you want to include dashboard page for nodes")
 @click.option('-f', is_flag=True, help="Add this flag if you want to include files page for nodes")
 @click.option('-w', is_flag=True, help="Add this flag if you want to include wiki page for nodes")
