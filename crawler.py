@@ -585,12 +585,13 @@ class Crawler:
                     save_html(body, url)
                 else:
                     self.debug_logger.debug(str(response.status) + " on : " + url)
-                    self.error_list.append(url)
-                    self.dictionary['error_list'] = self.error_list
-                    self.database.seek(0)
-                    self.database.truncate()
-                    json.dump(self.dictionary, self.database, indent=4)
-                    self.database.flush()
+                    if self.database is not None:
+                        self.error_list.append(url)
+                        self.dictionary['error_list'] = self.error_list
+                        self.database.seek(0)
+                        self.database.truncate()
+                        json.dump(self.dictionary, self.database, indent=4)
+                        self.database.flush()
 
 # Method to record the milestone
     def record_milestone(self, url):
@@ -598,11 +599,12 @@ class Crawler:
         Called by scrape_url to keep track of progress.
         :param url: url of the page that finished
         """
-        self.dictionary['milestone'] = url
-        self.database.seek(0)
-        self.database.truncate()
-        json.dump(self.dictionary, self.database, indent=4)
-        self.database.flush()
+        if self.database is not None:
+            self.dictionary['milestone'] = url
+            self.database.seek(0)
+            self.database.truncate()
+            json.dump(self.dictionary, self.database, indent=4)
+            self.database.flush()
 
 
 def save_html(html, page):

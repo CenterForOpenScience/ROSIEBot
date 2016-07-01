@@ -548,6 +548,3 @@ def main(json_filename, num_retries):
         subsequent_verifications(json_filename, run_file, num_retries)
     if num_retries == 1:
         initial_verification(json_filename)
-
-# for testing
-if __name__ == "__main__": main(json_filename='201606231548.json', num_retries= 2)

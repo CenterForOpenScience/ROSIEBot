@@ -14,6 +14,7 @@ import verifier
 # Specify parameters for other needed values
 @click.option('--dm', default=None, type=click.STRING, help="Date marker needed for normal scrape")
 @click.option('--tf', default=None, type=click.STRING, help="filename of the task file")
+@click.option('--rn', default=3, type=click.INT, help="Number of times to retry")
 # Specify areas of scraping; if none of these are included in the command, then do a full scrape
 @click.option('--registrations', is_flag=True, help="Add this flag if you want to scrape for registrations")
 @click.option('--users', is_flag=True, help="Add this flag if you want to scrape for users")
@@ -26,7 +27,7 @@ import verifier
 @click.option('-a', is_flag=True, help="Add this flag if you want to include analytics page for nodes")
 @click.option('-r', is_flag=True, help="Add this flag if you want to include registrations page for nodes")
 @click.option('-k', is_flag=True, help="Add this flag if you want to include forks page for nodes")
-def cli_entry_point(scrape, resume, verify, compile_active, dm, tf, registrations, users, institutions, nodes, d, f, w, a, r, k):
+def cli_entry_point(scrape, resume, verify, compile_active, dm, tf, rn, registrations, users, institutions, nodes, d, f, w, a, r, k):
     if scrape and resume and verify and compile_active:
         click.echo('Invalid parameters.')
         return
@@ -62,7 +63,10 @@ def cli_entry_point(scrape, resume, verify, compile_active, dm, tf, registration
         return
 
     if verify and tf is not None:
-        verify_mirror(tf)
+        try:
+            verify_mirror(tf, rn)
+        except FileNotFoundError:
+            click.echo('File Not Found for the task.')
         return
 
     return
@@ -275,8 +279,8 @@ def resume_scrape(db, tf):
     db.flush()
 
 
-def verify_mirror(tf):
-    verifier.main(tf)
+def verify_mirror(tf, rn):
+    verifier.main(tf, rn)
 
 
 if __name__ == '__main__':
