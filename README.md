@@ -94,9 +94,9 @@ Flags:
 
 Crawl and scrape the site. Must include date marker `--dm=<DATE>`, where `<DATE>` is the date of last scrape in the form **YYYY-MM-DDTHH:MM:SS.000**, ex. 1970-06-15T00:00:00.000
 
-This is where specifying `--nodes` (projects), `--registrations`, `--users`, `--institutions` is possible. If none are specified, all are included by default.
+This is where specifying `--nodes` (projects), `--registrations`, `--users`, `--institutions` is necessary.
 
-When projects are included, whether explicitly or by default, the following flags may be used to include project pages:
+When projects are included, the following flags may be used to include project pages:
 
 - `-d` : dashboard
 - `-f` : files page
