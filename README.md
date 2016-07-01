@@ -111,7 +111,7 @@ Pick up where a normal process left off in case of an unfortunate halt. The norm
 
 **`--verify`**
 
-Verify the completeness of the mirror. See below for steps. This process also requires the .json file described for the resume process.
+Verify the completeness of the mirror. See below for steps. This process also requires a .json file in the form described in the resume step, and `--rt=<INT>`, where `<INT>` is the desired number of retries. 
 
 
 ## Verification Steps
