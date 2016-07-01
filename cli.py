@@ -51,6 +51,7 @@ def cli_entry_point(scrape, resume, verify, compile_active, dm, tf, rn, registra
         click.echo('Creating a task file named : ' + filename)
         with open(filename, 'w') as db:
             normal_scrape(dm, registrations, users, institutions, nodes, d, f, w, a, r, k, db)
+        click.echo("Finished scrape. Taskfile is:", filename)
         return
 
     if resume and tf is not None:
