@@ -554,5 +554,3 @@ def main(json_filename, num_retries):
     # num_retries = 2
     # call two verification/scraping methods depending on num retries
     run_verification(json_filename, num_retries)
-
-if __name__ == "__main__": main()
