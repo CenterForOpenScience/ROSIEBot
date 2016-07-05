@@ -60,7 +60,7 @@ if (isset($_SERVER['HTTP_REFERER'])) {
             Authenticity for
             <?php
             echo $ref . ': ';
-            $officials = array("http://localhost:8888/", "http://127.0.0.1:6565/approved_mirror.html");
+            $officials = array("http://localhost:8888/", "http://127.0.0.1:6565/approved_mirror.html", "http://localhost:6565/approved_mirror.html");
 
             if (array_search($ref, $officials) !== false) {
 
