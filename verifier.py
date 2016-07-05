@@ -91,7 +91,7 @@ class Verifier:
 
 class ProjectDashboardVerifier(Verifier):
     def __init__(self):
-        super().__init__(self, 410, ProjectDashboardPage, "")
+        super().__init__(410, ProjectDashboardPage, '')
         self.page_elements = {
             '#nodeTitleEditable': '',  # Title
             '#contributors span.date.node-last-modified-date': '',  # Last modified
@@ -106,7 +106,7 @@ class ProjectDashboardVerifier(Verifier):
 
 class ProjectFilesVerifier(Verifier):
     def __init__(self):
-        super().__init__(self, 380, ProjectFilesPage, "files/")
+        super().__init__(380, ProjectFilesPage, "files/")
         self.page_elements = {
             '.fg-file-links': '',  # Links to files (names them)
         }
@@ -114,7 +114,7 @@ class ProjectFilesVerifier(Verifier):
 
 class ProjectWikiVerifier(Verifier):
     def __init__(self):
-        super().__init__(self, 410, ProjectWikiPage, "wiki/")
+        super().__init__(410, ProjectWikiPage, "wiki/")
         self.page_elements = {
             'pre': '#wikiViewRender > p > em',  # Wiki content / `No wiki content`
             '#viewVersionSelect option': '',  # Current version date modified
@@ -124,7 +124,7 @@ class ProjectWikiVerifier(Verifier):
 
 class ProjectAnalyticsVerifier(Verifier):
     def __init__(self):
-        super().__init__(self, 380, ProjectAnalyticsPage, "analytics/")
+        super().__init__(380, ProjectAnalyticsPage, "analytics/")
         self.page_elements = {
             '#adBlock': 'div.watermarked > div > div.m-b-md.p-md.osf-box-lt.box-round.text-center',
             # Warning about AdBlock
@@ -135,7 +135,7 @@ class ProjectAnalyticsVerifier(Verifier):
 
 class ProjectRegistrationsVerifier(Verifier):
     def __init__(self):
-        super().__init__(self, 380, ProjectRegistrationsPage, "registrations/")
+        super().__init__(380, ProjectRegistrationsPage, "registrations/")
         self.page_elements = {
             '#renderNode': '#registrations > div > div > p'  # List of nodes
         }
@@ -143,7 +143,7 @@ class ProjectRegistrationsVerifier(Verifier):
 
 class ProjectForksVerifier(Verifier):
     def __init__(self):
-        super().__init__(self, 380, ProjectForksPage, "forks/")
+        super().__init__(380, ProjectForksPage, "forks/")
         self.page_elements = {
             '#renderNode': 'div.watermarked > div > div.row > div.col-xs-9.col-sm-8 > p'  # List
         }
@@ -151,7 +151,7 @@ class ProjectForksVerifier(Verifier):
 
 class RegistrationDashboardVerifier(Verifier):
     def __init__(self):
-        super().__init__(self, 410, RegistrationDashboardPage, "")
+        super().__init__(410, RegistrationDashboardPage, "")
         self.page_elements = {
             '#nodeTitleEditable': '',  # Title
             '#contributors > div > p:nth-of-type(5) > span': '',  # Last modified
@@ -166,7 +166,7 @@ class RegistrationDashboardVerifier(Verifier):
 
 class RegistrationFilesVerifier(Verifier):
     def __init__(self):
-        super().__init__(self, 380, RegistrationFilesPage, "files/")
+        super().__init__(380, RegistrationFilesPage, "files/")
         self.page_elements = {
             '.fg-file-links': '',  # Links to files (names them)
         }
@@ -174,7 +174,7 @@ class RegistrationFilesVerifier(Verifier):
 
 class RegistrationWikiVerifier(Verifier):
     def __init__(self):
-        super().__init__(self, 410, RegistrationWikiPage, "wiki/")
+        super().__init__(410, RegistrationWikiPage, "wiki/")
         self.page_elements = {
             'pre': '#wikiViewRender > p > em',  # Wiki content / `No wiki content`
             '#viewVersionSelect option': '',  # Current version date modified
@@ -184,7 +184,7 @@ class RegistrationWikiVerifier(Verifier):
 
 class RegistrationAnalyticsVerifier(Verifier):
     def __init__(self):
-        super().__init__(self, 380, RegistrationAnalyticsPage, "analytics/")
+        super().__init__(380, RegistrationAnalyticsPage, "analytics/")
         self.page_elements = {
             '#adBlock': 'div.watermarked > div > div.m-b-md.p-md.osf-box-lt.box-round.text-center',
             # Warning about AdBlock
@@ -195,7 +195,7 @@ class RegistrationAnalyticsVerifier(Verifier):
 
 class RegistrationForksVerifier(Verifier):
     def __init__(self):
-        super().__init__(self, 380, RegistrationForksPage, "forks/")
+        super().__init__(380, RegistrationForksPage, "forks/")
         self.page_elements = {
             '#renderNode': 'div.watermarked > div > div.row > div.col-xs-9.col-sm-8 > p'  # List
         }
@@ -203,7 +203,7 @@ class RegistrationForksVerifier(Verifier):
 
 class UserProfileVerifier(Verifier):
     def __init__(self):
-        super().__init__(self, 80, RegistrationAnalyticsPage, "")
+        super().__init__(80, UserProfilePage, "")
         self.page_elements = {
             '#projects': 'div > div:nth-of-type(1) > div > div.panel-body > div',  # Project list / "No projects"
             '#components': 'div > div:nth-of-type(2) > div > div.panel-body > div',  # Component list / "No components"
@@ -213,17 +213,17 @@ class UserProfileVerifier(Verifier):
 
 class InstitutionDashboardVerifier(Verifier):
     def __init__(self):
-        super().__init__(self, 350, InstitutionDashboardPage, "")
+        super().__init__(350, InstitutionDashboardPage, "")
         self.page_elements = {
             '#fileBrowser > div.db-infobar > div > div': '#fileBrowser > div.db-infobar > div > div',  # Project preview
             '#tb-tbody': '#fileBrowser > div.db-main > div.db-non-load-template.m-md.p-md.osf-box'  # Project browser
         }
 
 
-# called when json file had scrape_nodes = true
-# checks for all the components of a project and if they were scraped
-# verifies them and returns a list of the failed pages
-def scraped_nodes(verification_dictionary, list_name):
+# Called when json file had scrape_nodes = true
+# Checks for all the components of a project and if they were scraped
+# Verifies them and returns a list of the failed pages
+def verify_nodes(verification_dictionary, list_name):
     nodes_list_verified = []
     if verification_dictionary['include_files']:
         project_files_verifier = ProjectFilesVerifier()
@@ -258,9 +258,9 @@ def scraped_nodes(verification_dictionary, list_name):
     return nodes_list_verified
 
 
-# called when json file had scrape_registrations = true
-# verifies the components of a registration and returns a list of the failed pages
-def scraped_registrations(verification_dictionary, list_name):
+# Called when json file had scrape_registrations = true
+# Verifies the components of a registration and returns a list of the failed pages
+def verify_registrations(verification_dictionary, list_name):
     # Must run all page types automatically
     registration_files_verifier = RegistrationFilesVerifier()
     registration_files_verifier.run_verifier(verification_dictionary, verification_dictionary[list_name])
@@ -287,18 +287,18 @@ def scraped_registrations(verification_dictionary, list_name):
     return registrations_list_verified
 
 
-# called when json file had scrape_users = true
-# verifies all user profile pages and returns a list of the failed pages
-def scraped_users(verification_dictionary, list_name):
+# Called when json file had scrape_users = true
+# Verifies all user profile pages and returns a list of the failed pages
+def verify_users(verification_dictionary, list_name):
     user_profiles_verifier = UserProfileVerifier()
     user_profiles_verifier.run_verifier(verification_dictionary, verification_dictionary[list_name])
     user_profiles = user_profiles_verifier.failed_pages
     return user_profiles
 
 
-# called when json file had scrape_institutions = true
-# verifies all user profile pages and returns a list of the failed pages
-def scraped_institutions(verification_dictionary, list_name):
+# Called when json file had scrape_institutions = true
+# Verifies all user profile pages and returns a list of the failed pages
+def verify_institutions(verification_dictionary, list_name):
     institution_dashboards_verifier = InstitutionDashboardVerifier()
     institution_dashboards_verifier.run_verifier(verification_dictionary, verification_dictionary[list_name])
     institution_dashboards = institution_dashboards_verifier.failed_pages
@@ -306,6 +306,7 @@ def scraped_institutions(verification_dictionary, list_name):
 
 
 def call_rescrape(json_filename, verification_json_filename):
+    print("Called rescrape")
     second_chance = Crawler()
     if json_filename['scrape_nodes']:
         second_chance.node_urls = verification_json_filename['node_urls_failed_verification']
@@ -318,57 +319,63 @@ def call_rescrape(json_filename, verification_json_filename):
         second_chance.institution_urls = verification_json_filename['institution_urls_failed_verification']
 
 
-# first verification and then scraping the failed pages
-def initial_verification(json_file):
-    with codecs.open(json_file, mode='r', encoding='utf-8') as failure_file:
-        run_info = json.load(failure_file)
-    with codecs.open(json_file, mode='r', encoding='utf-8') as failure_file:
-        run_copy = json.load(failure_file)
-    if run_info['scrape_finished']:
-        if run_info['scrape_nodes']:
-            run_copy['node_urls_failed_verification'] = scraped_nodes(run_info, 'node_urls')
-        if run_info['scrape_registrations']:
-            run_copy['registration_urls_failed_verification'] = scraped_registrations(run_info, 'registration_urls')
-        if run_info['scrape_users']:
-            run_copy['user_profile_page_urls_failed_verification'] = scraped_registrations(run_info,
-                                                                                           'user_profile_page_urls')
-        if run_info['scrape_institutions']:
-            run_copy['institution_urls_failed_verification'] = scraped_institutions(run_info, 'institution_urls')
+def setup_verification(json_dictionary, verification_json_dictionary, first_scrape):
+    print("Check verification")
+    if json_dictionary['scrape_nodes']:
+        if first_scrape:
+            list_name = 'node_urls'
+        else:
+            list_name = 'node_urls_failed_verification'
+        verification_json_dictionary['node_urls_failed_verification'] = verify_nodes(json_dictionary, list_name)
+    if json_dictionary['scrape_registrations']:
+        if first_scrape:
+            list_name = 'registration_urls'
+        else:
+            list_name = 'registration_urls_failed_verification'
+        verification_json_dictionary['registration_urls_failed_verification'] = verify_registrations(json_dictionary,
+                                                                                                     list_name)
+    if json_dictionary['scrape_users']:
+        if first_scrape:
+            list_name = 'user_profile_page_urls'
+        else:
+            list_name = 'user_profile_page_urls_failed_verification'
+        verification_json_dictionary['user_profile_page_urls_failed_verification'] = \
+            verify_users(json_dictionary, list_name)
+    if json_dictionary['scrape_institutions']:
+        if first_scrape:
+            list_name = 'institution_urls'
+        else:
+            list_name = 'institution_urls_failed_verification'
+        verification_json_dictionary['institution_urls_failed_verification'] = verify_institutions(json_dictionary,
+                                                                                                   list_name)
 
-        with codecs.open(json_file, mode='w', encoding='utf-8') as file:
-            json.dump(run_copy, file, indent=4)
 
-    call_rescrape(run_info, run_copy)
-
-    return run_copy
-
-
-def subsequent_verifications(json_file, verified_dictionary, num_retries):
-    if verified_dictionary['scrape_finished']:
-        for i in range(num_retries):
-            if verified_dictionary['scrape_nodes']:
-                verified_dictionary['node_urls_failed_verification'] = scraped_nodes(verified_dictionary,
-                                                                                     'node_urls_failed_verification')
-            if verified_dictionary['scrape_registrations']:
-                verified_dictionary['registration_urls_failed_verification'] = \
-                    scraped_registrations(verified_dictionary, 'registration_urls_failed_verification')
-            if verified_dictionary['scrape_users']:
-                verified_dictionary['user_profile_page_urls_failed_verification'] = \
-                    scraped_users(verified_dictionary, 'user_profile_page_urls_failed_verification')
-            if verified_dictionary['scrape_institutions']:
-                verified_dictionary['institution_urls_failed_verification'] = \
-                    scraped_institutions(verified_dictionary, 'institution_urls_failed_verification')
+def run_verification(json_file, num_retries):
+    for i in range(num_retries):
+        with codecs.open(json_file, mode='r', encoding='utf-8') as failure_file:
+            run_info = json.load(failure_file)
+        with codecs.open(json_file, mode='r', encoding='utf-8') as failure_file:
+            run_copy = json.load(failure_file)
+        if i == 0:
+            print("Begun 1st run")
+            if run_info['scrape_finished']:
+                setup_verification(run_info, run_copy, True)
+                with codecs.open(json_file, mode='w', encoding='utf-8') as file:
+                    json.dump(run_copy, file, indent=4)
+                    print("Dumped json run_copy 1st verify")
+            call_rescrape(run_info, run_copy)
+        else:
+            print("Begun 2nd run")
+            setup_verification(run_copy, run_copy, False)
             # truncates json and dumps new lists
             with codecs.open(json_file, mode='w', encoding='utf-8') as file:
-                json.dump(verified_dictionary, file, indent=4)
-
-            call_rescrape(verified_dictionary, verified_dictionary)
+                json.dump(run_copy, file, indent=4)
+            call_rescrape(run_copy, run_copy)
 
 
 def main(json_filename, num_retries):
+    # for testing:
+    # json_filename = '201606301141.json'
+    # num_retries = 2
     # call two verification/scraping methods depending on num retries
-    if num_retries > 1:
-        run_file = initial_verification(json_filename)
-        subsequent_verifications(json_filename, run_file, num_retries)
-    if num_retries == 1:
-        initial_verification(json_filename)
+    run_verification(json_filename, num_retries)
