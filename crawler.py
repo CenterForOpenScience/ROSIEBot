@@ -47,8 +47,6 @@ class Crawler:
         self.http_base = base_urls[0]
         self.api_base = base_urls[1]
 
-        self.mirror_name = db.name.strip('.json')
-
         if date_modified is not None:
             self.date_modified_marker = date_modified
         # else:
@@ -584,7 +582,7 @@ class Crawler:
                 if response.status == 200:
                     self.debug_logger.debug("Finished : " + url)
                     self.record_milestone(url)
-                    save_html(body, url, self.mirror_name)
+                    save_html(body, url)
                 else:
                     self.debug_logger.debug(str(response.status) + " on : " + url)
                     self.error_list.append(url)
@@ -607,7 +605,7 @@ class Crawler:
         self.database.flush()
 
 
-def save_html(html, page, mirror_name):
+def save_html(html, page):
     # Mirror warning
     mirror_warning = """
         <div style="position:fixed;    bottom:0;left:0;    border-top-right-radius: 8px;    color:  white;
@@ -621,7 +619,7 @@ def save_html(html, page, mirror_name):
     new_footer = """<div id="footerSlideIn" style="display: none;">"""
 
     page = page.split('//', 1)[1]
-    page = mirror_name + '/' + page.split('/',1)[1]
+    page = 'archive/' + page.split('/',1)[1]
     if page[-1] != '/':
         page += '/'
     make_dirs(page)
