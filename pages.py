@@ -1,3 +1,9 @@
+""" The page superclass and sublclasses for verifier"""
+
+from bs4 import BeautifulSoup
+from settings import base_urls
+import os
+MIRROR = 'archive/'
 
 
 # Superclass for page-specific page instances

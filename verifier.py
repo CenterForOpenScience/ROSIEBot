@@ -1,15 +1,8 @@
 import json, codecs
-import os
-import sys
 from pages import ProjectDashboardPage, ProjectFilesPage, ProjectAnalyticsPage, \
     ProjectForksPage, ProjectRegistrationsPage, ProjectWikiPage, RegistrationDashboardPage, RegistrationFilesPage, \
     RegistrationAnalyticsPage, RegistrationForksPage, RegistrationWikiPage, UserProfilePage, InstitutionDashboardPage
-from bs4 import BeautifulSoup
-from settings import base_urls
 from crawler import Crawler
-
-
-MIRROR = 'archive/'
 
 
 # Verifier superclass
