@@ -494,7 +494,7 @@ def call_rescrape(json_filename, verification_json_filename):
         second_chance.institution_urls = verification_json_filename['institution_urls_failed_verification']
 
 
-def verification_checker(json_dictionary, verification_json_dictionary, first_scrape):
+def setup_verification(json_dictionary, verification_json_dictionary, first_scrape):
     print("Check verification")
     if json_dictionary['scrape_nodes']:
         if first_scrape:
@@ -532,16 +532,16 @@ def run_verification(json_file, num_retries):
         with codecs.open(json_file, mode='r', encoding='utf-8') as failure_file:
             run_copy = json.load(failure_file)
         if i == 0:
-            print("hit 1st run")
+            print("Begun 1st run")
             if run_info['scrape_finished']:
-                verification_checker(run_info, run_copy, True)
+                setup_verification(run_info, run_copy, True)
                 with codecs.open(json_file, mode='w', encoding='utf-8') as file:
                     json.dump(run_copy, file, indent=4)
-                    print("dumped json run_copy 1st verify")
+                    print("Dumped json run_copy 1st verify")
             call_rescrape(run_info, run_copy)
         else:
-            print("2nd run")
-            verification_checker(run_copy, run_copy, False)
+            print("Begun 2nd run")
+            setup_verification(run_copy, run_copy, False)
             # truncates json and dumps new lists
             with codecs.open(json_file, mode='w', encoding='utf-8') as file:
                 json.dump(run_copy, file, indent=4)
