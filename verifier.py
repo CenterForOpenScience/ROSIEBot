@@ -398,7 +398,7 @@ class InstitutionDashboardVerifier(Verifier):
 # Called when json file had scrape_nodes = true
 # Checks for all the components of a project and if they were scraped
 # Verifies them and returns a list of the failed pages
-def scraped_nodes(verification_dictionary, list_name):
+def verify_nodes(verification_dictionary, list_name):
     nodes_list_verified = []
     if verification_dictionary['include_files']:
         project_files_verifier = ProjectFilesVerifier()
@@ -435,7 +435,7 @@ def scraped_nodes(verification_dictionary, list_name):
 
 # Called when json file had scrape_registrations = true
 # Verifies the components of a registration and returns a list of the failed pages
-def scraped_registrations(verification_dictionary, list_name):
+def verify_registrations(verification_dictionary, list_name):
     # Must run all page types automatically
     registration_files_verifier = RegistrationFilesVerifier()
     registration_files_verifier.run_verifier(verification_dictionary, verification_dictionary[list_name])
@@ -464,7 +464,7 @@ def scraped_registrations(verification_dictionary, list_name):
 
 # Called when json file had scrape_users = true
 # Verifies all user profile pages and returns a list of the failed pages
-def scraped_users(verification_dictionary, list_name):
+def verify_users(verification_dictionary, list_name):
     user_profiles_verifier = UserProfileVerifier()
     user_profiles_verifier.run_verifier(verification_dictionary, verification_dictionary[list_name])
     user_profiles = user_profiles_verifier.failed_pages
@@ -473,7 +473,7 @@ def scraped_users(verification_dictionary, list_name):
 
 # Called when json file had scrape_institutions = true
 # Verifies all user profile pages and returns a list of the failed pages
-def scraped_institutions(verification_dictionary, list_name):
+def verify_institutions(verification_dictionary, list_name):
     institution_dashboards_verifier = InstitutionDashboardVerifier()
     institution_dashboards_verifier.run_verifier(verification_dictionary, verification_dictionary[list_name])
     institution_dashboards = institution_dashboards_verifier.failed_pages
@@ -501,28 +501,28 @@ def verification_checker(json_dictionary, verification_json_dictionary, first_sc
             list_name = 'node_urls'
         else:
             list_name = 'node_urls_failed_verification'
-        verification_json_dictionary['node_urls_failed_verification'] = scraped_nodes(json_dictionary, list_name)
+        verification_json_dictionary['node_urls_failed_verification'] = verify_nodes(json_dictionary, list_name)
     if json_dictionary['scrape_registrations']:
         if first_scrape:
             list_name = 'registration_urls'
         else:
             list_name = 'registration_urls_failed_verification'
-        verification_json_dictionary['registration_urls_failed_verification'] = scraped_registrations(json_dictionary,
-                                                                                                      list_name)
+        verification_json_dictionary['registration_urls_failed_verification'] = verify_registrations(json_dictionary,
+                                                                                                     list_name)
     if json_dictionary['scrape_users']:
         if first_scrape:
             list_name = 'user_profile_page_urls'
         else:
             list_name = 'user_profile_page_urls_failed_verification'
         verification_json_dictionary['user_profile_page_urls_failed_verification'] = \
-            scraped_users(json_dictionary, list_name)
+            verify_users(json_dictionary, list_name)
     if json_dictionary['scrape_institutions']:
         if first_scrape:
             list_name = 'institution_urls'
         else:
             list_name = 'institution_urls_failed_verification'
-        verification_json_dictionary['institution_urls_failed_verification'] = scraped_institutions(json_dictionary,
-                                                                                                    list_name)
+        verification_json_dictionary['institution_urls_failed_verification'] = verify_institutions(json_dictionary,
+                                                                                                   list_name)
 
 
 def run_verification(json_file, num_retries):
