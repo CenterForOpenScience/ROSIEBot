@@ -395,9 +395,9 @@ class InstitutionDashboardVerifier(Verifier):
         self.spot_check()
 
 
-# called when json file had scrape_nodes = true
-# checks for all the components of a project and if they were scraped
-# verifies them and returns a list of the failed pages
+# Called when json file had scrape_nodes = true
+# Checks for all the components of a project and if they were scraped
+# Verifies them and returns a list of the failed pages
 def scraped_nodes(verification_dictionary, list_name):
     nodes_list_verified = []
     if verification_dictionary['include_files']:
@@ -433,8 +433,8 @@ def scraped_nodes(verification_dictionary, list_name):
     return nodes_list_verified
 
 
-# called when json file had scrape_registrations = true
-# verifies the components of a registration and returns a list of the failed pages
+# Called when json file had scrape_registrations = true
+# Verifies the components of a registration and returns a list of the failed pages
 def scraped_registrations(verification_dictionary, list_name):
     # Must run all page types automatically
     registration_files_verifier = RegistrationFilesVerifier()
@@ -462,8 +462,8 @@ def scraped_registrations(verification_dictionary, list_name):
     return registrations_list_verified
 
 
-# called when json file had scrape_users = true
-# verifies all user profile pages and returns a list of the failed pages
+# Called when json file had scrape_users = true
+# Verifies all user profile pages and returns a list of the failed pages
 def scraped_users(verification_dictionary, list_name):
     user_profiles_verifier = UserProfileVerifier()
     user_profiles_verifier.run_verifier(verification_dictionary, verification_dictionary[list_name])
@@ -471,8 +471,8 @@ def scraped_users(verification_dictionary, list_name):
     return user_profiles
 
 
-# called when json file had scrape_institutions = true
-# verifies all user profile pages and returns a list of the failed pages
+# Called when json file had scrape_institutions = true
+# Verifies all user profile pages and returns a list of the failed pages
 def scraped_institutions(verification_dictionary, list_name):
     institution_dashboards_verifier = InstitutionDashboardVerifier()
     institution_dashboards_verifier.run_verifier(verification_dictionary, verification_dictionary[list_name])
@@ -481,7 +481,7 @@ def scraped_institutions(verification_dictionary, list_name):
 
 
 def call_rescrape(json_filename, verification_json_filename):
-    print("called rescrape")
+    print("Called rescrape")
     second_chance = Crawler()
     if json_filename['scrape_nodes']:
         second_chance.node_urls = verification_json_filename['node_urls_failed_verification']
@@ -495,7 +495,7 @@ def call_rescrape(json_filename, verification_json_filename):
 
 
 def verification_checker(json_dictionary, verification_json_dictionary, first_scrape):
-    print("verification checker")
+    print("Check verification")
     if json_dictionary['scrape_nodes']:
         if first_scrape:
             list_name = 'node_urls'
@@ -515,7 +515,7 @@ def verification_checker(json_dictionary, verification_json_dictionary, first_sc
         else:
             list_name = 'user_profile_page_urls_failed_verification'
         verification_json_dictionary['user_profile_page_urls_failed_verification'] = \
-            scraped_registrations(json_dictionary, list_name)
+            scraped_users(json_dictionary, list_name)
     if json_dictionary['scrape_institutions']:
         if first_scrape:
             list_name = 'institution_urls'
