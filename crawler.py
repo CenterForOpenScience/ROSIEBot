@@ -561,7 +561,10 @@ class Crawler:
             tasks.append(asyncio.ensure_future(self.scrape_url(url, sem)))
 
         loop = asyncio.get_event_loop()
-        loop.run_until_complete(asyncio.wait(tasks))
+        if len(tasks) > 0:
+            loop.run_until_complete(asyncio.wait(tasks))
+        else:
+            print("No pages to scrape.")
 
 # Async method for actual scraping
     async def scrape_url(self, url, sem):
