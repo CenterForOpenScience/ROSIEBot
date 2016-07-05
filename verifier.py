@@ -1,6 +1,5 @@
 import json, codecs
 import os
-import sys
 from bs4 import BeautifulSoup
 from settings import base_urls
 from crawler import Crawler
@@ -202,7 +201,7 @@ class ProjectDashboardVerifier(Verifier):
             # Activity / "Unable to retrieve at this time"
         }
 
-    def run_verifier(self,json_filename, json_list):
+    def run_verifier(self, json_filename, json_list):
         self.harvest_pages(json_filename, json_list, '', ProjectDashboardPage)
         self.size_comparison()
         self.spot_check()
@@ -482,6 +481,7 @@ def scraped_institutions(verification_dictionary, list_name):
 
 
 def call_rescrape(json_filename, verification_json_filename):
+    print("called rescrape")
     second_chance = Crawler()
     if json_filename['scrape_nodes']:
         second_chance.node_urls = verification_json_filename['node_urls_failed_verification']
@@ -494,57 +494,65 @@ def call_rescrape(json_filename, verification_json_filename):
         second_chance.institution_urls = verification_json_filename['institution_urls_failed_verification']
 
 
-# first verification and then scraping the failed pages
-def initial_verification(json_file):
-    with codecs.open(json_file, mode='r', encoding='utf-8') as failure_file:
-        run_info = json.load(failure_file)
-    with codecs.open(json_file, mode='r', encoding='utf-8') as failure_file:
-        run_copy = json.load(failure_file)
-    if run_info['scrape_finished']:
-        if run_info['scrape_nodes']:
-            run_copy['node_urls_failed_verification'] = scraped_nodes(run_info, 'node_urls')
-        if run_info['scrape_registrations']:
-            run_copy['registration_urls_failed_verification'] = scraped_registrations(run_info, 'registration_urls')
-        if run_info['scrape_users']:
-            run_copy['user_profile_page_urls_failed_verification'] = scraped_registrations(run_info,
-                                                                                           'user_profile_page_urls')
-        if run_info['scrape_institutions']:
-            run_copy['institution_urls_failed_verification'] = scraped_institutions(run_info, 'institution_urls')
+def verification_checker(json_dictionary, verification_json_dictionary, first_scrape):
+    print("verification checker")
+    if json_dictionary['scrape_nodes']:
+        if first_scrape:
+            list_name = 'node_urls'
+        else:
+            list_name = 'node_urls_failed_verification'
+        verification_json_dictionary['node_urls_failed_verification'] = scraped_nodes(json_dictionary, list_name)
+    if json_dictionary['scrape_registrations']:
+        if first_scrape:
+            list_name = 'registration_urls'
+        else:
+            list_name = 'registration_urls_failed_verification'
+        verification_json_dictionary['registration_urls_failed_verification'] = scraped_registrations(json_dictionary,
+                                                                                                      list_name)
+    if json_dictionary['scrape_users']:
+        if first_scrape:
+            list_name = 'user_profile_page_urls'
+        else:
+            list_name = 'user_profile_page_urls_failed_verification'
+        verification_json_dictionary['user_profile_page_urls_failed_verification'] = \
+            scraped_registrations(json_dictionary, list_name)
+    if json_dictionary['scrape_institutions']:
+        if first_scrape:
+            list_name = 'institution_urls'
+        else:
+            list_name = 'institution_urls_failed_verification'
+        verification_json_dictionary['institution_urls_failed_verification'] = scraped_institutions(json_dictionary,
+                                                                                                    list_name)
 
-        with codecs.open(json_file, mode='w', encoding='utf-8') as file:
-            json.dump(run_copy, file, indent=4)
 
-    call_rescrape(run_info, run_copy)
-
-    return run_copy
-
-
-def subsequent_verifications(json_file, verified_dictionary, num_retries):
-    if verified_dictionary['scrape_finished']:
-        for i in range(num_retries):
-            if verified_dictionary['scrape_nodes']:
-                verified_dictionary['node_urls_failed_verification'] = scraped_nodes(verified_dictionary,
-                                                                                     'node_urls_failed_verification')
-            if verified_dictionary['scrape_registrations']:
-                verified_dictionary['registration_urls_failed_verification'] = \
-                    scraped_registrations(verified_dictionary, 'registration_urls_failed_verification')
-            if verified_dictionary['scrape_users']:
-                verified_dictionary['user_profile_page_urls_failed_verification'] = \
-                    scraped_users(verified_dictionary, 'user_profile_page_urls_failed_verification')
-            if verified_dictionary['scrape_institutions']:
-                verified_dictionary['institution_urls_failed_verification'] = \
-                    scraped_institutions(verified_dictionary, 'institution_urls_failed_verification')
+def run_verification(json_file, num_retries):
+    for i in range(num_retries):
+        with codecs.open(json_file, mode='r', encoding='utf-8') as failure_file:
+            run_info = json.load(failure_file)
+        with codecs.open(json_file, mode='r', encoding='utf-8') as failure_file:
+            run_copy = json.load(failure_file)
+        if i == 0:
+            print("hit 1st run")
+            if run_info['scrape_finished']:
+                verification_checker(run_info, run_copy, True)
+                with codecs.open(json_file, mode='w', encoding='utf-8') as file:
+                    json.dump(run_copy, file, indent=4)
+                    print("dumped json run_copy 1st verify")
+            call_rescrape(run_info, run_copy)
+        else:
+            print("2nd run")
+            verification_checker(run_copy, run_copy, False)
             # truncates json and dumps new lists
             with codecs.open(json_file, mode='w', encoding='utf-8') as file:
-                json.dump(verified_dictionary, file, indent=4)
-
-            call_rescrape(verified_dictionary, verified_dictionary)
+                json.dump(run_copy, file, indent=4)
+            call_rescrape(run_copy, run_copy)
 
 
 def main(json_filename, num_retries):
+    # for testing:
+    # json_filename = '201606301141.json'
+    # num_retries = 2
     # call two verification/scraping methods depending on num retries
-    if num_retries > 1:
-        run_file = initial_verification(json_filename)
-        subsequent_verifications(json_filename, run_file, num_retries)
-    if num_retries == 1:
-        initial_verification(json_filename)
+    run_verification(json_filename, num_retries)
+
+if __name__ == "__main__": main()
