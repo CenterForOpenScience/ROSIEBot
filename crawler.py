@@ -60,6 +60,8 @@ class Crawler:
         self.user_profile_page_urls = []  # User profile page ("osf.io/profile/mst3k/")
         # Stores all the urls for institutions
         self.institution_urls = [self.http_base]  # Institution page ("osf.io/institution/cos")
+        # General pages
+        self.general_urls = [self.http_base, self.http_base + 'support/']
         # List of 504s:
         self.error_list = []
         # For sorting
@@ -548,6 +550,10 @@ class Crawler:
         """
         self.debug_logger.info("Scraping institutions")
         self._scrape_pages(self.institution_urls)
+
+    def scrape_general(self):
+        """ Index and support page """
+        self._scrape_pages(self.general_urls)
 
 # Wrapper method for scraping a list of pages
     def _scrape_pages(self, aspect_list):

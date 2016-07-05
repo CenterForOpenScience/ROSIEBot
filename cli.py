@@ -194,6 +194,8 @@ def normal_scrape(dm,
         json.dump(store, db, indent=4)
         db.flush()
 
+    rosie.scrape_general()
+
     store['scrape_finished'] = True
     db.seek(0)
     db.truncate()
