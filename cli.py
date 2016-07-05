@@ -81,7 +81,7 @@ def compile_active_list(file):
     list_of_active_nodes = [x[0].split('/')[4] for x in rosie.node_url_tuples]
     dict['list_of_active_nodes'] = list_of_active_nodes
     rosie.crawl_users_api(page_limit=10)
-    list_of_active_users = [x.split('/')[4] for x in rosie.user_profile_page_urls]
+    list_of_active_users = [x.split('/')[4] for x in rosie.user_urls]
     dict['list_of_active_users'] = list_of_active_users
     rosie.crawl_registrations_api(page_limit=10)
     list_of_active_registrations = [x[0].split('/')[3] for x in rosie.registration_url_tuples]
@@ -122,7 +122,7 @@ def normal_scrape(dm,
     store['scrape_finished'] = False
     store['node_urls'] = None
     store['registration_urls'] = None
-    store['user_profile_page_urls'] = None
+    store['user_urls'] = None
     store['institution_urls'] = None
     store['error_list'] = None
     store['milestone'] = None
@@ -152,7 +152,7 @@ def normal_scrape(dm,
 
     if scrape_users:
         rosie.crawl_users_api()
-        store['user_profile_page_urls'] = rosie.user_profile_page_urls
+        store['user_urls'] = rosie.user_urls
 
     if scrape_institutions:
         rosie.crawl_institutions_api()
@@ -223,7 +223,7 @@ def resume_scrape(db, tf):
         milestone_url = store['milestone']
         rosie.node_urls = store['node_urls']
         rosie.registration_urls = store['registration_urls']
-        rosie.user_profile_page_urls = store['user_profile_page_urls']
+        rosie.user_urls = store['user_urls']
         rosie.institution_urls = store['institution_urls']
         if store['error_list'] is not None:
             rosie.error_list = store['error_list']
@@ -256,9 +256,9 @@ def resume_scrape(db, tf):
         db.flush()
 
     if scrape_users and not users_finished:
-        if milestone_url in rosie.user_profile_page_urls:
-            rosie.user_profile_page_urls = \
-                rosie.user_profile_page_urls[rosie.user_profile_page_urls.index(milestone_url):]
+        if milestone_url in rosie.user_urls:
+            rosie.user_urls = \
+                rosie.user_urls[rosie.user_urls.index(milestone_url):]
         rosie.scrape_users()
         store['users_finished'] = True
         db.seek(0)
