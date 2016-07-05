@@ -70,6 +70,7 @@ def cli_entry_point(scrape, resume, verify, compile_active, dm, tf, rn, registra
             click.echo('File Not Found for the task.')
         return
 
+
     return
 
 
