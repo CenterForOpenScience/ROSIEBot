@@ -12,15 +12,32 @@ if (isset($_SERVER['HTTP_REFERER'])) {
         <title> Mirror Verification </title>
         <style>
             body {
-            font-family: Helvetica;
+            font-family: Helvetica Neue;
             padding: 50px;
             background: linear-gradient(#C5D6E6, white);
             }
-            div {
+            header {
+            background-color: #214762;
+            position: fixed;
+            top: 0;
+            color: white;
+            width: 100%;
+            left: 0;
+            padding-left: 17%;
+            padding-top: 5px;
+            float: down;
+            }
+            header img {
+            margin: 20px;
+            }
+            .contain {
+            position: relative;
+            top: 60px;
             background-color: rgba(255,255,255,.49);
             border-radius: 5px;
             padding: 10px;
             margin:auto;
+            margin-top: 20px;
             width: 50%;
             }
             .row {
@@ -54,25 +71,34 @@ if (isset($_SERVER['HTTP_REFERER'])) {
         </style>
     </head>
     <body>
-        <h2> OSF Mirror Authenticator </h2>
-        <div>
+        <header>
+            <img style="float: left;" src="/static/img/cos-white2.png" class="osf-navbar-logo" width="27" alt="COS logo">
+            <p style="font-size: 20px;"> OSF Mirror Authentication </p>
+        </header>
+
+        <div class="contain">
+            <p class="row"> <em> Referring URL: </em> <a href='<?php echo $displayref; ?>'> <?php echo $displayref; ?> </a>
             <p class="row">
-            Authenticity for
             <?php
-            echo $ref . ': ';
             $officials = array("http://localhost:8888/", "http://127.0.0.1:6565/approved_mirror.html", "http://localhost:6565/approved_mirror.html");
 
             if (array_search($ref, $officials) !== false) {
 
-                echo '<span class="io passed">Passed</span></p>';
+                echo '<em> Mirror integrity: </em><span class="io passed"> Passed </span></p>';
                 echo '<h3 class="row"> Is <span class="io mirror">' . $displayref . '</span> the site you navigated to?</h3>';
-                echo "<h2 class='row'> Do not trust this site if it isn't " . $displayref . ". </h2>";
+                echo "</div>
+                      <div class='contain'>
+                          <h2 class='row'><a href='" . $displayref . "'> " . $displayref . "</a> is trustworthy.</h2><h3 class='row'> Verify this is the site that brought you here.</h3>
+                      </div>";
             }
 
             else {
 
-                echo '<span class="io failed">Failed</span></p>';
-                echo "<h2 class='row'> Do not trust this site. </h2></div>";
+                echo '<em> Mirror integrity: </em> <span class="io failed"> Unknown </span></p>';
+                echo "</div>
+                      <div class='contain'>
+                        <h2 class='row'> This site may not be a faithful mirror of the OSF. </h2>
+                      </div>";
             }
             ?>
         </div>
