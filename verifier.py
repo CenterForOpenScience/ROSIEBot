@@ -1,7 +1,9 @@
 import json, codecs
 import os
 import sys
-import pages
+from pages import ProjectDashboardPage, ProjectFilesPage, ProjectAnalyticsPage, \
+    ProjectForksPage, ProjectRegistrationsPage, ProjectWikiPage, RegistrationDashboardPage, RegistrationFilesPage, \
+    RegistrationAnalyticsPage, RegistrationForksPage, RegistrationWikiPage, UserProfilePage, InstitutionDashboardPage
 from bs4 import BeautifulSoup
 from settings import base_urls
 from crawler import Crawler
@@ -12,35 +14,34 @@ MIRROR = 'archive/'
 
 # Verifier superclass
 class Verifier:
-    def __init__(self):
-        self.pages = []
-        self.minimum_size = 0
+    def __init__(self, min_size, pg_type, end):
+        self.minimum_size = min_size
+        self.page_type = pg_type
+        self.url_end = end
         self.page_elements = {}
+        self.pages = []
         self.failed_pages = []
 
     # Populate self.pages with the relevant files
-    def harvest_pages(self, json_filename, json_list, url_end, page_class):
+    def harvest_pages(self, json_filename, json_list):
         """
+        :param json_filename: The json file
         :param json_list: The list in the json file of found URLs
-        :param url_end: The json_list is non segregated by page type
-        :param page_class: The subclass for the specific page type
         :return: Null, but self.pages is populated.
         """
         for url in json_list:
-            if url_end in url:
+            if self.url_end in url:
                 print('rel: ', url)
                 if url in json_filename['error_list']:
                     self.failed_pages.append(url)
                     print('error: ', url)
                 else:
                     try:
-                        obj = page_class(url)
+                        obj = self.page_type(url)
                         self.pages.append(obj)
                     except FileNotFoundError:
                         self.failed_pages.append(url)
                 json_list.remove(url)
-
-            # First check
 
     # Compare page size to page-specific minimum that any fully-scraped page should have
     def size_comparison(self):
@@ -52,7 +53,6 @@ class Verifier:
                 self.failed_pages.append(page.url)
         return
 
-    # Second check
     # Check that specified elements are present and non-empty in each page
     # Check that specified elements or their alternates are present and non-empty in each page
     # Alternate: different elements appear if there isn't supposed to be content, so it has to check both
@@ -81,13 +81,17 @@ class Verifier:
 
         return
 
+    def run_verifier(self, json_filename, json_list):
+        self.harvest_pages(json_filename, json_list)
+        self.size_comparison()
+        self.spot_check()
+
 
 # Verifier subclasses
 
 class ProjectDashboardVerifier(Verifier):
     def __init__(self):
-        Verifier.__init__(self)
-        self.minimum_size = 410
+        super().__init__(self, 410, ProjectDashboardPage, "")
         self.page_elements = {
             '#nodeTitleEditable': '',  # Title
             '#contributors span.date.node-last-modified-date': '',  # Last modified
@@ -99,46 +103,28 @@ class ProjectDashboardVerifier(Verifier):
             # Activity / "Unable to retrieve at this time"
         }
 
-    def run_verifier(self,json_filename, json_list):
-        self.harvest_pages(json_filename, json_list, '', ProjectDashboardPage)
-        self.size_comparison()
-        self.spot_check()
-
 
 class ProjectFilesVerifier(Verifier):
     def __init__(self):
-        Verifier.__init__(self)
-        self.minimum_size = 380
+        super().__init__(self, 380, ProjectFilesPage, "files/")
         self.page_elements = {
             '.fg-file-links': '',  # Links to files (names them)
         }
 
-    def run_verifier(self, json_filename, json_list):
-        self.harvest_pages(json_filename, json_list, 'files/', ProjectFilesPage)
-        self.size_comparison()
-        self.spot_check()
-
 
 class ProjectWikiVerifier(Verifier):
     def __init__(self):
-        Verifier.__init__(self)
-        self.minimum_size = 410
+        super().__init__(self, 410, ProjectWikiPage, "wiki/")
         self.page_elements = {
             'pre': '#wikiViewRender > p > em',  # Wiki content / `No wiki content`
             '#viewVersionSelect option': '',  # Current version date modified
             '.fg-file-links': ''  # Links to other pages (names them)
         }
 
-    def run_verifier(self, json_filename, json_list):
-        self.harvest_pages(json_filename, json_list, 'wiki/', ProjectWikiPage)
-        self.size_comparison()
-        self.spot_check()
-
 
 class ProjectAnalyticsVerifier(Verifier):
     def __init__(self):
-        Verifier.__init__(self)
-        self.minimum_size = 380
+        super().__init__(self, 380, ProjectAnalyticsPage, "analytics/")
         self.page_elements = {
             '#adBlock': 'div.watermarked > div > div.m-b-md.p-md.osf-box-lt.box-round.text-center',
             # Warning about AdBlock
@@ -146,44 +132,26 @@ class ProjectAnalyticsVerifier(Verifier):
             # External frame for analytics
         }
 
-    def run_verifier(self, json_filename, json_list):
-        self.harvest_pages(json_filename, json_list, 'analytics/', ProjectAnalyticsPage)
-        self.size_comparison()
-        self.spot_check()
-
 
 class ProjectRegistrationsVerifier(Verifier):
     def __init__(self):
-        Verifier.__init__(self)
-        self.minimum_size = 390
+        super().__init__(self, 380, ProjectRegistrationsPage, "registrations/")
         self.page_elements = {
             '#renderNode': '#registrations > div > div > p'  # List of nodes
         }
 
-    def run_verifier(self, json_filename, json_list):
-        self.harvest_pages(json_filename, json_list, 'registrations/', ProjectRegistrationsPage)
-        self.size_comparison()
-        self.spot_check()
-
 
 class ProjectForksVerifier(Verifier):
     def __init__(self):
-        Verifier.__init__(self)
-        self.minimum_size = 380
+        super().__init__(self, 380, ProjectForksPage, "forks/")
         self.page_elements = {
             '#renderNode': 'div.watermarked > div > div.row > div.col-xs-9.col-sm-8 > p'  # List
         }
 
-    def run_verifier(self, json_filename, json_list):
-        self.harvest_pages(json_filename, json_list, 'forks/', ProjectForksPage)
-        self.size_comparison()
-        self.spot_check()
-
 
 class RegistrationDashboardVerifier(Verifier):
     def __init__(self):
-        Verifier.__init__(self)
-        self.minimum_size = 410
+        super().__init__(self, 410, RegistrationDashboardPage, "")
         self.page_elements = {
             '#nodeTitleEditable': '',  # Title
             '#contributors > div > p:nth-of-type(5) > span': '',  # Last modified
@@ -195,46 +163,28 @@ class RegistrationDashboardVerifier(Verifier):
             # Activity / "Unable to retrieve at this time"
         }
 
-    def run_verifier(self, json_filename, json_list):
-        self.harvest_pages(json_filename, json_list, '', RegistrationDashboardPage)
-        self.size_comparison()
-        self.spot_check()
-
 
 class RegistrationFilesVerifier(Verifier):
     def __init__(self):
-        Verifier.__init__(self)
-        self.minimum_size = 380
+        super().__init__(self, 380, RegistrationFilesPage, "files/")
         self.page_elements = {
             '.fg-file-links': '',  # Links to files (names them)
         }
 
-    def run_verifier(self, json_filename, json_list):
-        self.harvest_pages(json_filename, json_list, 'files/', RegistrationFilesPage)
-        self.size_comparison()
-        self.spot_check()
-
 
 class RegistrationWikiVerifier(Verifier):
     def __init__(self):
-        Verifier.__init__(self)
-        self.minimum_size = 410
+        super().__init__(self, 410, RegistrationWikiPage, "wiki/")
         self.page_elements = {
             'pre': '#wikiViewRender > p > em',  # Wiki content / `No wiki content`
             '#viewVersionSelect option': '',  # Current version date modified
             '.fg-file-links': ''  # Links to other pages (names them)
         }
 
-    def run_verifier(self, json_filename, json_list):
-        self.harvest_pages(json_filename, json_list, 'wiki/', RegistrationWikiPage)
-        self.size_comparison()
-        self.spot_check()
-
 
 class RegistrationAnalyticsVerifier(Verifier):
     def __init__(self):
-        Verifier.__init__(self)
-        self.minimum_size = 380
+        super().__init__(self, 380, RegistrationAnalyticsPage, "analytics/")
         self.page_elements = {
             '#adBlock': 'div.watermarked > div > div.m-b-md.p-md.osf-box-lt.box-round.text-center',
             # Warning about AdBlock
@@ -242,55 +192,32 @@ class RegistrationAnalyticsVerifier(Verifier):
             # External frame for analytics
         }
 
-    def run_verifier(self, json_filename, json_list):
-        self.harvest_pages(json_filename, json_list, 'analytics/', RegistrationAnalyticsPage)
-        self.size_comparison()
-        self.spot_check()
-
 
 class RegistrationForksVerifier(Verifier):
     def __init__(self):
-        Verifier.__init__(self)
-        self.minimum_size = 380
+        super().__init__(self, 380, RegistrationForksPage, "forks/")
         self.page_elements = {
             '#renderNode': 'div.watermarked > div > div.row > div.col-xs-9.col-sm-8 > p'  # List
         }
 
-    def run_verifier(self, json_filename, json_list):
-        self.harvest_pages(json_filename, json_list, 'forks/', RegistrationForksPage)
-        self.size_comparison()
-        self.spot_check()
-
 
 class UserProfileVerifier(Verifier):
     def __init__(self):
-        Verifier.__init__(self)
-        self.minimum_size = 80
+        super().__init__(self, 80, RegistrationAnalyticsPage, "")
         self.page_elements = {
             '#projects': 'div > div:nth-of-type(1) > div > div.panel-body > div',  # Project list / "No projects"
             '#components': 'div > div:nth-of-type(2) > div > div.panel-body > div',  # Component list / "No components"
             'body h2': ''  # Activity points, project count
         }
 
-    def run_verifier(self, json_filename, json_list):
-        self.harvest_pages(json_filename, json_list, '', UserProfilePage)
-        self.size_comparison()
-        self.spot_check()
-
 
 class InstitutionDashboardVerifier(Verifier):
     def __init__(self):
-        Verifier.__init__(self)
-        self.minimum_size = 350
+        super().__init__(self, 350, InstitutionDashboardPage, "")
         self.page_elements = {
             '#fileBrowser > div.db-infobar > div > div': '#fileBrowser > div.db-infobar > div > div',  # Project preview
             '#tb-tbody': '#fileBrowser > div.db-main > div.db-non-load-template.m-md.p-md.osf-box'  # Project browser
         }
-
-    def run_verifier(self, json_filename, json_list):
-        self.harvest_pages(json_filename, json_list, '', InstitutionDashboardPage)
-        self.size_comparison()
-        self.spot_check()
 
 
 # called when json file had scrape_nodes = true
