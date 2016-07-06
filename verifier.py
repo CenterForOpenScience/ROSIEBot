@@ -1,31 +1,46 @@
-import json, codecs
+import json
+import codecs
 from pages import ProjectDashboardPage, ProjectFilesPage, ProjectAnalyticsPage, \
     ProjectForksPage, ProjectRegistrationsPage, ProjectWikiPage, RegistrationDashboardPage, RegistrationFilesPage, \
     RegistrationAnalyticsPage, RegistrationForksPage, RegistrationWikiPage, UserProfilePage, InstitutionDashboardPage
 from crawler import Crawler
+import bs4
 
 
 # Verifier superclass
 class Verifier:
     def __init__(self, min_size, pg_type, end):
+        """
+        :param min_size: File size minimum for a page. Anything below this couldn't possibly be a complete file.
+        :param pg_type: The class to instantiate page objects with.
+        :param end: Indentifier in the URL, e.g. 'files/', 'end' is a misnomer ('wiki/' in the middle of a URL)
+        """
         self.minimum_size = min_size
         self.page_type = pg_type
         self.url_end = end
-        self.page_elements = {}
-        self.pages = []
+
+        # Certain elements will be absent if there's no content for them to display, so we check if there is a loading
+        # bar in its place. This means the element should exist, but it doesn't.
+        self.loading_elements = {}
+
+        # Other elements will be replaced by a message if there's no content for them (e.g. "This user has no projects")
+        # We check for the elements and their alternates if the original isn't found.
+        self.alternate_elements = {}
+
+        self.pages = []  # All the page objects
         self.failed_pages = []
 
     # Populate self.pages with the relevant files
-    def harvest_pages(self, json_filename, json_list):
+    def harvest_pages(self, json_dictionary, json_list):
         """
-        :param json_filename: The json file
+        :param json_dictionary: The dictionary created from the json file
         :param json_list: The list in the json file of found URLs
         :return: Null, but self.pages is populated.
         """
         for url in json_list[:]:
             if self.url_end in url:
                 print('rel: ', url)
-                if url in json_filename['error_list']:
+                if url in json_dictionary['error_list']:
                     self.failed_pages.append(url)
                     print('error: ', url)
                 else:
@@ -46,33 +61,81 @@ class Verifier:
                 self.failed_pages.append(page.url)
         return
 
-    # Check that specified elements are present and non-empty in each page
+    # Check that specified elements are supposed to exist and a loading bar isn't present instead
     # Check that specified elements or their alternates are present and non-empty in each page
     # Alternate: different elements appear if there isn't supposed to be content, so it has to check both
     # Format: Filled-in : Alternate
     def spot_check(self):
         for page in self.pages:
             soup = page.get_content()
-            for element in self.page_elements:
-                alt = self.page_elements[element]
-                result = soup.select(element)
-                # No results or empty results
-                if (len(result) == 0 or len(result[0].contents) == 0) and alt != '':
-                    # print("Failed: first spot_check(): ", page, element, "Retrying with alt: ", alt)
-                    alt_result = soup.select(alt)
-
-                    # Element's alternate has no or empty results
-                    if len(alt_result) == 0 or len(alt_result[0].contents) == 0:
-                        print("Failed: alternate spot_check(): ", page, alt, '\n')
+            for element in self.loading_elements:
+                final_element = self.loading_elements[element]  # What is supposed to be there
+                loading_bar_result = soup.select(element)
+                if len(loading_bar_result) > 0:  # Loading bar is present, but possibly inoperative
+                    final_result = soup.select(final_element)
+                    if len(final_result) == 0:
                         self.failed_pages.append(page.url)
-                        break
 
-                elif (len(result) == 0 or len(result[0].contents) == 0) and alt == '':
-                    print('Failed: spot_check(): ', page, element, "No alt.", '\n')
-                    self.failed_pages.append(page.url)
-                    break
+    """
+    Neither: Neither supposed to be present
+    Both: Loaded, loader still present
 
-        return
+    Only loader: Not loaded! Try again!
+    Only element: Good! Passed!
+
+    Institution projects:
+    PASS: No fetching, no fg-file-links
+    PASS: No fetching, fg-file-links
+    FAIL: Fetching, no fg-file-links (should be)
+    PASS/FAIL: Fetching, fg-file-links
+
+    if loading is present:
+        INST: check if the final exists in the page
+        no fg-file-links (should be): FAILURE
+        incomplete fg-file-links: SUCCESS
+
+        COMP: check if the final exists in the page
+        no nodes rendered: FAILURE
+        all nodes rendered: SUCCESS
+    *** REJECT PRESENT LOADER AND ABSENCE OF A FINAL
+
+    else:
+        INST: PASS
+        institution has no projects
+        projects are all loaded
+
+        COMP: PASS
+        no nodes to render
+    *** IGNORE THE ABSENCE OF THE LOADER
+
+
+
+    Component list:
+    PASS: No containment, no render-node
+    IMPO: No containment, render-node
+    FAIL: Containment, no render-node
+    PASS: Containment, render-node
+    """
+
+        #     for element in self.alternate_elements:
+        #         alt = self.alternate_elements[element]
+        #         result = soup.select(element)
+        #         # No results or empty results
+        #         if (len(result) == 0 or len(result[0].contents) == 0) and alt != '':
+        #             # print("Failed: first spot_check(): ", page, element, "Retrying with alt: ", alt)
+        #             alt_result = soup.select(alt)
+        #
+        #             # Element's alternate has no or empty results
+        #             if len(alt_result) == 0 or len(alt_result[0].contents) == 0:
+        #                 print("Failed: alternate spot_check(): ", page, alt, '\n')
+        #                 self.failed_pages.append(page.url)
+        #                 return
+        #
+        #         elif (len(result) == 0 or len(result[0].contents) == 0) and alt == '':
+        #             print('Failed: spot_check(): ', page, element, "No alt.", '\n')
+        #             self.failed_pages.append(page.url)
+        #             return
+        # return
 
     def run_verifier(self, json_filename, json_list):
         self.harvest_pages(json_filename, json_list)
@@ -85,13 +148,15 @@ class Verifier:
 class ProjectDashboardVerifier(Verifier):
     def __init__(self):
         super().__init__(410, ProjectDashboardPage, '')
-        self.page_elements = {
+        self.loading_elements = {
+            "#treeGrid > div > p": '#tb-tbody',  # Files list
+            "#containment": "#render-node",  # Exists if there are supposed to be components / Is it filled?
+        }
+        self.alternate_elements = {
             '#nodeTitleEditable': '',  # Title
             '#contributors span.date.node-last-modified-date': '',  # Last modified
             '#contributorsList > ol': '',  # Contributor list
             '#tb-tbody': '',  # File list
-            '#render-node': 'div.row > div:nth-of-type(2) > div.components.panel.panel-default > div.panel-body > p',
-            # Nodes list
             '#logScope > div > div > div.panel-body > span > dl': '#logFeed > div > p'
             # Activity / "Unable to retrieve at this time"
         }
@@ -100,7 +165,7 @@ class ProjectDashboardVerifier(Verifier):
 class ProjectFilesVerifier(Verifier):
     def __init__(self):
         super().__init__(380, ProjectFilesPage, "files/")
-        self.page_elements = {
+        self.alternate_elements = {
             '.fg-file-links': '',  # Links to files (names them)
         }
 
@@ -108,7 +173,7 @@ class ProjectFilesVerifier(Verifier):
 class ProjectWikiVerifier(Verifier):
     def __init__(self):
         super().__init__(410, ProjectWikiPage, "wiki/")
-        self.page_elements = {
+        self.alternate_elements = {
             'pre': '#wikiViewRender > p > em',  # Wiki content / `No wiki content`
             '#viewVersionSelect option': '',  # Current version date modified
             '.fg-file-links': ''  # Links to other pages (names them)
@@ -118,7 +183,7 @@ class ProjectWikiVerifier(Verifier):
 class ProjectAnalyticsVerifier(Verifier):
     def __init__(self):
         super().__init__(380, ProjectAnalyticsPage, "analytics/")
-        self.page_elements = {
+        self.alternate_elements = {
             '#adBlock': 'div.watermarked > div > div.m-b-md.p-md.osf-box-lt.box-round.text-center',
             # Warning about AdBlock
             'iframe': 'div.watermarked > div > div.m-b-md.p-md.osf-box-lt.box-round.text-center',
@@ -129,7 +194,7 @@ class ProjectAnalyticsVerifier(Verifier):
 class ProjectRegistrationsVerifier(Verifier):
     def __init__(self):
         super().__init__(380, ProjectRegistrationsPage, "registrations/")
-        self.page_elements = {
+        self.alternate_elements = {
             '#renderNode': '#registrations > div > div > p'  # List of nodes
         }
 
@@ -137,7 +202,7 @@ class ProjectRegistrationsVerifier(Verifier):
 class ProjectForksVerifier(Verifier):
     def __init__(self):
         super().__init__(380, ProjectForksPage, "forks/")
-        self.page_elements = {
+        self.alternate_elements = {
             '#renderNode': 'div.watermarked > div > div.row > div.col-xs-9.col-sm-8 > p'  # List
         }
 
@@ -145,7 +210,7 @@ class ProjectForksVerifier(Verifier):
 class RegistrationDashboardVerifier(Verifier):
     def __init__(self):
         super().__init__(410, RegistrationDashboardPage, "")
-        self.page_elements = {
+        self.alternate_elements = {
             '#nodeTitleEditable': '',  # Title
             '#contributors > div > p:nth-of-type(5) > span': '',  # Last modified
             '#contributorsList > ol': '',  # Contributor list
@@ -160,7 +225,7 @@ class RegistrationDashboardVerifier(Verifier):
 class RegistrationFilesVerifier(Verifier):
     def __init__(self):
         super().__init__(380, RegistrationFilesPage, "files/")
-        self.page_elements = {
+        self.alternate_elements = {
             '.fg-file-links': '',  # Links to files (names them)
         }
 
@@ -168,7 +233,7 @@ class RegistrationFilesVerifier(Verifier):
 class RegistrationWikiVerifier(Verifier):
     def __init__(self):
         super().__init__(410, RegistrationWikiPage, "wiki/")
-        self.page_elements = {
+        self.alternate_elements = {
             'pre': '#wikiViewRender > p > em',  # Wiki content / `No wiki content`
             '#viewVersionSelect option': '',  # Current version date modified
             '.fg-file-links': ''  # Links to other pages (names them)
@@ -178,7 +243,7 @@ class RegistrationWikiVerifier(Verifier):
 class RegistrationAnalyticsVerifier(Verifier):
     def __init__(self):
         super().__init__(380, RegistrationAnalyticsPage, "analytics/")
-        self.page_elements = {
+        self.alternate_elements = {
             '#adBlock': 'div.watermarked > div > div.m-b-md.p-md.osf-box-lt.box-round.text-center',
             # Warning about AdBlock
             'iframe': 'div.watermarked > div > div.m-b-md.p-md.osf-box-lt.box-round.text-center',
@@ -189,7 +254,7 @@ class RegistrationAnalyticsVerifier(Verifier):
 class RegistrationForksVerifier(Verifier):
     def __init__(self):
         super().__init__(380, RegistrationForksPage, "forks/")
-        self.page_elements = {
+        self.alternate_elements = {
             '#renderNode': 'div.watermarked > div > div.row > div.col-xs-9.col-sm-8 > p'  # List
         }
 
@@ -197,7 +262,7 @@ class RegistrationForksVerifier(Verifier):
 class UserProfileVerifier(Verifier):
     def __init__(self):
         super().__init__(80, UserProfilePage, "")
-        self.page_elements = {
+        self.alternate_elements = {
             '#projects': 'div > div:nth-of-type(1) > div > div.panel-body > div',  # Project list / "No projects"
             '#components': 'div > div:nth-of-type(2) > div > div.panel-body > div',  # Component list / "No components"
             'body h2': ''  # Activity points, project count
@@ -207,9 +272,11 @@ class UserProfileVerifier(Verifier):
 class InstitutionDashboardVerifier(Verifier):
     def __init__(self):
         super().__init__(350, InstitutionDashboardPage, "")
-        self.page_elements = {
-            '#fileBrowser > div.db-infobar > div > div': '#fileBrowser > div.db-infobar > div > div',  # Project preview
-            '#tb-tbody': '#fileBrowser > div.db-main > div.db-non-load-template.m-md.p-md.osf-box'  # Project browser
+        self.loading_elements = {
+            '#fileBrowser > div.db-main > div.line-loader > div.load-message': '.fg-file-links'  # "loading" / Project browser
+        }
+        self.alternate_elements = {
+            '#fileBrowser > div.db-infobar > div > div': '#fileBrowser > div.db-infobar > div > div'  # Project preview / "Select a project"
         }
 
 
@@ -300,16 +367,17 @@ def verify_institutions(verification_dictionary, list_name):
 
 def call_rescrape(json_filename, verification_json_filename):
     print("Called rescrape")
-    second_chance = Crawler()
-    if json_filename['scrape_nodes']:
-        second_chance.node_urls = verification_json_filename['node_urls_failed_verification']
-        second_chance.scrape_nodes()
-    if json_filename['scrape_registrations']:
-        second_chance.registration_urls = verification_json_filename['registration_urls_failed_verification']
-    if json_filename['scrape_users']:
-        second_chance.user_profile_page_urls = verification_json_filename['user_profile_page_urls_failed_verification']
-    if json_filename['scrape_institutions']:
-        second_chance.institution_urls = verification_json_filename['institution_urls_failed_verification']
+    # second_chance = Crawler()
+    # if json_filename['scrape_nodes']:
+    #     second_chance.node_urls = verification_json_filename['node_urls_failed_verification']
+    #     second_chance.scrape_nodes()
+    # if json_filename['scrape_registrations']:
+    #     second_chance.registration_urls = verification_json_filename['registration_urls_failed_verification']
+    # if json_filename['scrape_users']:
+    #     second_chance.user_profile_page_urls = verification_json_filename['user_profile_page_urls_failed_verification']
+    # if json_filename['scrape_institutions']:
+    #     second_chance.institution_urls = verification_json_filename['institution_urls_failed_verification']
+    pass
 
 
 def setup_verification(json_dictionary, verification_json_dictionary, first_scrape):
@@ -367,8 +435,7 @@ def run_verification(json_file, num_retries):
 
 
 def main(json_filename, num_retries):
-    # for testing:
-    # json_filename = '201606301141.json'
+    # For testing:
     # num_retries = 2
     # call two verification/scraping methods depending on num retries
     run_verification(json_filename, num_retries)
