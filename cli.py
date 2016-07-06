@@ -47,6 +47,9 @@ def cli_entry_point(scrape, resume, verify, resume_verify, compile_active, dm, t
             compile_active_list(file)
         return
 
+    if scrape and dm is None:
+        click.echo("Date marker needed for normal scrape")
+
     if scrape and dm is not None:
         click.echo('Starting normal scrape with date marker set to : ' + dm)
         now = datetime.datetime.now()
@@ -57,6 +60,9 @@ def cli_entry_point(scrape, resume, verify, resume_verify, compile_active, dm, t
         click.echo("Finished scrape. Taskfile is: " + filename)
         return
 
+    if resume and tf is None:
+        click.echo("Need a task file to resume a scrape")
+
     if resume and tf is not None:
         click.echo('Resuming scrape with the task file : ' + tf)
         try:
@@ -66,12 +72,18 @@ def cli_entry_point(scrape, resume, verify, resume_verify, compile_active, dm, t
             click.echo('File Not Found for the task.')
         return
 
+    if verify and tf is None:
+        click.echo("Need a task file to verify a mirror")
+
     if verify and tf is not None:
         try:
             verify_mirror(tf, rn)
         except FileNotFoundError:
             click.echo('File Not Found for the task.')
         return
+
+    if resume_verify and tf is None:
+        click.echo("Need a task file to resume verification")
 
     if resume_verify and tf is not None:
         try:
