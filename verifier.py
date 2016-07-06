@@ -307,7 +307,7 @@ def call_rescrape(json_filename, verification_json_filename):
     if json_filename['scrape_registrations']:
         second_chance.registration_urls = verification_json_filename['registration_urls_failed_verification']
     if json_filename['scrape_users']:
-        second_chance.user_profile_page_urls = verification_json_filename['user_profile_page_urls_failed_verification']
+        second_chance.user_urls = verification_json_filename['user_urls_failed_verification']
     if json_filename['scrape_institutions']:
         second_chance.institution_urls = verification_json_filename['institution_urls_failed_verification']
 
@@ -329,10 +329,10 @@ def setup_verification(json_dictionary, verification_json_dictionary, first_scra
                                                                                                      list_name)
     if json_dictionary['scrape_users']:
         if first_scrape:
-            list_name = 'user_profile_page_urls'
+            list_name = 'user_urls'
         else:
-            list_name = 'user_profile_page_urls_failed_verification'
-        verification_json_dictionary['user_profile_page_urls_failed_verification'] = \
+            list_name = 'user_urls_failed_verification'
+        verification_json_dictionary['user_urls_failed_verification'] = \
             verify_users(json_dictionary, list_name)
     if json_dictionary['scrape_institutions']:
         if first_scrape:

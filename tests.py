@@ -48,9 +48,9 @@ class test_crawler(unittest.TestCase):
 
     def test_profile_urls_updated_by_crawl(self):
         c = Crawler(d)
-        l1 = c.user_profile_page_urls.copy()
+        l1 = c.user_urls.copy()
         c.crawl_users_api(page_limit=1)
-        l2 = c.user_profile_page_urls.copy()
+        l2 = c.user_urls.copy()
         self.assertEqual(len(l1), 0)
         self.assertGreater(len(l2), len(l1))
         self.assertNotEqual(l1, l2)
