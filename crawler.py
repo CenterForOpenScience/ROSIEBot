@@ -1,6 +1,7 @@
 import asyncio
 import aiohttp
 import json
+import codecs
 import datetime
 import os
 import sys
