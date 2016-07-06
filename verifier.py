@@ -22,7 +22,7 @@ class Verifier:
         :param json_list: The list in the json file of found URLs
         :return: Null, but self.pages is populated.
         """
-        for url in json_list:
+        for url in json_list[:]:
             if self.url_end in url:
                 print('rel: ', url)
                 if url in json_filename['error_list']:
