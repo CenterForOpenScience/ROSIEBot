@@ -53,12 +53,13 @@ class Verifier:
 
     # Compare page size to page-specific minimum that any fully-scraped page should have
     def size_comparison(self):
-        for page in self.pages:
+        for page in self.pages[:]:
             # print(page)
             # print(page.file_size)
             if not page.file_size > self.minimum_size:
                 print('Failed: size_comparison(): ', page, ' has size: ', page.file_size)
                 self.failed_pages.append(page.url)
+                self.pages.remove(page)
         return
 
     # Check that specified elements are supposed to exist and a loading bar isn't present instead
@@ -66,7 +67,7 @@ class Verifier:
     # Alternate: different elements appear if there isn't supposed to be content, so it has to check both
     # Format: Filled-in : Alternate
     def spot_check(self):
-        for page in self.pages:
+        for page in self.pages[:]:
             soup = page.get_content()
             # Existential crisis:
             for element in self.loading_elements:
@@ -77,6 +78,7 @@ class Verifier:
                     if len(final_result) == 0:  # Final element isn't in place
                         print("Failed: existential spot_check() ", page, final_element, " doesn't exist, loader ", element, " present.")
                         self.failed_pages.append(page.url)
+                        self.pages.remove(page)
                         break
 
             # Alternate checker:
@@ -91,12 +93,14 @@ class Verifier:
                     if len(alt_result) == 0 or len(alt_result[0].contents) == 0:
                         print("Failed: alternate spot_check(): ", page, alt, '\n')
                         self.failed_pages.append(page.url)
+                        self.pages.remove(page)
                         break
 
                 # Element has no alternate and no results or empty results
                 elif (len(result) == 0 or len(result[0].contents) == 0) and alt == '':
                     print('Failed: spot_check(): ', page, element, "No alt.", '\n')
                     self.failed_pages.append(page.url)
+                    self.pages.remove(page)
                     break
         return
 
@@ -389,7 +393,7 @@ def run_verification(json_file, num_retries):
                     print("Dumped json run_copy 1st verify")
             call_rescrape(run_info, run_copy)
         else:
-            print("Begun 2nd run")
+            print("Begun next run")
             setup_verification(run_copy, run_copy, False)
             # truncates json and dumps new lists
             with codecs.open(json_file, mode='w', encoding='utf-8') as file:
