@@ -68,74 +68,37 @@ class Verifier:
     def spot_check(self):
         for page in self.pages:
             soup = page.get_content()
+            # Existential crisis:
             for element in self.loading_elements:
                 final_element = self.loading_elements[element]  # What is supposed to be there
                 loading_bar_result = soup.select(element)
-                if len(loading_bar_result) > 0:  # Loading bar is present, but possibly inoperative
+                if len(loading_bar_result) > 0:  # Loading bar is present
                     final_result = soup.select(final_element)
-                    if len(final_result) == 0:
+                    if len(final_result) == 0:  # Final element isn't in place
+                        print("Failed: existential spot_check() ", page, final_element, " doesn't exist, loader ", element, " present.")
                         self.failed_pages.append(page.url)
+                        break
 
-    """
-    Neither: Neither supposed to be present
-    Both: Loaded, loader still present
+            # Alternate checker:
+            for element in self.alternate_elements:
+                alt = self.alternate_elements[element]
+                result = soup.select(element)
+                # No results or empty results, with alternate
+                if (len(result) == 0 or len(result[0].contents) == 0) and alt != '':
+                    alt_result = soup.select(alt)
 
-    Only loader: Not loaded! Try again!
-    Only element: Good! Passed!
+                    # Element's alternate has no or empty results
+                    if len(alt_result) == 0 or len(alt_result[0].contents) == 0:
+                        print("Failed: alternate spot_check(): ", page, alt, '\n')
+                        self.failed_pages.append(page.url)
+                        break
 
-    Institution projects:
-    PASS: No fetching, no fg-file-links
-    PASS: No fetching, fg-file-links
-    FAIL: Fetching, no fg-file-links (should be)
-    PASS/FAIL: Fetching, fg-file-links
-
-    if loading is present:
-        INST: check if the final exists in the page
-        no fg-file-links (should be): FAILURE
-        incomplete fg-file-links: SUCCESS
-
-        COMP: check if the final exists in the page
-        no nodes rendered: FAILURE
-        all nodes rendered: SUCCESS
-    *** REJECT PRESENT LOADER AND ABSENCE OF A FINAL
-
-    else:
-        INST: PASS
-        institution has no projects
-        projects are all loaded
-
-        COMP: PASS
-        no nodes to render
-    *** IGNORE THE ABSENCE OF THE LOADER
-
-
-
-    Component list:
-    PASS: No containment, no render-node
-    IMPO: No containment, render-node
-    FAIL: Containment, no render-node
-    PASS: Containment, render-node
-    """
-
-        #     for element in self.alternate_elements:
-        #         alt = self.alternate_elements[element]
-        #         result = soup.select(element)
-        #         # No results or empty results
-        #         if (len(result) == 0 or len(result[0].contents) == 0) and alt != '':
-        #             # print("Failed: first spot_check(): ", page, element, "Retrying with alt: ", alt)
-        #             alt_result = soup.select(alt)
-        #
-        #             # Element's alternate has no or empty results
-        #             if len(alt_result) == 0 or len(alt_result[0].contents) == 0:
-        #                 print("Failed: alternate spot_check(): ", page, alt, '\n')
-        #                 self.failed_pages.append(page.url)
-        #                 return
-        #
-        #         elif (len(result) == 0 or len(result[0].contents) == 0) and alt == '':
-        #             print('Failed: spot_check(): ', page, element, "No alt.", '\n')
-        #             self.failed_pages.append(page.url)
-        #             return
-        # return
+                # Element has no alternate and no results or empty results
+                elif (len(result) == 0 or len(result[0].contents) == 0) and alt == '':
+                    print('Failed: spot_check(): ', page, element, "No alt.", '\n')
+                    self.failed_pages.append(page.url)
+                    break
+        return
 
     def run_verifier(self, json_filename, json_list):
         self.harvest_pages(json_filename, json_list)
@@ -174,7 +137,7 @@ class ProjectWikiVerifier(Verifier):
     def __init__(self):
         super().__init__(410, ProjectWikiPage, "wiki/")
         self.alternate_elements = {
-            'pre': '#wikiViewRender > p > em',  # Wiki content / `No wiki content`
+            '#wikiViewRender': '#wikiViewRender > p > em',  # Wiki content / `No wiki content`
             '#viewVersionSelect option': '',  # Current version date modified
             '.fg-file-links': ''  # Links to other pages (names them)
         }
@@ -210,13 +173,14 @@ class ProjectForksVerifier(Verifier):
 class RegistrationDashboardVerifier(Verifier):
     def __init__(self):
         super().__init__(410, RegistrationDashboardPage, "")
+        self.loading_elements = {
+            "#treeGrid > div > p": '#tb-tbody',  # Files list
+            "#containment": "#render-node",  # Exists if there are supposed to be components / Is it filled?
+        }
         self.alternate_elements = {
             '#nodeTitleEditable': '',  # Title
             '#contributors > div > p:nth-of-type(5) > span': '',  # Last modified
             '#contributorsList > ol': '',  # Contributor list
-            '#tb-tbody': '',  # File list
-            '#render-node': 'div.row > div:nth-of-type(2) > div.components.panel.panel-default > div.panel-body > p',
-            # Nodes list
             '#logScope > div > div > div.panel-body > span > dl': '#logFeed > div > p'
             # Activity / "Unable to retrieve at this time"
         }
@@ -234,7 +198,7 @@ class RegistrationWikiVerifier(Verifier):
     def __init__(self):
         super().__init__(410, RegistrationWikiPage, "wiki/")
         self.alternate_elements = {
-            'pre': '#wikiViewRender > p > em',  # Wiki content / `No wiki content`
+            '#wikiViewRender': '#wikiViewRender > p > em',  # Wiki content / `No wiki content`
             '#viewVersionSelect option': '',  # Current version date modified
             '.fg-file-links': ''  # Links to other pages (names them)
         }
@@ -366,18 +330,17 @@ def verify_institutions(verification_dictionary, list_name):
 
 
 def call_rescrape(json_filename, verification_json_filename):
-    print("Called rescrape")
-    # second_chance = Crawler()
-    # if json_filename['scrape_nodes']:
-    #     second_chance.node_urls = verification_json_filename['node_urls_failed_verification']
-    #     second_chance.scrape_nodes()
-    # if json_filename['scrape_registrations']:
-    #     second_chance.registration_urls = verification_json_filename['registration_urls_failed_verification']
-    # if json_filename['scrape_users']:
-    #     second_chance.user_profile_page_urls = verification_json_filename['user_profile_page_urls_failed_verification']
-    # if json_filename['scrape_institutions']:
-    #     second_chance.institution_urls = verification_json_filename['institution_urls_failed_verification']
-    pass
+    print("Called rescrape.")
+    second_chance = Crawler()
+    if json_filename['scrape_nodes']:
+        second_chance.node_urls = verification_json_filename['node_urls_failed_verification']
+        second_chance.scrape_nodes()
+    if json_filename['scrape_registrations']:
+        second_chance.registration_urls = verification_json_filename['registration_urls_failed_verification']
+    if json_filename['scrape_users']:
+        second_chance.user_profile_page_urls = verification_json_filename['user_profile_page_urls_failed_verification']
+    if json_filename['scrape_institutions']:
+        second_chance.institution_urls = verification_json_filename['institution_urls_failed_verification']
 
 
 def setup_verification(json_dictionary, verification_json_dictionary, first_scrape):
