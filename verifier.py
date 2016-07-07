@@ -73,7 +73,7 @@ class Verifier:
             for element in self.loading_elements:
                 final_element = self.loading_elements[element]  # What is supposed to be there
                 loading_bar_result = soup.select(element)
-                if len(loading_bar_result) > 0:  # Loading bar is present
+                if len(loading_bar_result) == 0:  # Loading bar is present
                     final_result = soup.select(final_element)
                     if len(final_result) == 0:  # Final element isn't in place
                         print("Failed: existential spot_check() ", page, final_element, " doesn't exist, loader ", element, " present.")
@@ -127,6 +127,50 @@ class ProjectDashboardVerifier(Verifier):
             '#logScope > div > div > div.panel-body > span > dl': '#logFeed > div > p'
             # Activity / "Unable to retrieve at this time"
         }
+
+    # Override: the loader for loading_elements is still supposed to exist
+    # Check that specified elements are supposed to exist and a loading bar isn't present instead
+    # Check that specified elements or their alternates are present and non-empty in each page
+    # Alternate: different elements appear if there isn't supposed to be content, so it has to check both
+    # Format: Filled-in : Alternate
+    def spot_check(self):
+        for page in self.pages[:]:
+            soup = page.get_content()
+            # Existential crisis:
+            for element in self.loading_elements:
+                final_element = self.loading_elements[element]  # What is supposed to be there
+                loading_bar_result = soup.select(element)
+                if len(loading_bar_result) > 0:  # Loading bar is present
+                    final_result = soup.select(final_element)
+                    if len(final_result) == 0:  # Final element isn't in place
+                        print("Failed: existential spot_check() ", page, final_element, " doesn't exist, loader ", element,
+                              " present.")
+                        self.failed_pages.append(page.url)
+                        self.pages.remove(page)
+                        break
+
+            # Alternate checker:
+            for element in self.alternate_elements:
+                alt = self.alternate_elements[element]
+                result = soup.select(element)
+                # No results or empty results, with alternate
+                if (len(result) == 0 or len(result[0].contents) == 0) and alt != '':
+                    alt_result = soup.select(alt)
+
+                    # Element's alternate has no or empty results
+                    if len(alt_result) == 0 or len(alt_result[0].contents) == 0:
+                        print("Failed: alternate spot_check(): ", page, alt, '\n')
+                        self.failed_pages.append(page.url)
+                        self.pages.remove(page)
+                        break
+
+                # Element has no alternate and no results or empty results
+                elif (len(result) == 0 or len(result[0].contents) == 0) and alt == '':
+                    print('Failed: spot_check(): ', page, element, "No alt.", '\n')
+                    self.failed_pages.append(page.url)
+                    self.pages.remove(page)
+                    break
+        return
 
 
 class ProjectFilesVerifier(Verifier):
