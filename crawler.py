@@ -372,7 +372,7 @@ class Crawler:
                 self.node_urls.append(base_url + 'files/')
             if all_pages or wiki:
                 wiki_name_list = self._node_wikis_by_parent_guid[base_url.strip("/").split("/")[-1]]
-                wiki_url_list = [base_url + 'wiki/' + urllib.parse.quote(x) + '/' for x in wiki_name_list]
+                wiki_url_list = [base_url + 'wiki/' + x + '/' for x in wiki_name_list]
                 self.node_urls += wiki_url_list
 
                 # the strip split -1 bit returns the last section of the base_url, which is the GUId
@@ -419,7 +419,7 @@ class Crawler:
             if all_pages or wiki:
                 # the strip split -1 bit returns the last section of the base_url, which is the GUId
                 wiki_name_list = self._registration_wikis_by_parent_guid[base_url.strip("/").split("/")[-1]]
-                wiki_url_list = [base_url + 'wiki/' + urllib.parse.quote(x) + '/' for x in wiki_name_list]
+                wiki_url_list = [base_url + 'wiki/' + x + '/' for x in wiki_name_list]
                 self.registration_urls += wiki_url_list
             if all_pages or analytics:
                 self.registration_urls.append(base_url + 'analytics/')
@@ -562,7 +562,7 @@ class Crawler:
         Runner method that runs scrape_url()
         :param aspect_list: list of url of pages to scrape
         """
-        sem = asyncio.BoundedSemaphore(value=5)
+        sem = asyncio.BoundedSemaphore(value=1)
         tasks = []
         for url in aspect_list:
             tasks.append(asyncio.ensure_future(self.scrape_url(url, sem)))
@@ -584,11 +584,9 @@ class Crawler:
         """
         async with sem:
             async with aiohttp.ClientSession() as s:
-                print("Sending url request to : " + url)
                 response = await s.get(url, headers=self.headers)
                 body = await response.text()
                 response.close()
-                print(response.status)
                 if response.status == 200:
                     self.debug_logger.debug("Finished : " + url)
                     self.record_milestone(url)
