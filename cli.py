@@ -11,6 +11,8 @@ import verifier
 @click.option('--scrape', is_flag=True, help="Do a normal scrape, need date marker specified")
 @click.option('--resume', is_flag=True, help="Resume last unfinished scrape, need to import task file")
 @click.option('--verify', is_flag=True, help="Verify the existing OSF static mirror, need to import task file")
+@click.option('--resume_verify', is_flag=True, help="Resume verification of the existing OSF static mirror, need to "
+                                                    "import task file")
 # Specify parameters for other needed values
 @click.option('--dm', default=None, type=click.STRING, help="Date marker needed for normal scrape")
 @click.option('--tf', default=None, type=click.STRING, help="filename of the task file")
@@ -27,12 +29,13 @@ import verifier
 @click.option('-a', is_flag=True, help="Add this flag if you want to include analytics page for nodes")
 @click.option('-r', is_flag=True, help="Add this flag if you want to include registrations page for nodes")
 @click.option('-k', is_flag=True, help="Add this flag if you want to include forks page for nodes")
-def cli_entry_point(scrape, resume, verify, compile_active, dm, tf, rn, registrations, users, institutions, nodes, d, f, w, a, r, k):
+def cli_entry_point(scrape, resume, verify, resume_verify, compile_active, dm, tf, rn, registrations, users,
+                    institutions, nodes, d, f, w, a, r, k):
     if scrape and resume and verify and compile_active:
         click.echo('Invalid parameters.')
         return
 
-    if not scrape and not resume and not verify and not compile_active:
+    if not scrape and not resume and not verify and not resume_verify and not compile_active:
         click.echo('You have to choose a mode to run')
 
     if compile_active:
@@ -44,6 +47,9 @@ def cli_entry_point(scrape, resume, verify, compile_active, dm, tf, rn, registra
             compile_active_list(file)
         return
 
+    if scrape and dm is None:
+        click.echo("Date marker needed for normal scrape")
+
     if scrape and dm is not None:
         click.echo('Starting normal scrape with date marker set to : ' + dm)
         now = datetime.datetime.now()
@@ -54,6 +60,9 @@ def cli_entry_point(scrape, resume, verify, compile_active, dm, tf, rn, registra
         click.echo("Finished scrape. Taskfile is: " + filename)
         return
 
+    if resume and tf is None:
+        click.echo("Need a task file to resume a scrape")
+
     if resume and tf is not None:
         click.echo('Resuming scrape with the task file : ' + tf)
         try:
@@ -63,6 +72,9 @@ def cli_entry_point(scrape, resume, verify, compile_active, dm, tf, rn, registra
             click.echo('File Not Found for the task.')
         return
 
+    if verify and tf is None:
+        click.echo("Need a task file to verify a mirror")
+
     if verify and tf is not None:
         try:
             verify_mirror(tf, rn)
@@ -70,6 +82,15 @@ def cli_entry_point(scrape, resume, verify, compile_active, dm, tf, rn, registra
             click.echo('File Not Found for the task.')
         return
 
+    if resume_verify and tf is None:
+        click.echo("Need a task file to resume verification")
+
+    if resume_verify and tf is not None:
+        try:
+            resume_verify_mirror(tf, rn)
+        except FileNotFoundError:
+            click.echo('File Not Found for the task.')
+        return
 
     return
 
@@ -81,7 +102,7 @@ def compile_active_list(file):
     list_of_active_nodes = [x[0].split('/')[4] for x in rosie.node_url_tuples]
     dict['list_of_active_nodes'] = list_of_active_nodes
     rosie.crawl_users_api(page_limit=10)
-    list_of_active_users = [x.split('/')[4] for x in rosie.user_profile_page_urls]
+    list_of_active_users = [x.split('/')[4] for x in rosie.user_urls]
     dict['list_of_active_users'] = list_of_active_users
     rosie.crawl_registrations_api(page_limit=10)
     list_of_active_registrations = [x[0].split('/')[3] for x in rosie.registration_url_tuples]
@@ -122,7 +143,7 @@ def normal_scrape(dm,
     store['scrape_finished'] = False
     store['node_urls'] = None
     store['registration_urls'] = None
-    store['user_profile_page_urls'] = None
+    store['user_urls'] = None
     store['institution_urls'] = None
     store['error_list'] = None
     store['milestone'] = None
@@ -152,7 +173,7 @@ def normal_scrape(dm,
 
     if scrape_users:
         rosie.crawl_users_api()
-        store['user_profile_page_urls'] = rosie.user_profile_page_urls
+        store['user_urls'] = rosie.user_urls
 
     if scrape_institutions:
         rosie.crawl_institutions_api()
@@ -194,6 +215,8 @@ def normal_scrape(dm,
         json.dump(store, db, indent=4)
         db.flush()
 
+    rosie.scrape_general()
+
     store['scrape_finished'] = True
     db.seek(0)
     db.truncate()
@@ -221,7 +244,7 @@ def resume_scrape(db, tf):
         milestone_url = store['milestone']
         rosie.node_urls = store['node_urls']
         rosie.registration_urls = store['registration_urls']
-        rosie.user_profile_page_urls = store['user_profile_page_urls']
+        rosie.user_urls = store['user_urls']
         rosie.institution_urls = store['institution_urls']
         if store['error_list'] is not None:
             rosie.error_list = store['error_list']
@@ -254,9 +277,9 @@ def resume_scrape(db, tf):
         db.flush()
 
     if scrape_users and not users_finished:
-        if milestone_url in rosie.user_profile_page_urls:
-            rosie.user_profile_page_urls = \
-                rosie.user_profile_page_urls[rosie.user_profile_page_urls.index(milestone_url):]
+        if milestone_url in rosie.user_urls:
+            rosie.user_urls = \
+                rosie.user_urls[rosie.user_urls.index(milestone_url):]
         rosie.scrape_users()
         store['users_finished'] = True
         db.seek(0)
@@ -284,6 +307,9 @@ def resume_scrape(db, tf):
 def verify_mirror(tf, rn):
     verifier.main(tf, rn)
 
+
+def resume_verify_mirror(tf, rn):
+    verifier.resume_verification(tf, rn)
 
 if __name__ == '__main__':
     cli_entry_point()

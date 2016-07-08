@@ -26,6 +26,11 @@ This software requires Python 3.5 for the aiohttp library. If desired, create a 
 
 `workon rosie`
 
+##### Clone the repository into your development folder:
+`git clone https://github.com/zamattiac/ROSIEBOt.git`
+
+Navigate into the new folder ( `cd ROSIEBot` )
+
 `pip install -r requirements.txt` to install dependency libraries.
 
 ##### Enter/exit the virtual environment:

@@ -19,7 +19,7 @@ node_urls               -> List of node urls to scrape
 node_url_tuples         -> List of node tuples
 registration_urls       -> List of registration urls
 registration_url_tuples -> List of registration tuples
-user_profile_page_urls  -> List of user urls to scrape
+user_urls  -> List of user urls to scrape
 institution_urls        -> List of institution urls to scrape
 
 Example:
@@ -47,7 +47,7 @@ with shelve.open('198906040000.task') as db:
         rosie.node_urls = db['node_urls']
         rosie.registration_url_tuples = db['registration_url_tuples']
         rosie.registration_urls = db['registration_urls']
-        rosie.user_profile_page_urls = db['user_profile_page_urls']
+        rosie.user_urls = db['user_urls']
         rosie.institution_urls = db['institution_urls']
     except KeyError:
         print('Could not find key in the file')
