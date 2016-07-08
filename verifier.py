@@ -78,28 +78,28 @@ class Verifier:
                     self.failed_pages.append(page.url)
                     self.pages.remove(page)
                     break
+            else:
+                # Alternate checker:
+                for element in self.alternate_elements:
+                    alt = self.alternate_elements[element]
+                    result = soup.select(element)
+                    # No results or empty results, with alternate
+                    if (len(result) == 0 or len(result[0].contents) == 0) and alt != '':
+                        alt_result = soup.select(alt)
 
-            # Alternate checker:
-            for element in self.alternate_elements:
-                alt = self.alternate_elements[element]
-                result = soup.select(element)
-                # No results or empty results, with alternate
-                if (len(result) == 0 or len(result[0].contents) == 0) and alt != '':
-                    alt_result = soup.select(alt)
+                        # Element's alternate has no or empty results
+                        if len(alt_result) == 0 or len(alt_result[0].contents) == 0:
+                            print("Failed: alternate spot_check(): ", page, alt, '\n')
+                            self.failed_pages.append(page.url)
+                            self.pages.remove(page)
+                            break
 
-                    # Element's alternate has no or empty results
-                    if len(alt_result) == 0 or len(alt_result[0].contents) == 0:
-                        print("Failed: alternate spot_check(): ", page, alt, '\n')
+                    # Element has no alternate and no results or empty results
+                    elif (len(result) == 0 or len(result[0].contents) == 0) and alt == '':
+                        print('Failed: spot_check(): ', page, element, "No alt.", '\n')
                         self.failed_pages.append(page.url)
                         self.pages.remove(page)
                         break
-
-                # Element has no alternate and no results or empty results
-                elif (len(result) == 0 or len(result[0].contents) == 0) and alt == '':
-                    print('Failed: spot_check(): ', page, element, "No alt.", '\n')
-                    self.failed_pages.append(page.url)
-                    self.pages.remove(page)
-                    break
         return
 
     def run_verifier(self, json_filename, json_list):
@@ -146,28 +146,28 @@ class ProjectDashboardVerifier(Verifier):
                         self.failed_pages.append(page.url)
                         self.pages.remove(page)
                         break
+            else:
+                # Alternate checker:
+                for element in self.alternate_elements:
+                    alt = self.alternate_elements[element]
+                    result = soup.select(element)
+                    # No results or empty results, with alternate
+                    if (len(result) == 0 or len(result[0].contents) == 0) and alt != '':
+                        alt_result = soup.select(alt)
 
-            # Alternate checker:
-            for element in self.alternate_elements:
-                alt = self.alternate_elements[element]
-                result = soup.select(element)
-                # No results or empty results, with alternate
-                if (len(result) == 0 or len(result[0].contents) == 0) and alt != '':
-                    alt_result = soup.select(alt)
+                        # Element's alternate has no or empty results
+                        if len(alt_result) == 0 or len(alt_result[0].contents) == 0:
+                            print("Failed: alternate spot_check(): ", page, alt, '\n')
+                            self.failed_pages.append(page.url)
+                            self.pages.remove(page)
+                            break
 
-                    # Element's alternate has no or empty results
-                    if len(alt_result) == 0 or len(alt_result[0].contents) == 0:
-                        print("Failed: alternate spot_check(): ", page, alt, '\n')
+                    # Element has no alternate and no results or empty results
+                    elif (len(result) == 0 or len(result[0].contents) == 0) and alt == '':
+                        print('Failed: spot_check(): ', page, element, "No alt.", '\n')
                         self.failed_pages.append(page.url)
                         self.pages.remove(page)
                         break
-
-                # Element has no alternate and no results or empty results
-                elif (len(result) == 0 or len(result[0].contents) == 0) and alt == '':
-                    print('Failed: spot_check(): ', page, element, "No alt.", '\n')
-                    self.failed_pages.append(page.url)
-                    self.pages.remove(page)
-                    break
         return
 
 
@@ -251,28 +251,28 @@ class RegistrationDashboardVerifier(Verifier):
                         self.failed_pages.append(page.url)
                         self.pages.remove(page)
                         break
+            else:
+                # Alternate checker:
+                for element in self.alternate_elements:
+                    alt = self.alternate_elements[element]
+                    result = soup.select(element)
+                    # No results or empty results, with alternate
+                    if (len(result) == 0 or len(result[0].contents) == 0) and alt != '':
+                        alt_result = soup.select(alt)
 
-            # Alternate checker:
-            for element in self.alternate_elements:
-                alt = self.alternate_elements[element]
-                result = soup.select(element)
-                # No results or empty results, with alternate
-                if (len(result) == 0 or len(result[0].contents) == 0) and alt != '':
-                    alt_result = soup.select(alt)
+                        # Element's alternate has no or empty results
+                        if len(alt_result) == 0 or len(alt_result[0].contents) == 0:
+                            print("Failed: alternate spot_check(): ", page, alt, '\n')
+                            self.failed_pages.append(page.url)
+                            self.pages.remove(page)
+                            break
 
-                    # Element's alternate has no or empty results
-                    if len(alt_result) == 0 or len(alt_result[0].contents) == 0:
-                        print("Failed: alternate spot_check(): ", page, alt, '\n')
+                    # Element has no alternate and no results or empty results
+                    elif (len(result) == 0 or len(result[0].contents) == 0) and alt == '':
+                        print('Failed: spot_check(): ', page, element, "No alt.", '\n')
                         self.failed_pages.append(page.url)
                         self.pages.remove(page)
                         break
-
-                # Element has no alternate and no results or empty results
-                elif (len(result) == 0 or len(result[0].contents) == 0) and alt == '':
-                    print('Failed: spot_check(): ', page, element, "No alt.", '\n')
-                    self.failed_pages.append(page.url)
-                    self.pages.remove(page)
-                    break
         return
 
 
@@ -422,6 +422,19 @@ def verify_institutions(verification_dictionary, list_name):
 def call_rescrape(json_dictionary, verification_json_dictionary):
     print("Called rescrape.")
     second_chance = Crawler()
+    if json_dictionary['scrape_nodes']:
+        second_chance.node_urls = verification_json_dictionary['node_urls_failed_verification']
+        second_chance.scrape_nodes()
+    if json_dictionary['scrape_registrations']:
+        second_chance.registration_urls = verification_json_dictionary['registration_urls_failed_verification']
+        second_chance.scrape_registrations()
+    if json_dictionary['scrape_users']:
+        second_chance.user_profile_page_urls = verification_json_dictionary['user_profile_page_urls_failed_verification']
+        second_chance.scrape_users()
+        second_chance.user_urls = verification_json_dictionary['user_urls_failed_verification']
+    if json_filename['scrape_institutions']:
+        second_chance.institution_urls = verification_json_dictionary['institution_urls_failed_verification']
+        second_chance.scrape_institutions()
     if json_dictionary['scrape_nodes']:
         second_chance.node_urls = verification_json_dictionary['node_urls_failed_verification']
         second_chance.scrape_nodes(async=True)
