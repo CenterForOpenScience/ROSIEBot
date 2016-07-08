@@ -18,14 +18,14 @@ if (isset($_SERVER['HTTP_REFERER'])) {
             }
             header {
             background-color: #214762;
-            position: fixed;
+            position: relative;
             top: 0;
             color: white;
             width: 100%;
             left: 0;
             padding-left: 17%;
             padding-top: 5px;
-            float: down;
+            margin: -10px;
             }
             header img {
             margin: 20px;
