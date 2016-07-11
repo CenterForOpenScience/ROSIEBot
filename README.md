@@ -17,6 +17,7 @@ This software requires Python 3.5 for the aiohttp library. If desired, create a 
 ##### From scratch:
 
 `pip install virtualenv`
+`pip install virtualenvwrapper`
 
 ##### Create virtualenv 'rosie':
 
