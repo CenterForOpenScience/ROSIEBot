@@ -424,19 +424,6 @@ def call_rescrape(json_dictionary, verification_json_dictionary):
     second_chance = Crawler()
     if json_dictionary['scrape_nodes']:
         second_chance.node_urls = verification_json_dictionary['node_urls_failed_verification']
-        second_chance.scrape_nodes()
-    if json_dictionary['scrape_registrations']:
-        second_chance.registration_urls = verification_json_dictionary['registration_urls_failed_verification']
-        second_chance.scrape_registrations()
-    if json_dictionary['scrape_users']:
-        second_chance.user_profile_page_urls = verification_json_dictionary['user_profile_page_urls_failed_verification']
-        second_chance.scrape_users()
-        second_chance.user_urls = verification_json_dictionary['user_urls_failed_verification']
-    if json_filename['scrape_institutions']:
-        second_chance.institution_urls = verification_json_dictionary['institution_urls_failed_verification']
-        second_chance.scrape_institutions()
-    if json_dictionary['scrape_nodes']:
-        second_chance.node_urls = verification_json_dictionary['node_urls_failed_verification']
         second_chance.scrape_nodes(async=True)
     if json_dictionary['scrape_registrations']:
         second_chance.registration_urls = verification_json_dictionary['registration_urls_failed_verification']
