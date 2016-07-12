@@ -6,6 +6,10 @@ from pages import ProjectDashboardPage, ProjectFilesPage, ProjectAnalyticsPage, 
 from crawler import Crawler
 import bs4
 
+f = open('error_file2', 'w')
+f2 = open('size_check_file', 'w')
+f3 = open('error_list_file', 'w')
+
 
 # Verifier superclass
 class Verifier:
@@ -41,6 +45,7 @@ class Verifier:
             if self.url_end in url:
                 print('rel: ', url)
                 if url in json_dictionary['error_list']:
+                    f3.write("Already in error list" + url + '\n')
                     self.failed_pages.append(url)
                     print('error: ', url)
                 else:
@@ -49,6 +54,7 @@ class Verifier:
                         self.pages.append(obj)
                     except FileNotFoundError:
                         self.failed_pages.append(url)
+                        f3.write("FileNotFoundError: " + url + '\n')
                 json_list.remove(url)
 
     # Compare page size to page-specific minimum that any fully-scraped page should have
@@ -58,6 +64,9 @@ class Verifier:
             # print(page.file_size)
             if not page.file_size > self.minimum_size:
                 print('Failed: size_comparison(): ', page, ' has size: ', page.file_size)
+                msg = str(page)
+                msg2 = str(page.file_size)
+                f2.write("Page Failed: " + msg + " has size: " + msg2 + '\n')
                 self.failed_pages.append(page.url)
                 self.pages.remove(page)
         return
@@ -68,19 +77,27 @@ class Verifier:
     # Format: Filled-in : Alternate
     def spot_check(self):
         for page in self.pages[:]:
+            print(page, "has entered spot check")
             soup = page.get_content()
             # Existential crisis:
             for element in self.loading_elements:
+                print(element, " Loading Element on page: ", page)
                 final_element = self.loading_elements[element]  # What is supposed to be there
                 loading_bar_result = soup.select(element)  # Is a loading bar present?
                 if len(loading_bar_result) > 0:  # A loading bar exists (so content does not exist completely)
-                    print("Failed: existential spot_check() ", page, final_element, " doesn't exist, loader ", element, " present.")
+                    print("Failed: existential spot_check() ", page, final_element, " doesn't exist, loader ", element,
+                          " present.")
+                    msg = str(final_element)
+                    msg2 = str(element)
+                    msg3 = str(page)
+                    f.write(msg3 + " failed for elements: " + msg2 + " " + msg + '\n')
                     self.failed_pages.append(page.url)
                     self.pages.remove(page)
                     break
             else:
                 # Alternate checker:
                 for element in self.alternate_elements:
+                    print(element, " Alternate Element on page: ", page)
                     alt = self.alternate_elements[element]
                     result = soup.select(element)
                     # No results or empty results, with alternate
@@ -90,6 +107,9 @@ class Verifier:
                         # Element's alternate has no or empty results
                         if len(alt_result) == 0 or len(alt_result[0].contents) == 0:
                             print("Failed: alternate spot_check(): ", page, alt, '\n')
+                            msg = str(alt)
+                            msg3 = str(page)
+                            f.write(msg3 + " failed for alt: " + msg + '\n')
                             self.failed_pages.append(page.url)
                             self.pages.remove(page)
                             break
@@ -97,6 +117,9 @@ class Verifier:
                     # Element has no alternate and no results or empty results
                     elif (len(result) == 0 or len(result[0].contents) == 0) and alt == '':
                         print('Failed: spot_check(): ', page, element, "No alt.", '\n')
+                        msg2 = str(element)
+                        msg3 = str(page)
+                        f.write(msg3 + " failed for element (no alt) : " + msg2 + '\n')
                         self.failed_pages.append(page.url)
                         self.pages.remove(page)
                         break
@@ -122,7 +145,7 @@ class ProjectDashboardVerifier(Verifier):
             '#contributors span.date.node-last-modified-date': '',  # Last modified
             '#contributorsList > ol': '',  # Contributor list
             '#tb-tbody': '',  # File list
-            '#logScope > div > div > div.panel-body > span > dl': '#logFeed > div > p'
+            '#logFeed': ''
             # Activity / "Unable to retrieve at this time"
         }
 
@@ -133,9 +156,11 @@ class ProjectDashboardVerifier(Verifier):
     # Format: Filled-in : Alternate
     def spot_check(self):
         for page in self.pages[:]:
+            print(page, "has entered spot check")
             soup = page.get_content()
             # Existential crisis:
             for element in self.loading_elements:
+                print(element, " Loading Element on page: ", page)
                 final_element = self.loading_elements[element]  # What is supposed to be there
                 loading_bar_result = soup.select(element)
                 if len(loading_bar_result) > 0:  # Container div is present
@@ -143,12 +168,17 @@ class ProjectDashboardVerifier(Verifier):
                     if len(final_result) == 0:  # Final element isn't in place
                         print("Failed: existential spot_check() ", page, final_element, " doesn't exist, loader ", element,
                               " present.")
+                        msg = str(final_element)
+                        msg2 = str(element)
+                        msg3 = str(page)
+                        f.write(msg3 + " Project Dashboard page failed for elements: " + msg2 + " " + msg + '\n')
                         self.failed_pages.append(page.url)
                         self.pages.remove(page)
                         break
             else:
                 # Alternate checker:
                 for element in self.alternate_elements:
+                    print(element, " Alternate Element on page: ", page)
                     alt = self.alternate_elements[element]
                     result = soup.select(element)
                     # No results or empty results, with alternate
@@ -158,6 +188,9 @@ class ProjectDashboardVerifier(Verifier):
                         # Element's alternate has no or empty results
                         if len(alt_result) == 0 or len(alt_result[0].contents) == 0:
                             print("Failed: alternate spot_check(): ", page, alt, '\n')
+                            msg = str(alt)
+                            msg3 = str(page)
+                            f.write(msg3 + " Project Dashboard page failed for alt: " + msg + '\n')
                             self.failed_pages.append(page.url)
                             self.pages.remove(page)
                             break
@@ -165,6 +198,9 @@ class ProjectDashboardVerifier(Verifier):
                     # Element has no alternate and no results or empty results
                     elif (len(result) == 0 or len(result[0].contents) == 0) and alt == '':
                         print('Failed: spot_check(): ', page, element, "No alt.", '\n')
+                        msg2 = str(element)
+                        msg3 = str(page)
+                        f.write(msg3 + " Project Dashboard page failed for element (no alt) : " + msg2 + '\n')
                         self.failed_pages.append(page.url)
                         self.pages.remove(page)
                         break
@@ -238,9 +274,11 @@ class RegistrationDashboardVerifier(Verifier):
     # Format: Filled-in : Alternate
     def spot_check(self):
         for page in self.pages[:]:
+            print(page, "has entered spot check")
             soup = page.get_content()
             # Existential crisis:
             for element in self.loading_elements:
+                print(element, " Loading Element on page: ", page)
                 final_element = self.loading_elements[element]  # What is supposed to be there
                 loading_bar_result = soup.select(element)
                 if len(loading_bar_result) > 0:  # Container div is present
@@ -248,12 +286,17 @@ class RegistrationDashboardVerifier(Verifier):
                     if len(final_result) == 0:  # Final element isn't in place
                         print("Failed: existential spot_check() ", page, final_element, " doesn't exist, loader ", element,
                               " present.")
+                        msg = str(final_element)
+                        msg2 = str(element)
+                        msg3 = str(page)
+                        f.write(msg3 + " Registration Dashboard failed for elements: " + msg2 + " " + msg + '\n')
                         self.failed_pages.append(page.url)
                         self.pages.remove(page)
                         break
             else:
                 # Alternate checker:
                 for element in self.alternate_elements:
+                    print(element, " Alternate Element on page: ", page)
                     alt = self.alternate_elements[element]
                     result = soup.select(element)
                     # No results or empty results, with alternate
@@ -263,6 +306,9 @@ class RegistrationDashboardVerifier(Verifier):
                         # Element's alternate has no or empty results
                         if len(alt_result) == 0 or len(alt_result[0].contents) == 0:
                             print("Failed: alternate spot_check(): ", page, alt, '\n')
+                            msg = str(alt)
+                            msg3 = str(page)
+                            f.write(msg3 + " Registration Dashboard failed for alt: " + msg + '\n')
                             self.failed_pages.append(page.url)
                             self.pages.remove(page)
                             break
@@ -270,6 +316,9 @@ class RegistrationDashboardVerifier(Verifier):
                     # Element has no alternate and no results or empty results
                     elif (len(result) == 0 or len(result[0].contents) == 0) and alt == '':
                         print('Failed: spot_check(): ', page, element, "No alt.", '\n')
+                        msg2 = str(element)
+                        msg3 = str(page)
+                        f.write(msg3 + " Registration Dashboard failed for element (no alt) : " + msg2 + '\n')
                         self.failed_pages.append(page.url)
                         self.pages.remove(page)
                         break
@@ -521,8 +570,26 @@ def resume_verification(json_filename, num_retries):
             run_verification(json_filename, num_retries)
 
 
-def main(json_filename, num_retries):
+def test_verification(json_filename):
+    with codecs.open(json_filename, mode='r', encoding='utf-8') as failure_file:
+        run_info = json.load(failure_file)
+    with codecs.open(json_filename, mode='r', encoding='utf-8') as failure_file:
+        run_copy = json.load(failure_file)
+    if run_info['scrape_finished']:
+        setup_verification(run_info, run_copy, True)
+        run_copy['1st_verification_finished'] = True
+        with codecs.open(json_filename, mode='w', encoding='utf-8') as file:
+            json.dump(run_copy, file, indent=4)
+            print("Dumped json run_copy 1st verify")
+
+
+def main():
     # For testing:
-    # num_retries = 2
+    json_filename = "201607071024.json"
+    # num_retries += 2
     # call two verification/scraping methods depending on num retries
-    run_verification(json_filename, num_retries)
+    # run_verification(json_filename, num_retries)
+    test_verification(json_filename)
+
+if __name__ == '__main__':
+    main()
