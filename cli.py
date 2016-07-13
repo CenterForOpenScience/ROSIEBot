@@ -305,11 +305,19 @@ def resume_scrape(db, tf):
 
 
 def verify_mirror(tf, rn):
-    verifier.main(tf, rn)
+    for i in range(rn):
+        verifier.main(tf, i)
 
 
 def resume_verify_mirror(tf, rn):
-    verifier.resume_verification(tf, rn)
+    with codecs.open(tf, mode='r', encoding='utf-8') as failure_file:
+        run_info = json.load(failure_file)
+    if run_info['1st_verification_finished']:
+        for i in range(rn):
+            verifier.resume_verification(tf)
+    else:
+        for i in range(rn):
+            verifier.main(tf, i)
 
 if __name__ == '__main__':
     cli_entry_point()
