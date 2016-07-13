@@ -44,12 +44,12 @@ Navigate into the new folder ( `cd ROSIEBot` )
 ##### Site Hierarchy
 |                   |                                                                   |
 |-------------------|-------------------------------------------------------------------|
-| Type              | An type of content hosted on the OSF, with its own GUID.          |
+| Category          | An type of content hosted on the OSF, with its own GUID.          |
 | Page              | One of the pages associated with a type (see below)               |
 | File              | A page instance / specific URL                                    |
 
 
-##### OSF Content Types
+##### OSF Content Categories
 
 - Projects
 - Registrations
@@ -67,7 +67,7 @@ Navigate into the new folder ( `cd ROSIEBot` )
 | Registrations |              |
 | Forks         | Forks        |
 
-For projects and registration types, the catchy acronym `FWARF` (Files, wiki, analytics, registrations, forks) lists the correct page order.
+For projects and registration categories, the catchy acronym `DFWARF` (Dashboard, files, wiki, analytics, registrations, forks) lists the correct page order.
 
 ##### Our Process
 - Crawling: getting lists of all the URLs to visit
