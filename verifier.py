@@ -493,7 +493,7 @@ def run_verification(json_file, i):
 def resume_verification(json_filename):
         with codecs.open(json_filename, mode='r', encoding='utf-8') as failure_file:
             run_copy = json.load(failure_file)
-        print("Begun 2nd run")
+        print("Resumed verification.")
         setup_verification(run_copy, run_info, False)
         # truncates json and dumps new lists
         with codecs.open(json_filename, mode='w', encoding='utf-8') as file:
