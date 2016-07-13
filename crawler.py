@@ -101,16 +101,6 @@ class Crawler:
         # Holds temporary copy of persistent file in memory
         self.dictionary = dictionary
 
-    def _truncate_node_url_tuples(self):
-        """
-        Called by crawl_nodes_api() to truncate self.node_url_tuples according to self.date_modified_marker
-        so that nodes that are updated before the date_modified_marker chronologically will be discarded
-        """
-        if self.date_modified_marker is not None:
-            self.node_url_tuples = [x for x in self.node_url_tuples if x[1] >= self.date_modified_marker]
-            self.debug_logger.info("node_url_tuples truncated according to date_modified_marker: " +
-                                   str(self.date_modified_marker))
-
     def _truncate_registration_url_tuples(self):
         """
         Called by crawl_registrations_api() to truncate self.registration_url_tuples according to
@@ -134,7 +124,7 @@ class Crawler:
         sem = asyncio.BoundedSemaphore(value=10)
         # Request number of pages in nodes API
         with requests.Session() as s:
-            response = s.get(self.api_base + 'nodes/')
+            response = s.get(self.api_base + 'nodes/' + '?filter[date_modified][gte]=' + self.date_modified_marker.isoformat(sep='T'))
             j = response.json()
             num_pages = math.ceil(j['links']['meta']['total'] / j['links']['meta']['per_page'])
             if num_pages < page_limit or page_limit == 0:
@@ -142,12 +132,13 @@ class Crawler:
         tasks = []
         for i in range(1, page_limit + 1):
             tasks.append(asyncio.ensure_future(self.parse_nodes_api(
-                self.api_base + 'nodes/?page=' + str(i),
+                self.api_base + 'nodes/' + '?filter[date_modified][gte]=' +
+                self.date_modified_marker.isoformat(sep='T') +
+                '&page=' + str(i),
                 sem
             )))
         loop = asyncio.get_event_loop()
         loop.run_until_complete(asyncio.wait(tasks))
-        self._truncate_node_url_tuples()
 
     def crawl_registrations_api(self, page_limit=0):
         """
