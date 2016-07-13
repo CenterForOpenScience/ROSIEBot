@@ -105,7 +105,7 @@ class Verifier:
     def run_verifier(self, json_filename, json_list):
         self.harvest_pages(json_filename, json_list)
         self.size_comparison()
-        self.spot_check()
+        # self.spot_check()
 
 
 # Verifier subclasses
@@ -467,45 +467,38 @@ def setup_verification(json_dictionary, verification_json_dictionary, first_scra
                                                                                                    list_name)
 
 
-def run_verification(json_file, num_retries):
-    for i in range(num_retries):
-        with codecs.open(json_file, mode='r', encoding='utf-8') as failure_file:
-            run_info = json.load(failure_file)
-        with codecs.open(json_file, mode='r', encoding='utf-8') as failure_file:
-            run_copy = json.load(failure_file)
-        if i == 0:
-            print("Begun 1st run")
-            if run_info['scrape_finished']:
-                setup_verification(run_info, run_copy, True)
-                run_copy['1st_verification_finished'] = True
-                with codecs.open(json_file, mode='w', encoding='utf-8') as file:
-                    json.dump(run_copy, file, indent=4)
-                    print("Dumped json run_copy 1st verify")
-            call_rescrape(run_info, run_copy)
-        else:
-            print("Begun next run")
-            setup_verification(run_copy, run_copy, False)
-            # truncates json and dumps new lists
+def run_verification(json_file, i):
+    with codecs.open(json_file, mode='r', encoding='utf-8') as failure_file:
+        run_info = json.load(failure_file)
+    with codecs.open(json_file, mode='r', encoding='utf-8') as failure_file:
+        run_copy = json.load(failure_file)
+    if i == 0:
+        print("Begun 1st run")
+        if run_info['scrape_finished']:
+            setup_verification(run_info, run_copy, True)
+            run_copy['1st_verification_finished'] = True
             with codecs.open(json_file, mode='w', encoding='utf-8') as file:
                 json.dump(run_copy, file, indent=4)
-            call_rescrape(run_copy, run_copy)
+                print("Dumped json run_copy 1st verify")
+        call_rescrape(run_info, run_copy)
+    else:
+        print("Begun next run")
+        setup_verification(run_copy, run_copy, False)
+        # truncates json and dumps new lists
+        with codecs.open(json_file, mode='w', encoding='utf-8') as file:
+            json.dump(run_copy, file, indent=4)
+        call_rescrape(run_copy, run_copy)
 
 
-def resume_verification(json_filename, num_retries):
+def resume_verification(json_filename):
         with codecs.open(json_filename, mode='r', encoding='utf-8') as failure_file:
-            run_info = json.load(failure_file)
-        if run_info['1st_verification_finished']:
-            for i in range(num_retries):
-                with codecs.open(json_filename, mode='r', encoding='utf-8') as failure_file:
-                    run_copy = json.load(failure_file)
-                print("Begun 2nd run")
-                setup_verification(run_copy, run_info, False)
-                # truncates json and dumps new lists
-                with codecs.open(json_filename, mode='w', encoding='utf-8') as file:
-                    json.dump(run_copy, file, indent=4)
-                call_rescrape(run_copy, run_copy)
-        else:
-            run_verification(json_filename, num_retries)
+            run_copy = json.load(failure_file)
+        print("Resumed verification.")
+        setup_verification(run_copy, run_info, False)
+        # truncates json and dumps new lists
+        with codecs.open(json_filename, mode='w', encoding='utf-8') as file:
+            json.dump(run_copy, file, indent=4)
+        call_rescrape(run_copy, run_copy)
 
 
 def main(json_filename, num_retries):
