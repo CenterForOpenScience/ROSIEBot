@@ -132,8 +132,8 @@ class Crawler:
         tasks = []
         for i in range(1, page_limit + 1):
             tasks.append(asyncio.ensure_future(self.parse_nodes_api(
-                self.api_base + 'nodes/' + '?filter%5Bdate_modified%5D%5Bgte%5D=' +
-                urllib.parse.quote(self.date_modified_marker.isoformat(sep='T')) +
+                self.api_base + 'nodes/' + '?filter[date_modified][gte]=' +
+                self.date_modified_marker.isoformat(sep='T') +
                 '&page=' + str(i),
                 sem
             )))
