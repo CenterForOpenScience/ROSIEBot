@@ -101,26 +101,16 @@ class Crawler:
         # Holds temporary copy of persistent file in memory
         self.dictionary = dictionary
 
-    # def _truncate_node_url_tuples(self):
-    #     """
-    #     Called by crawl_nodes_api() to truncate self.node_url_tuples according to self.date_modified_marker
-    #     so that nodes that are updated before the date_modified_marker chronologically will be discarded
-    #     """
-    #     if self.date_modified_marker is not None:
-    #         self.node_url_tuples = [x for x in self.node_url_tuples if x[1] >= self.date_modified_marker]
-    #         self.debug_logger.info("node_url_tuples truncated according to date_modified_marker: " +
-    #                                str(self.date_modified_marker))
-    #
-    # def _truncate_registration_url_tuples(self):
-    #     """
-    #     Called by crawl_registrations_api() to truncate self.registration_url_tuples according to
-    #     self.date_modified_marker so that registrations that are updated before the date_modified_marker
-    #     chronologically will be discarded
-    #     """
-    #     if self.date_modified_marker is not None:
-    #         self.registration_url_tuples = [x for x in self.registration_url_tuples if x[1] >= self.date_modified_marker]
-    #         self.debug_logger.info("registration_url_tuples truncated according to date_modified_marker: " +
-    #                                str(self.date_modified_marker))
+    def _truncate_registration_url_tuples(self):
+        """
+        Called by crawl_registrations_api() to truncate self.registration_url_tuples according to
+        self.date_modified_marker so that registrations that are updated before the date_modified_marker
+        chronologically will be discarded
+        """
+        if self.date_modified_marker is not None:
+            self.registration_url_tuples = [x for x in self.registration_url_tuples if x[1] >= self.date_modified_marker]
+            self.debug_logger.info("registration_url_tuples truncated according to date_modified_marker: " +
+                                   str(self.date_modified_marker))
 
 # API Crawling
     def crawl_nodes_api(self, page_limit=0):
@@ -179,6 +169,7 @@ class Crawler:
             )))
         loop = asyncio.get_event_loop()
         loop.run_until_complete(asyncio.wait(tasks))
+        self._truncate_registration_url_tuples()
 
     def crawl_users_api(self, page_limit=0):
         """
