@@ -7,6 +7,7 @@ import shutil
 class Node:
     def __init__(self, guid):
         self.folder_path = self.get_path_from_guid(guid)
+        self.pathFound = True
 
     def get_path_from_guid(self, guid):
         path = 'archive/' + guid
@@ -32,7 +33,11 @@ class Deletion:
 
     def delete_node(self, node):
         print("Deleting", node.folder_path)
-        shutil.rmtree(node.folder_path)
+        if os.path.exists(node.folder_path):
+            shutil.rmtree(node.folder_path)
+        else:
+            node.pathFound = False
+            print(node.folder_path, " Not Found")
 
 
 def run_deleter(initial_list, subsequent_list):
