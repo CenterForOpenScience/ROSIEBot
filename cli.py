@@ -98,13 +98,13 @@ def cli_entry_point(scrape, resume, verify, resume_verify, compile_active, dm, t
 def compile_active_list(file):
     dict = {}
     rosie = crawler.Crawler()
-    rosie.crawl_nodes_api(page_limit=10)
+    rosie.crawl_nodes_api()
     list_of_active_nodes = [x[0].split('/')[4] for x in rosie.node_url_tuples]
     dict['list_of_active_nodes'] = list_of_active_nodes
-    rosie.crawl_users_api(page_limit=10)
+    rosie.crawl_users_api()
     list_of_active_users = [x.split('/')[4] for x in rosie.user_urls]
     dict['list_of_active_users'] = list_of_active_users
-    rosie.crawl_registrations_api(page_limit=10)
+    rosie.crawl_registrations_api()
     list_of_active_registrations = [x[0].split('/')[3] for x in rosie.registration_url_tuples]
     dict['list_of_active_registrations'] = list_of_active_registrations
     json.dump(dict, file, indent=4)
