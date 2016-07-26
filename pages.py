@@ -1,8 +1,9 @@
-""" The page superclass and sublclasses for verifier"""
+""" The page superclass and subclasses for verifier"""
 
 from bs4 import BeautifulSoup
 from settings import base_urls
 import os
+
 MIRROR = 'archive/'
 
 
