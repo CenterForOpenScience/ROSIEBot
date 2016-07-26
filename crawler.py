@@ -1,7 +1,6 @@
 import asyncio
 import aiohttp
 import json
-import codecs
 import datetime
 import os
 import sys
@@ -10,7 +9,7 @@ import requests
 import math
 import collections
 import logging
-import urllib.parse
+import tqdm
 
 # Configure for testing in settings.py
 from settings import base_urls
@@ -112,6 +111,10 @@ class Crawler:
             self.debug_logger.info("registration_url_tuples truncated according to date_modified_marker: " +
                                    str(self.date_modified_marker))
 
+    async def _wait_with_progress_bar(self, tasks):
+        for task in tqdm.tqdm(tasks, total=len(tasks)):
+            await task
+
 # API Crawling
     def crawl_nodes_api(self, page_limit=0):
         """
@@ -138,7 +141,7 @@ class Crawler:
                 sem
             )))
         loop = asyncio.get_event_loop()
-        loop.run_until_complete(asyncio.wait(tasks))
+        loop.run_until_complete(self._wait_with_progress_bar(tasks))
 
     def crawl_registrations_api(self, page_limit=0):
         """
@@ -168,7 +171,7 @@ class Crawler:
                 sem
             )))
         loop = asyncio.get_event_loop()
-        loop.run_until_complete(asyncio.wait(tasks))
+        loop.run_until_complete(self._wait_with_progress_bar(tasks))
         self._truncate_registration_url_tuples()
 
     def crawl_users_api(self, page_limit=0):
@@ -193,7 +196,7 @@ class Crawler:
                 sem
             )))
         loop = asyncio.get_event_loop()
-        loop.run_until_complete(asyncio.wait(tasks))
+        loop.run_until_complete(self._wait_with_progress_bar(tasks))
 
     def crawl_institutions_api(self, page_limit=0):
         """
@@ -220,7 +223,7 @@ class Crawler:
                 sem
             )))
         loop = asyncio.get_event_loop()
-        loop.run_until_complete(asyncio.wait(tasks))
+        loop.run_until_complete(self._wait_with_progress_bar(tasks))
 
 # API Scraping
 
@@ -237,7 +240,7 @@ class Crawler:
         """
         async with sem:
             async with aiohttp.ClientSession() as s:
-                self.debug_logger.info("Crawling nodes api, url = " + api_url)
+                # self.debug_logger.info("Crawling nodes api, url = " + api_url)
                 response = await s.get(api_url)
                 body = await response.read()
                 response.close()
@@ -265,7 +268,7 @@ class Crawler:
         """
         async with sem:
             async with aiohttp.ClientSession() as s:
-                self.debug_logger.info("Crawling registrations api, url = " + api_url)
+                # self.debug_logger.info("Crawling registrations api, url = " + api_url)
                 response = await s.get(api_url)
                 body = await response.read()
                 response.close()
@@ -294,7 +297,7 @@ class Crawler:
         """
         async with sem:
             async with aiohttp.ClientSession() as s:
-                self.debug_logger.info("Crawling users api, url = " + api_url)
+                # self.debug_logger.info("Crawling users api, url = " + api_url)
                 response = await s.get(api_url)
                 body = await response.read()
                 response.close()
@@ -314,7 +317,7 @@ class Crawler:
         """
         async with sem:
             async with aiohttp.ClientSession() as s:
-                self.debug_logger.info("Crawling institutions api, url = " + api_url)
+                # self.debug_logger.info("Crawling institutions api, url = " + api_url)
                 response = await s.get(api_url)
                 body = await response.read()
                 response.close()
@@ -429,7 +432,7 @@ class Crawler:
         for node_url in [x[0] for x in self.node_url_tuples]:
             tasks.append(asyncio.ensure_future(self.get_node_wiki_names(node_url.strip('/').split('/')[-1], sem)))
         loop = asyncio.get_event_loop()
-        loop.run_until_complete(asyncio.wait(tasks))
+        loop.run_until_complete(self._wait_with_progress_bar(tasks))
 
     # Async method called by crawl_wiki
 
@@ -442,7 +445,7 @@ class Crawler:
         async with sem:
             async with aiohttp.ClientSession() as s:
                 u = self.api_base + 'nodes/' + parent_node + '/wikis/'
-                self.debug_logger.info("Crawling nodes api, url = " + u)
+                # self.debug_logger.info("Crawling nodes api, url = " + u)
                 response = await s.get(u)
                 body = await response.read()
                 response.close()
@@ -469,7 +472,7 @@ class Crawler:
         for node_url in [x[0] for x in self.registration_url_tuples]:
             tasks.append(asyncio.ensure_future(self.get_registration_wiki_names(node_url.strip('/').split('/')[-1], sem)))
         loop = asyncio.get_event_loop()
-        loop.run_until_complete(asyncio.wait(tasks))
+        loop.run_until_complete(self._wait_with_progress_bar(tasks))
 
     # Async method called by crawl_wiki
     async def get_registration_wiki_names(self, parent_node, sem):
@@ -481,7 +484,7 @@ class Crawler:
         async with sem:
             async with aiohttp.ClientSession() as s:
                 u = self.api_base + 'registrations/' + parent_node + '/wikis/'
-                self.debug_logger.info("Crawling registrations api, url = " + u)
+                # self.debug_logger.info("Crawling registrations api, url = " + u)
                 response = await s.get(u)
                 body = await response.read()
                 response.close()
@@ -560,7 +563,7 @@ class Crawler:
 
         loop = asyncio.get_event_loop()
         if len(tasks) > 0:
-            loop.run_until_complete(asyncio.wait(tasks))
+            loop.run_until_complete(self._wait_with_progress_bar(tasks))
         else:
             print("No pages to scrape.")
 
@@ -579,7 +582,7 @@ class Crawler:
                 body = await response.text()
                 response.close()
                 if response.status == 200:
-                    self.debug_logger.debug("Finished : " + url)
+                    # self.debug_logger.debug("Finished : " + url)
                     self.record_milestone(url)
                     save_html(body, url)
                 else:
