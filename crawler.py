@@ -495,7 +495,7 @@ class Crawler:
                         try:
                             self._registration_wikis_by_parent_guid[parent_node].append(datum['attributes']['name'])
                         except:
-                            pass
+                            self.debug_logger.critical("Fail api call on " + u)
 
 
 # Wrapper methods for scraping different type of pages
