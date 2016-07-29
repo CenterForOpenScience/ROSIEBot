@@ -53,10 +53,9 @@ def cli_entry_point(scrape, resume, verify, resume_verify, compile_active, delet
             compile_active_list(file)
         return
 
-    if scrape and dm is None:
-        click.echo("Date marker needed for normal scrape")
-
-    if scrape and dm is not None:
+    if scrape:
+        if dm is None:
+            dm = datetime.datetime.strptime('1970-01-01T00:00:00', "%Y-%m-%dT%H:%M:%S")
         click.echo('Starting normal scrape with date marker set to : ' + dm)
         now = datetime.datetime.now()
         filename = now.strftime('%Y%m%d%H%M' + '.json')
@@ -134,32 +133,29 @@ def normal_scrape(dm,
     else:
         date_marker = datetime.datetime.strptime(dm, "%Y-%m-%dT%H:%M:%S")
 
-    if date_marker is None:
-        click.echo("Date marker is not specified or specified date marker cannot be parsed")
-        return
-
-    store = {}
-    store['scrape_registrations'] = scrape_registrations
-    store['scrape_users'] = scrape_users
-    store['scrape_institutions'] = scrape_institutions
-    store['scrape_nodes'] = scrape_nodes
-    store['include_dashboard'] = include_dashboard
-    store['include_files'] = include_files
-    store['include_wiki'] = include_wiki
-    store['include_analytics'] = include_analytics
-    store['include_registrations'] = include_registrations
-    store['include_forks'] = include_forks
-    store['nodes_finished'] = False
-    store['registrations_finished'] = False
-    store['users_finished'] = False
-    store['institutions_finished'] = False
-    store['scrape_finished'] = False
-    store['node_urls'] = None
-    store['registration_urls'] = None
-    store['user_urls'] = None
-    store['institution_urls'] = None
-    store['error_list'] = None
-    store['milestone'] = None
+    store = {
+        'scrape_registrations': scrape_registrations,
+        'scrape_users': scrape_users,
+        'scrape_institutions': scrape_institutions,
+        'scrape_nodes': scrape_nodes,
+        'include_dashboard': include_dashboard,
+        'include_files': include_files,
+        'include_wiki': include_wiki,
+        'include_analytics': include_analytics,
+        'include_registrations': include_registrations,
+        'include_forks': include_forks,
+        'nodes_finished': False,
+        'registrations_finished': False,
+        'users_finished': False,
+        'institutions_finished': False,
+        'scrape_finished': False,
+        'node_urls': None,
+        'registration_urls': None,
+        'user_urls': None,
+        'institution_urls': None,
+        'error_list': None,
+        'milestone': None
+    }
 
     rosie = crawler.Crawler(date_modified=date_marker, db=db, dictionary=store)
 
