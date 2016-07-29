@@ -9,7 +9,6 @@ osf.io/
 .env
 *.json
 !task_file_example.txt
-*.json
 archive/
 *.zip
 *.htm
