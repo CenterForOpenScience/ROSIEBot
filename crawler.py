@@ -59,7 +59,7 @@ class Crawler:
         # Stores all the urls for user profile pages
         self.user_urls = []  # User profile page ("osf.io/mst3k/")
         # Stores all the urls for institutions
-        self.institution_urls = [self.http_base]  # Institution page ("osf.io/institutions/cos")
+        self.institution_urls = []  # Institution page ("osf.io/institutions/cos")
         # General pages
         self.general_urls = [self.http_base, self.http_base + 'support/']
         # List of 504s:
