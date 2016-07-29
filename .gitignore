@@ -8,7 +8,6 @@ osf.io/
 *.txt
 .env
 *.json
-settings.py
 !task_file_example.txt
 *.json
 archive/
