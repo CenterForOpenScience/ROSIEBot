@@ -143,7 +143,6 @@ class Crawler:
         loop = asyncio.get_event_loop()
         loop.run_until_complete(self._wait_with_progress_bar(tasks))
         self.debug_logger.info("Finished crawling nodes API pages")
-        json.dump(self.index, open('index.json', 'w'))
 
     def crawl_registrations_api(self, page_limit=0):
         """
