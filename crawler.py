@@ -123,8 +123,10 @@ class Crawler:
         according to self.date_modified_marker.
         :param page_limit: Number of pages of API to crawl. If page_limit=0, then crawl all pages.
         """
-        self.debug_logger.info("Start crawling nodes API pages")
         sem = asyncio.BoundedSemaphore(value=10)
+
+        self.debug_logger.info("\nStart crawling nodes API pages")
+
         # Request number of pages in nodes API
         with requests.Session() as s:
             response = s.get(self.api_base + 'nodes/' + '?filter[date_modified][gte]=' + self.date_modified_marker.isoformat(sep='T'))
@@ -154,6 +156,8 @@ class Crawler:
         # Setting a semaphore for rate limiting
         sem = asyncio.BoundedSemaphore(value=10)
 
+        self.debug_logger.info("\nStart crawling registrations API pages")
+
         # Request number of pages in nodes API
         with requests.Session() as s:
             response = s.get(self.api_base + 'registrations/')
@@ -182,6 +186,8 @@ class Crawler:
         # Setting a semaphore for rate limiting
         sem = asyncio.BoundedSemaphore(value=10)
 
+        self.debug_logger.info("\nStart crawling users API pages")
+
         # Request number of pages in nodes API
         with requests.Session() as s:
             response = s.get(self.api_base + 'users/')
@@ -196,6 +202,7 @@ class Crawler:
                 sem
             )))
         loop = asyncio.get_event_loop()
+
         loop.run_until_complete(self._wait_with_progress_bar(tasks))
 
     def crawl_institutions_api(self, page_limit=0):
@@ -205,6 +212,8 @@ class Crawler:
         """
         # Setting a semaphore for rate limiting
         sem = asyncio.BoundedSemaphore(value=10)
+
+        self.debug_logger.info('\nStart crawling institution API pages')
 
         # Request number of pages in nodes API
         with requests.Session() as s:
@@ -429,6 +438,9 @@ class Crawler:
         """
         tasks = []
         sem = asyncio.BoundedSemaphore(value=5)
+
+        self.debug_logger.info("\nCrawling node wiki API pages")
+
         for node_url in [x[0] for x in self.node_url_tuples]:
             tasks.append(asyncio.ensure_future(self.get_node_wiki_names(node_url.strip('/').split('/')[-1], sem)))
         loop = asyncio.get_event_loop()
@@ -469,6 +481,10 @@ class Crawler:
         """
         tasks = []
         sem = asyncio.BoundedSemaphore(value=5)
+
+        self.debug_logger.info("\nCrawling registration wiki API pages")
+
+
         for node_url in [x[0] for x in self.registration_url_tuples]:
             tasks.append(asyncio.ensure_future(self.get_registration_wiki_names(node_url.strip('/').split('/')[-1], sem)))
         loop = asyncio.get_event_loop()
@@ -563,6 +579,7 @@ class Crawler:
 
         loop = asyncio.get_event_loop()
         if len(tasks) > 0:
+            self.debug_logger.info("\nScraping pages")
             loop.run_until_complete(self._wait_with_progress_bar(tasks))
         else:
             print("No pages to scrape.")
