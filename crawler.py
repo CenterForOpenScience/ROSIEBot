@@ -79,7 +79,7 @@ class Crawler:
         self.debug_logger.propagate = 0
         # Console handler for debug logger
         self.console_log_handler = logging.StreamHandler()
-        self.console_log_handler.setLevel(logging.DEBUG)
+        self.console_log_handler.setLevel(logging.CRITICAL)
         # Debug file handler for debug logger
         self.debug_log_handler = logging.FileHandler(settings.DEBUG_LOG_FILENAME, mode='w')
         self.debug_log_handler.setLevel(logging.DEBUG)
@@ -142,6 +142,8 @@ class Crawler:
             )))
         loop = asyncio.get_event_loop()
         loop.run_until_complete(self._wait_with_progress_bar(tasks))
+        self.debug_logger.info("Finished crawling nodes API pages")
+        json.dump(self.index, open('index.json', 'w'))
 
     def crawl_registrations_api(self, page_limit=0):
         """
@@ -151,6 +153,7 @@ class Crawler:
         the list according to self.date_modified_marker.
         :param page_limit: Number of pages of API to crawl. If page_limit=0, then crawl all pages.
         """
+        self.debug_logger.info("Start crawling registration API pages")
         # Setting a semaphore for rate limiting
         sem = asyncio.BoundedSemaphore(value=10)
 
@@ -172,6 +175,7 @@ class Crawler:
             )))
         loop = asyncio.get_event_loop()
         loop.run_until_complete(self._wait_with_progress_bar(tasks))
+        self.debug_logger.info("Start crawling registration API pages")
         self._truncate_registration_url_tuples()
 
     def crawl_users_api(self, page_limit=0):
@@ -179,6 +183,7 @@ class Crawler:
         The runner method that runs parse_users_api(), which will populate the list of self.user_urls.
         :param page_limit: Number of pages of API to crawl. If page_limit=0, then crawl all pages.
         """
+        self.debug_logger.info("Start crawling user API pages")
         # Setting a semaphore for rate limiting
         sem = asyncio.BoundedSemaphore(value=10)
 
@@ -197,12 +202,14 @@ class Crawler:
             )))
         loop = asyncio.get_event_loop()
         loop.run_until_complete(self._wait_with_progress_bar(tasks))
+        self.debug_logger.info("Finished crawling user API pages")
 
     def crawl_institutions_api(self, page_limit=0):
         """
         The runner method that runs parse_institutions_api(), which will populate the list of self.institution_urls.
         :param page_limit: Number of pages of API to crawl. If page_limit=0, then crawl all pages.
         """
+        self.debug_logger.info("Start crawling institution API pages")
         # Setting a semaphore for rate limiting
         sem = asyncio.BoundedSemaphore(value=10)
 
@@ -224,6 +231,7 @@ class Crawler:
             )))
         loop = asyncio.get_event_loop()
         loop.run_until_complete(self._wait_with_progress_bar(tasks))
+        self.debug_logger.info("Finished crawling institution API pages")
 
 # API Scraping
 
@@ -240,7 +248,7 @@ class Crawler:
         """
         async with sem:
             async with aiohttp.ClientSession() as s:
-                # self.debug_logger.info("Crawling nodes api, url = " + api_url)
+                self.debug_logger.info("Crawling nodes api, url = " + api_url)
                 response = await s.get(api_url)
                 body = await response.read()
                 response.close()
@@ -268,7 +276,7 @@ class Crawler:
         """
         async with sem:
             async with aiohttp.ClientSession() as s:
-                # self.debug_logger.info("Crawling registrations api, url = " + api_url)
+                self.debug_logger.info("Crawling registrations api, url = " + api_url)
                 response = await s.get(api_url)
                 body = await response.read()
                 response.close()
@@ -297,7 +305,7 @@ class Crawler:
         """
         async with sem:
             async with aiohttp.ClientSession() as s:
-                # self.debug_logger.info("Crawling users api, url = " + api_url)
+                self.debug_logger.info("Crawling users api, url = " + api_url)
                 response = await s.get(api_url)
                 body = await response.read()
                 response.close()
@@ -317,7 +325,7 @@ class Crawler:
         """
         async with sem:
             async with aiohttp.ClientSession() as s:
-                # self.debug_logger.info("Crawling institutions api, url = " + api_url)
+                self.debug_logger.info("Crawling institutions api, url = " + api_url)
                 response = await s.get(api_url)
                 body = await response.read()
                 response.close()
@@ -420,21 +428,19 @@ class Crawler:
             if all_pages or forks:
                 self.registration_urls.append(base_url + 'forks/')
 
-# Resolving wiki links for Nodes
-
     def crawl_node_wiki(self):
         """
         Called by generate_node_urls if necessary. This is the runner method to run get_node_wiki_names() in order to
         get the urls of wikis of a node. The urls of wikis will be added to self.node_urls
         """
+        self.debug_logger.info("Start crawling node wiki API pages")
         tasks = []
         sem = asyncio.BoundedSemaphore(value=5)
         for node_url in [x[0] for x in self.node_url_tuples]:
             tasks.append(asyncio.ensure_future(self.get_node_wiki_names(node_url.strip('/').split('/')[-1], sem)))
         loop = asyncio.get_event_loop()
         loop.run_until_complete(self._wait_with_progress_bar(tasks))
-
-    # Async method called by crawl_wiki
+        self.debug_logger.info("Finished crawling node wiki API pages")
 
     async def get_node_wiki_names(self, parent_node, sem):
         """
@@ -458,23 +464,21 @@ class Crawler:
                         except KeyError:
                             self.debug_logger.critical("Fail api call on " + u)
 
-
-# Resolving wiki links for Registrations
-
     def crawl_registration_wiki(self):
         """
         Called by generate_registration_urls if necessary. This is the runner method to run
         get_registration_wiki_names() in order to get the urls of wikis of a registration.
         The urls of wikis will be added to self.registration_urls
         """
+        self.debug_logger.info("Start crawling registration wiki API pages")
         tasks = []
         sem = asyncio.BoundedSemaphore(value=5)
         for node_url in [x[0] for x in self.registration_url_tuples]:
             tasks.append(asyncio.ensure_future(self.get_registration_wiki_names(node_url.strip('/').split('/')[-1], sem)))
         loop = asyncio.get_event_loop()
         loop.run_until_complete(self._wait_with_progress_bar(tasks))
+        self.debug_logger.info("Finished crawling registration wiki API pages")
 
-    # Async method called by crawl_wiki
     async def get_registration_wiki_names(self, parent_node, sem):
         """
         Asynchronous scraping method for scraping the V2 Registrations Wikis API.
@@ -497,10 +501,6 @@ class Crawler:
                         except:
                             self.debug_logger.critical("Fail api call on " + u)
 
-
-# Wrapper methods for scraping different type of pages
-
-# Wrapper methods for scraping different types of pages
     def scrape_nodes(self, async=True):
         """
         Wrapper method that scrape all urls in self.node_urls. Calls _scrape_pages().
@@ -516,6 +516,7 @@ class Crawler:
                     lst.append(self.node_urls.pop(0))
                 if len(lst) > 0:
                     self._scrape_pages(lst)
+        self.debug_logger.info("Finished scraping nodes, async = " + str(async))
 
     def scrape_registrations(self, async=True):
         """
@@ -531,6 +532,7 @@ class Crawler:
                 while len(self.registration_urls) > 0 and elem[0] in self.registration_urls:
                     lst.append(self.registration_urls.pop(0))
                 self._scrape_pages(lst)
+        self.debug_logger.info("Finished scraping registrations, async = " + str(async))
 
     def scrape_users(self):
         """
@@ -538,6 +540,7 @@ class Crawler:
         """
         self.debug_logger.info("Scraping users")
         self._scrape_pages(self.user_urls)
+        self.debug_logger.info("Finished scraping users")
 
     def scrape_institutions(self):
         """
@@ -545,18 +548,23 @@ class Crawler:
         """
         self.debug_logger.info("Scraping institutions")
         self._scrape_pages(self.institution_urls)
+        self.debug_logger.info("Finished scraping institutions")
 
     def scrape_general(self):
-        """ Index and support page """
+        """
+        Wrapper method that scrape all general_urls. Calls _scrape_pages().
+        """
+        self.debug_logger.info("Scraping general pages")
         self._scrape_pages(self.general_urls)
+        self.debug_logger.info("Finished scraping general pages")
 
-# Wrapper method for scraping a list of pages
+    # TODO Make semaphore value a parameter
     def _scrape_pages(self, aspect_list):
         """
         Runner method that runs scrape_url()
         :param aspect_list: list of url of pages to scrape
         """
-        sem = asyncio.BoundedSemaphore(value=1)
+        sem = asyncio.BoundedSemaphore(value=5)
         tasks = []
         for url in aspect_list:
             tasks.append(asyncio.ensure_future(self.scrape_url(url, sem)))
@@ -565,9 +573,8 @@ class Crawler:
         if len(tasks) > 0:
             loop.run_until_complete(self._wait_with_progress_bar(tasks))
         else:
-            print("No pages to scrape.")
+            self.debug_logger.info("No pages to scrape")
 
-# Async method for actual scraping
     async def scrape_url(self, url, sem):
         """
         Asynchronous method that scrape page. Calls save_html() to save scraped page to file.
@@ -582,7 +589,7 @@ class Crawler:
                 body = await response.text()
                 response.close()
                 if response.status == 200:
-                    # self.debug_logger.debug("Finished : " + url)
+                    self.debug_logger.debug("Finished : " + url)
                     self.record_milestone(url)
                     save_html(body, url)
                 else:
@@ -608,7 +615,7 @@ class Crawler:
             json.dump(self.dictionary, self.database, indent=4)
             self.database.flush()
 
-
+# TODO add timestamp to pages scraped
 def save_html(html, page):
     # Mirror warning
     mirror_warning = """
