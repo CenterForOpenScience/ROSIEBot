@@ -12,6 +12,7 @@ settings.py
 !task_file_example.txt
 *.json
 archive/
+!archive/static/consolidated.css
 *.zip
 *.htm
 !requirements.txt

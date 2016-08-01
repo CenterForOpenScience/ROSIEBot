@@ -5,6 +5,7 @@ import json
 import codecs
 import verifier
 import deleter
+import shrinker
 import os
 
 @click.command()
@@ -49,11 +50,6 @@ def cli_entry_point(scrape, resume, verify, resume_verify, compile_active, delet
 
     if (resume or verify or resume_verify or shrink) and tf is None:
         click.echo("This mode requires a task file in the form: --tf=<FILENAME>")
-        return
-
-    elif (resume or verify or resume_verify or shrink) and tf is not None:
-        if not os.path.exists(tf):
-            click.echo("Taskfile does not exist.")
         return
 
     if compile_active:
@@ -349,7 +345,8 @@ def delete_nodes(ptf, ctf):
     deleter.run_deleter(previous_task_file['list_of_active_nodes'],
                         current_task_file['list_of_active_nodes'])
 
-def folder_size(folder):
+
+def get_folder_size(folder):
     folder_size = 0
     for (path, dirs, files) in os.walk(folder):
         for file in files:
@@ -357,9 +354,13 @@ def folder_size(folder):
             folder_size += os.path.getsize(filename)
     return "%0.1f MB" % (folder_size / (1024 * 1024.0))
 
+
 def shrink_size(tf):
-    click.echo("Beginning size: " + folder_size("archive"))
-    pass
+    click.echo("Beginning size: " + get_folder_size("archive"))
+    freud = shrinker.Shrinker(tf)
+    freud.run()
+    click.echo("New size: " + get_folder_size("archive"))
+    return
 
 if __name__ == '__main__':
     cli_entry_point()
