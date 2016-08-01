@@ -611,11 +611,11 @@ class Crawler:
 
 def save_html(html, page):
     # Mirror warning
-    today = datetime.date.today().strftime("%B %d, %Y")
+    today = datetime.datetime.today().strftime("%B %d, %Y at %I:%M %p")
     mirror_warning = """
         <div style="position:fixed;    bottom:0;left:0;    border-top-right-radius: 8px;    color:  white;
         background-color: red;  padding: .5em;">
-            This is a read-only mirror of the OSF from {}. Some features may not be available.
+            This page is a read-only mirror of the OSF saved on {}. Some features may not be available.
         </div>
         """.format(today)
 
