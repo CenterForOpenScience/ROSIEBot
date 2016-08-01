@@ -5,6 +5,7 @@ import json
 import codecs
 import verifier
 import deleter
+import os
 
 @click.command()
 # Specify parameters that choose between different modes
@@ -15,6 +16,7 @@ import deleter
 @click.option('--resume_verify', is_flag=True, help="Resume verification of the existing OSF static mirror, need to "
                                                     "import task file")
 @click.option('--delete', is_flag=True, help="Delete nodes from the mirror that have been deleted by users")
+@click.option('--shrink', is_flag=True, help="Reduce the mirror size by eliminating redundant CSS, need to import task file")
 # Specify parameters for other needed values
 @click.option('--dm', default=None, type=click.STRING, help="Date marker needed for normal scrape")
 @click.option('--tf', default=None, type=click.STRING, help="filename of the task file")
@@ -35,14 +37,24 @@ import deleter
 @click.option('-a', is_flag=True, help="Add this flag if you want to include analytics page for nodes")
 @click.option('-r', is_flag=True, help="Add this flag if you want to include registrations page for nodes")
 @click.option('-k', is_flag=True, help="Add this flag if you want to include forks page for nodes")
-def cli_entry_point(scrape, resume, verify, resume_verify, compile_active, delete, dm, tf, rn, ptf, ctf, registrations, users,
+def cli_entry_point(scrape, resume, verify, resume_verify, compile_active, delete, shrink, dm, tf, rn, ptf, ctf, registrations, users,
                     institutions, nodes, d, f, w, a, r, k):
     if scrape and resume and verify and compile_active:
         click.echo('Invalid parameters.')
         return
 
-    if not scrape and not resume and not verify and not resume_verify and not compile_active and not delete:
+    if not scrape and not resume and not verify and not resume_verify and not compile_active and not delete and not shrink:
         click.echo('You have to choose a mode to run')
+        return
+
+    if (resume or verify or resume_verify or shrink) and tf is None:
+        click.echo("This mode requires a task file in the form: --tf=<FILENAME>")
+        return
+
+    elif (resume or verify or resume_verify or shrink) and tf is not None:
+        if not os.path.exists(tf):
+            click.echo("Taskfile does not exist.")
+        return
 
     if compile_active:
         now = datetime.datetime.now()
@@ -65,10 +77,7 @@ def cli_entry_point(scrape, resume, verify, resume_verify, compile_active, delet
         click.echo("Finished scrape. Taskfile is: " + filename)
         return
 
-    if resume and tf is None:
-        click.echo("Need a task file to resume a scrape")
-
-    if resume and tf is not None:
+    if resume:
         click.echo('Resuming scrape with the task file : ' + tf)
         try:
             with codecs.open(tf, 'r', encoding='utf-8') as db:
@@ -77,20 +86,14 @@ def cli_entry_point(scrape, resume, verify, resume_verify, compile_active, delet
             click.echo('File Not Found for the task.')
         return
 
-    if verify and tf is None:
-        click.echo("Need a task file to verify a mirror")
-
-    if verify and tf is not None:
+    if verify:
         try:
             verify_mirror(tf, rn)
         except FileNotFoundError:
             click.echo('File Not Found for the task.')
         return
 
-    if resume_verify and tf is None:
-        click.echo("Need a task file to resume verification")
-
-    if resume_verify and tf is not None:
+    if resume_verify:
         try:
             resume_verify_mirror(tf, rn)
         except FileNotFoundError:
@@ -103,6 +106,11 @@ def cli_entry_point(scrape, resume, verify, resume_verify, compile_active, delet
         except FileNotFoundError:
             click.echo("Either the json file of previously active nodes was not found or the json file of currently "
                        "active nodes was not found.")
+        return
+
+    if shrink:
+        shrink_size(tf)
+        return
 
     return
 
@@ -340,6 +348,18 @@ def delete_nodes(ptf, ctf):
                         current_task_file['list_of_active_users'])
     deleter.run_deleter(previous_task_file['list_of_active_nodes'],
                         current_task_file['list_of_active_nodes'])
+
+def folder_size(folder):
+    folder_size = 0
+    for (path, dirs, files) in os.walk(folder):
+        for file in files:
+            filename = os.path.join(path, file)
+            folder_size += os.path.getsize(filename)
+    return "%0.1f MB" % (folder_size / (1024 * 1024.0))
+
+def shrink_size(tf):
+    click.echo("Beginning size: " + folder_size("archive"))
+    pass
 
 if __name__ == '__main__':
     cli_entry_point()
