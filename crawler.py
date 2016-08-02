@@ -261,7 +261,7 @@ class Crawler:
                         date = datetime.datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S.%f")
                     else:
                         date = datetime.datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S")
-                        self.node_url_tuples.append((self.http_base + 'project/' + element['id'] + '/', date))
+                    self.node_url_tuples.append((self.http_base + 'project/' + element['id'] + '/', date))
                     self.node_url_tuples.sort(key=lambda x: x[1])
 
     async def parse_registrations_api(self, api_url, sem):
