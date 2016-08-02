@@ -292,7 +292,7 @@ class Crawler:
                         date = datetime.datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S.%f")
                     else:
                         date = datetime.datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S")
-                    self.registration_url_tuples.append((self.http_base + element['id'] + '/', date))
+                    self.registration_url_tuples.append((self.http_base + 'registration/' + element['id'] + '/', date))
                     self.registration_url_tuples.sort(key=lambda x: x[1])
 
     async def parse_users_api(self, api_url, sem):
@@ -545,7 +545,8 @@ class Crawler:
             for elem in self.registration_url_tuples:
                 lst = []
                 while len(self.registration_urls) > 0 and elem[0] in self.registration_urls:
-                    lst.append(self.registration_urls.pop(0))
+                    url = self.registration_urls.pop(0).replace(base_urls[0], base_urls[0] + 'registration/')
+                    lst.append(url)
                 self._scrape_pages(lst)
 
     def scrape_users(self):
