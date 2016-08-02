@@ -292,7 +292,7 @@ class Crawler:
                         date = datetime.datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S.%f")
                     else:
                         date = datetime.datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S")
-                    self.registration_url_tuples.append((self.http_base + 'registration/' + element['id'] + '/', date))
+                    self.registration_url_tuples.append((self.http_base + element['id'] + '/', date))
                     self.registration_url_tuples.sort(key=lambda x: x[1])
 
     async def parse_users_api(self, api_url, sem):
@@ -545,8 +545,7 @@ class Crawler:
             for elem in self.registration_url_tuples:
                 lst = []
                 while len(self.registration_urls) > 0 and elem[0] in self.registration_urls:
-                    url = self.registration_urls.pop(0).replace(base_urls[0], base_urls[0] + 'registration/')
-                    lst.append(url)
+                    lst.append(self.registration_urls.pop(0))
                 self._scrape_pages(lst)
 
     def scrape_users(self):
@@ -642,7 +641,13 @@ def save_html(html, page):
 
     page = page.split('//', 1)[1]
     page = page.split('/', 1)[1]
-    page = 'archive/' + page
+
+    # Add /registration/ to URL
+    if 'institution' not in page and 'profile' not in page and 'project' not in page:
+        page = 'archive/registration/' + page
+    else:
+        page = 'archive/' + page
+
     if page[-1] != '/':
         page += '/'
     make_dirs(page)
