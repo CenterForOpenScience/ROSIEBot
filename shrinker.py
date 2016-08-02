@@ -37,7 +37,7 @@ class Shrinker:
             for elem in soup.findAll('style'):
                 elem.extract()
             link_tag = soup.new_tag("link", href="/static/consolidated.css", rel="stylesheet")
-            soup.title.insert_after(link_tag)
+            soup.head.insert(0, link_tag)
             # soup = soup.prettify()
             file.seek(0)
             file.write(str(soup))
