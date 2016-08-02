@@ -1,5 +1,6 @@
 .idea/
 __pycache__/
+.venv/
 localhost:70/
 staging.osf.io/
 127.0.0.1:70/
