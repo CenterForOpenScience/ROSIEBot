@@ -19,8 +19,6 @@ import deleter
 @click.option('--dm', default=None, type=click.STRING, help="Date marker needed for normal scrape")
 @click.option('--tf', default=None, type=click.STRING, help="filename of the task file")
 @click.option('--rn', default=3, type=click.INT, help="Number of times to retry")
-@click.option('--ptf', default=None, type=click.STRING, help="json file generated from compile_active of previously "
-                                                             "active nodes")
 @click.option('--ctf', default=None, type=click.STRING, help="json file generated from compile_active of currently "
                                                              "active nodes")
 # Specify areas of scraping
@@ -98,12 +96,11 @@ def cli_entry_point(scrape, resume, verify, resume_verify, compile_active, delet
             click.echo('File Not Found for the task.')
         return
 
-    if delete and ptf is not None and ctf is not None:
+    if delete and ctf is not None:
         try:
-            delete_nodes(ptf, ctf)
+            delete_nodes(ctf)
         except FileNotFoundError:
-            click.echo("Either the json file of previously active nodes was not found or the json file of currently "
-                       "active nodes was not found.")
+            click.echo("The json file of currently active nodes was not found.")
 
     return
 
@@ -333,17 +330,12 @@ def resume_verify_mirror(tf, rn):
             verifier.main(tf, i)
 
 
-def delete_nodes(ptf, ctf):
-    with codecs.open(ptf, mode='r', encoding='utf-8') as previous_tf:
-        previous_task_file = json.load(previous_tf)
+def delete_nodes(ctf):
     with codecs.open(ctf, mode='r', encoding='utf-8') as current_tf:
         current_task_file = json.load(current_tf)
-    deleter.run_deleter(previous_task_file['list_of_active_registrations'],
-                        current_task_file['list_of_active_registrations'])
-    deleter.run_deleter(previous_task_file['list_of_active_users'],
-                        current_task_file['list_of_active_users'])
-    deleter.run_deleter(previous_task_file['list_of_active_nodes'],
-                        current_task_file['list_of_active_nodes'])
+    deleter.run_deleter(current_task_file['list_of_active_registrations'], 'registration/')
+    deleter.run_deleter(current_task_file['list_of_active_users'], 'profile/')
+    deleter.run_deleter(current_task_file['list_of_active_nodes'], 'project/')
 
 if __name__ == '__main__':
     cli_entry_point()
