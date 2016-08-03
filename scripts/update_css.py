@@ -1,6 +1,16 @@
+"""
+Currently, Prerender injects 1000s of lines of CSS into each file. Shrink utility replaces this with a CSS
+link to a file of all the stuff that was once there.
+
+This script renews the consolidated CSS file with the stuff the OSF pages of tomorrow have injected into them.
+"""
 from bs4 import BeautifulSoup
 import requests
 
+# Reading from HTTP request vs. from a file
+REMOTE = True
+
+# URLs to use if REMOTE. Any example of each type of page will do, really
 page_urls = {
     'https://osf.io/2ngdw/files': 'Project Files',
     'https://osf.io/2ngdw/wiki': 'Project Wiki',
@@ -11,10 +21,15 @@ page_urls = {
     'https://osf.io/institutions/cos': 'Institution'
 }
 
-# For local files, if the style tags should be removed.
+# Local filename if not REMOTE
+FILENAME = ''
+# Remove style element from the local file after scraping
 SHRINK_FILE = True
 
+# Output CSS file
 CSS_FILEPATH = '../archive/static/consolidated.css'
+
+
 giblets = []
 css = open(CSS_FILEPATH, 'w')
 
@@ -60,10 +75,15 @@ def open_html(path):
 
 
 def main():
-    # Go through every page type
-    for page in page_urls:
-        print("Extracting", page_urls[page], page)
-        stream_html(page)
+
+    if REMOTE:
+        # Go through every page type
+        for page in page_urls:
+            print("Extracting", page_urls[page], page)
+            stream_html(page)
+
+    else:
+        open_html(FILENAME)
 
     for block in giblets:
         css.write(block + '\n')
