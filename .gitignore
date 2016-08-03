@@ -1,19 +1,23 @@
+# General business
 .idea/
 __pycache__/
 .venv/
+.env
+
+# Mirror folders
 localhost:70/
 staging.osf.io/
 127.0.0.1:70/
 127.0.0.1/
 osf.io/
-*.txt
-.env
-*.json
-settings.py
-!task_file_example.txt
-*.json
 archive/
 !archive/static/consolidated.css
+
+# Logs and Taskfiles
+*.txt
+!task_file_example.txt
+!requirements.txt
+*.json
 *.zip
 *.htm
-!requirements.txt
+*.log
