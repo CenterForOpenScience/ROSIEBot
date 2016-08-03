@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><link href="/static/consolidated.css" rel="stylesheet"/><link href="/static/consolidated.css" rel="stylesheet"/><link href="/static/consolidated.css" rel="stylesheet"/><link href="/static/consolidated.css" rel="stylesheet"/><link href="/static/consolidated.css" rel="stylesheet"/>
+<meta charset="utf-8">
+<title>OSF | Routine Experiment Registrations</title>
+<meta content="8KhqrnI0nmzqKiY5MnbCsC8JV4aY5GNqOgJyQAw5lpA" name="google-site-verification">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<meta content="
+" name="description">
+<meta content="IE=edge" http-equiv="X-UA-Compatible">
+<meta content="!" name="fragment">
+<!-- Facebook display -->
+<meta content="http://centerforopenscience.org/static/img/cos_center_logo_small.png" name="og:image">
+<meta content="Routine Experiment Registrations" name="og:title">
+<meta content="3" name="og:ttl">
+<meta content="
+
+        Empra class SS 2016. | 
+    Hosted on the Open Science Framework
+
+
+" name="og:description">
+<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+<!--[if lt IE 9]>
+      
+      
+      
+      
+    <![endif]-->
+<link href="/static/vendor/bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="/static/vendor/bower_components/select2/select2.css" rel="stylesheet">
+<link href="/static/vendor/bower_components/osf-style/css/base.css" rel="stylesheet">
+<link href="/static/css/style.css" rel="stylesheet">
+<!-- JQuery 3 for IE Patching -->
+<link href="//fonts.googleapis.com/css?family=Carrois+Gothic|Inika|Patua+One" rel="stylesheet" type="text/css">
+<link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,300,700" rel="stylesheet" type="text/css">
+</link></link></link></link></link></link></meta></meta></meta></meta></meta></meta></meta></meta></meta></meta></head>
+<body data-spy="scroll" data-target=".scrollspy"><div id="MathJax_Message" style="">Loading [MathJax]/extensions/MathZoom.js</div>
+<link href="/static/css/nav.css" rel="stylesheet">
+<div class="osf-nav-wrapper">
+<nav class="navbar navbar-inverse navbar-fixed-top" id="navbarScope" role="navigation">
+<div class="container">
+<div class="navbar-header">
+<button aria-controls="navbar" aria-expanded="false" class="navbar-toggle collapsed" data-target="#navbar" data-toggle="collapse" type="button">
+<span class="sr-only">Toggle navigation</span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+</button>
+<!-- ko ifnot: onSearchPage -->
+<span class="visible-xs" data-bind="click : toggleSearch, css: searchCSS">
+<a class="osf-xs-search pull-right" style="padding-top: 12px">
+<span class="fa fa-search fa-lg fa-inverse" data-placement="bottom" rel="tooltip" title="Search OSF"></span>
+</a>
+</span>
+<!-- /ko -->
+<a class="navbar-brand hidden-sm hidden-xs" href="/"><img alt="COS logo" class="osf-navbar-logo" src="/static/img/cos-white2.png" width="27"> Open Science Framework</img></a>
+<a class="navbar-brand visible-sm visible-xs" href="/"><img alt="COS logo" class="osf-navbar-logo" src="/static/img/cos-white2.png" width="27"> OSF</img></a>
+</div>
+<div class="navbar-collapse collapse navbar-right" id="navbar">
+<ul class="nav navbar-nav">
+<li class="dropdown">
+<a aria-expanded="false" class="dropdown-toggle" data-toggle="dropdown" href="#" role="button">Browse <span class="caret"></span></a>
+<ul class="dropdown-menu" role="menu">
+<li><a href="https://osf.io/explore/activity/">New Projects</a></li>
+<li><a href="https://osf.io/search/?q=*&amp;filter=registration">Registry</a></li>
+<li><a href="https://osf.io/meetings/">Meetings</a></li>
+</ul>
+</li>
+<li class="dropdown">
+<a href="https://osf.io/support/">Support</a>
+</li>
+<!-- ko ifnot: onSearchPage -->
+<li class="hidden-xs" data-bind="click : toggleSearch, css: searchCSS">
+<a class="">
+<span class="fa fa-search fa-lg" data-placement="bottom" rel="tooltip" title="Search OSF"></span>
+</a>
+</li>
+<!-- /ko -->
+<li class="dropdown sign-in">
+<div class="col-sm-12">
+<a class="btn btn-success btn-top-signup m-r-xs" href="/register/">Sign Up</a>
+<a class="btn btn-info btn-top-login p-sm" href="https://accounts.osf.io/login?service=https://osf.io/project/mst3k/registrations/">Sign In</a>
+</div>
+</li>
+</ul>
+</div><!--/.navbar-collapse -->
+</div>
+</nav>
+<!-- ko ifnot: onSearchPage -->
+<div class="osf-search" data-bind="fadeVisible: showSearch" style="display: none;">
+<div class="container">
+<div class="row">
+<div class="col-md-12">
+<form class="input-group" data-bind="submit: submit">
+<input class="osf-search-input form-control" data-bind="value: query, hasFocus: true" id="searchPageFullBar" name="search-placeholder" placeholder="Search" type="text">
+<label class="search-label-placeholder" for="search-placeholder" id="searchBarLabel">Search</label>
+<span class="input-group-btn">
+<button class="btn osf-search-btn" data-bind="click: submit" type="button"><i class="fa fa-circle-arrow-right fa-lg"></i></button>
+<button class="btn osf-search-btn" data-target="#search-help-modal" data-toggle="modal" type="button"><i class="fa fa-question fa-lg"></i></button>
+<button class="btn osf-search-btn" data-bind="visible: showClose, click : toggleSearch" type="button"><i class="fa fa-times fa-lg"></i></button>
+</span>
+</input></form>
+</div>
+</div>
+</div>
+</div>
+<div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="search-help-modal" role="dialog" tabindex="-1">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-header">
+<button aria-label="Close" class="close" data-dismiss="modal" type="button"><span aria-hidden="true"></span>×</button>
+<h3 class="modal-title">Search help</h3>
+</div>
+<div class="modal-body">
+<h4>Queries</h4>
+<p>Search uses the <a href="http://extensions.xwiki.org/xwiki/bin/view/Extension/Search+Application+Query+Syntax">Lucene search syntax</a>.This gives you many options, but can be very simple as well. Examples of valid searches include:</p>
+<ul>
+<li><a href="/search/?q=repro*">repro*</a></li>
+<li><a href="/search/?q=brian+AND+title%3Amany">brian AND title:many</a></li>
+<li><a href="/search/?q=tags%3A%28psychology%29">tags:(psychology)</a></li>
+</ul>
+</div>
+<div class="modal-footer">
+<button class="btn btn-default" data-dismiss="modal" type="button">Close</button>
+</div>
+</div>
+</div>
+</div>
+<!-- /ko -->
+</div>
+<div class="watermarked">
+<div class="container ">
+<div id="projectBanner">
+<header class="subhead" id="overview">
+<nav class="navbar osf-project-navbar" id="projectSubnav" role="navigation">
+<div class="container">
+<div class="navbar-header">
+<button class="navbar-toggle collapsed" data-target=".project-nav" data-toggle="collapse" type="button">
+<span class="sr-only">Toggle navigation</span>
+<span class="fa fa-bars fa-lg"></span>
+</button>
+<a class="navbar-brand visible-xs" href="/project/mst3k/">
+                        Project Navigation
+                    </a>
+</div>
+<div class="collapse navbar-collapse project-nav">
+<ul class="nav navbar-nav">
+<li>
+<a class="project-title" href="/project/mst3k/">
+                                Routine Experiment
+                            </a>
+</li>
+<li id="projectNavFiles">
+<a href="/project/mst3k/files/">
+                                Files
+                            </a>
+</li>
+<!-- Add-on tabs -->
+<li>
+<a href="/project/mst3k/wiki">
+
+                                        Wiki
+                                    </a>
+</li>
+<li><a href="/project/mst3k/analytics/">Analytics</a></li>
+<li class="active"><a href="/project/mst3k/registrations/">Registrations</a></li>
+<li><a href="/project/mst3k/forks/">Forks</a></li>
+</ul>
+</div>
+</div>
+</nav>
+</header>
+</div>
+<div class="modal fade" id="showLinks">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-header">
+<h3>Links to this project</h3>
+</div>
+<div class="modal-body">
+<table class="table table-striped">
+<thead>
+<tr><th>Title</th>
+<th>Authors</th>
+</tr></thead>
+<tbody data-bind="foreach: links"></tbody>
+</table>
+</div><!-- end modal-body -->
+<div class="modal-footer">
+<a class="btn btn-default" data-dismiss="modal" href="#">Close</a>
+</div><!-- end modal-footer -->
+</div><!-- end modal-content -->
+</div><!-- end modal-dialog -->
+</div><!-- end modal -->
+<div id="registrationsListScope">
+<ul class="nav nav-tabs" id="registrationsTabs" role="tablist">
+<li class="active" role="presentation">
+<a aria-controls="registrations" href="#registrations" id="registrationsControl">Registrations</a>
+</li>
+</ul>
+<div class="tab-content registrations-view">
+<div class="tab-pane active" id="registrations" role="tabpanel">
+<div class="row" style="min-height: 150px; padding-top:20px;">
+<div class="col-xs-9 col-sm-8">
+<ul class="list-group m-md " data-bind="stopBinding: true">
+<span class="render-nodes-list scripted" id="registrations" style="display: inline;">
+<div id="render-node">
+<li class="project list-group-item list-group-item-node" node_reference="jqa8c:node">
+<p class="list-group-item-heading f-w-lg">
+                Private Registration
+        </p>
+</li>
+</div>
+</span>
+</ul>
+</div>
+</div>
+</div>
+<div class="tab-pane" id="drafts" role="tabpanel">
+<div class="row scripted" id="draftRegistrationsScope" style="min-height: 150px; padding-top: 20px; display: block;">
+<div class="spinner-loading-wrapper" data-bind="visible: loadingDrafts">
+<div class="logo-spin logo-lg"></div>
+</div>
+<form id="newDraftRegistrationForm" method="POST" style="display:none">
+<!-- ko if: selectedSchema() --><!-- /ko -->
+</form>
+<div>
+<div class="col-md-9">
+<div class="scripted" data-bind="foreach: drafts" style="display: block;"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="modal fade" id="duplicateModal">
+<div class="modal-dialog modal-lg">
+<div class="modal-content">
+<div class="modal-body">
+<div class="row">
+<div class="col-md-4">
+<h4 class="f-w-lg">Links To This Project
+                                 <span class="btn btn-default disabled pull-right">
+                                    0
+                                </span>
+</h4>
+<p>Linking to this project will reference it in another project, without
+creating a copy. The link will always point to the most up-to-date version.</p>
+</div>
+<div class="col-md-4">
+<h4 class="f-w-lg">Templated From
+                            <span class="btn btn-default disabled pull-right">
+                                0
+                            </span>
+</h4>
+<p>This option will create a new project, using this project as a template.
+The new project will be structured in the same way, but contain no data.</p>
+<a class="btn btn-primary form-control disabled" data-dismiss="modal" onclick="NodeActions.useAsTemplate();">
+                            Copy Project Structure
+                        </a>
+</div>
+<div class="col-md-4">
+<h4 class="f-w-lg">Forks
+                            <button class="btn btn-default disabled pull-right">
+                                0
+                            </button>
+</h4>
+<p>Fork this project if you plan to build upon it in your own work.
+The new project will be an exact duplicate of this project's current state,
+with you as the only contributor.</p>
+<a class="btn btn-primary form-control disabled" data-dismiss="modal" onclick="NodeActions.forkNode();">
+                                Fork this Project
+                            </a>
+<a class="btn btn-info btn-block m-t-xs" href="/project/mst3k/forks/">View Forks</a>
+</div>
+</div>
+</div>
+<div class="modal-footer">
+<button class="btn btn-default" data-dismiss="modal" type="button">Close</button>
+</div>
+</div><!-- /.modal-content -->
+</div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+</div><!-- end container -->
+</div><!-- end watermarked -->
+<div id="footerSlideIn">
+<div class="container">
+<div class="row">
+<div class="col-sm-2 hidden-xs">
+<img class="logo" src="/static/img/circle_logo.png">
+</img></div>
+<div class="col-sm-10 col-xs-12">
+<a class="close" data-bind="click: dismiss" href="#">×</a>
+<h1>Start managing your projects on the OSF today.</h1>
+<p>Free and easy to use, the Open Science Framework supports the entire research lifecycle: planning, execution, reporting, archiving, and discovery.</p>
+<div>
+<a class="btn btn-primary" data-bind="click: trackClick.bind($data, 'Create Account')" href="/#signUp">Create an Account</a>
+<a class="btn btn-primary" data-bind="click: trackClick.bind($data, 'Learn More')" href="http://help.osf.io" rel="noreferrer" target="_blank">Learn More</a>
+<a data-bind="click: dismiss">Hide this message</a>
+</div>
+</div>
+</div>
+</div>
+</div>
+<footer class="footer m-t-lg m-b-lg p-lg bg-color-light">
+<div class="container">
+<div class="row">
+<div class="col-sm-2 col-md-3 col-md-offset-1">
+<h4>OSF</h4>
+<ul>
+<li><a href="https://osf.io/explore/activity/">Explore</a></li>
+<li><a href="mailto:contact@osf.io" rel="nofollow">Contact</a><noscript>Contact OSF: &lt;span class="obfuscated-email-noscript"&gt;&lt;strong&gt;&lt;u&gt;cont&lt;span style="display:none;"&gt;null&lt;/span&gt;act@&lt;span style="display:none;"&gt;null&lt;/span&gt;osf.&lt;span style="display:none;"&gt;null&lt;/span&gt;io&lt;/u&gt;&lt;/strong&gt;&lt;/span&gt;</noscript></li>
+<li><a href="https://osf.io/support">Help/Support</a></li>
+<li><a href="http://help.osf.io" rel="noreferrer" target="_blank">Guides</a></li><a href="http://help.osf.io" rel="noreferrer" target="_blank">
+</a><li><a href="http://help.osf.io" rel="noreferrer" target="_blank"></a><a href="https://osf.io/faq">FAQ</a></li>
+</ul>
+</div>
+<div class="col-sm-5 col-md-4">
+<h4>Center for Open Science</h4>
+<ul>
+<li><a href="http://cos.io">Home</a></li>
+<li><a href="https://osf.io/ezcuj/wiki/home/">Reproducibility Project: Psychology</a></li>
+<li><a href="https://osf.io/e81xl/wiki/home/">Reproducibility Project: Cancer Biology</a></li>
+<li><a href="http://cos.io/top/">TOP Guidelines</a></li>
+<li><a href="https://www.givinglibrary.org/organizations/center-for-open-science">Donate</a></li>
+</ul>
+</div>
+<div class="col-sm-4 col-md-3">
+<h4>Socialize</h4>
+<a aria-label="Twitter" href="http://twitter.com/OSFramework"><i class="fa fa-twitter fa-2x"></i></a>
+<a aria-label="Facebook" href="https://www.facebook.com/OpenScienceFramework"><i class="fa fa-facebook fa-2x"></i></a>
+<a aria-label="Google Group" href="https://groups.google.com/forum/#!forum/openscienceframework"><i class="fa fa-group fa-2x"></i></a>
+<a aria-label="GitHub" href="https://www.github.com/centerforopenscience"><i class="fa fa-github fa-2x"></i></a>
+<a aria-label="Google Plus" href="https://plus.google.com/103557785986281627994" rel="publisher"><i class="fa fa-google-plus fa-2x"></i></a>
+</div> <!-- column -->
+</div>
+</div>
+</footer><!-- end footer -->
+<div class="container copyright">
+<div class="row">
+<div class="col-md-12">
+<p>Copyright © 2011-2016 <a href="http://centerforopenscience.org">Center for Open Science</a> |
+                <a href="https://github.com/CenterForOpenScience/centerforopenscience.org/blob/master/TERMS_OF_USE.md">Terms of Use</a> |
+                <a href="https://github.com/CenterForOpenScience/centerforopenscience.org/blob/master/PRIVACY_POLICY.md">Privacy Policy</a>
+</p>
+</div>
+</div>
+</div><!-- end container copyright -->
+</link></body></html>
+<div style="position:fixed;    bottom:0;left:0;    border-top-right-radius: 8px;    color:  white;
+        background-color: red;  padding: .5em;">
+            This page is a read-only mirror of the OSF saved on August 02, 2016 at 09:56 AM. Some features may not be available.
+        </div>

@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en"><head><link href="/static/consolidated.css" rel="stylesheet"/>
+<meta charset="utf-8">
+<title>OSF | Routine Experiment</title>
+<meta content="8KhqrnI0nmzqKiY5MnbCsC8JV4aY5GNqOgJyQAw5lpA" name="google-site-verification">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<meta content="
+" name="description">
+<meta content="IE=edge" http-equiv="X-UA-Compatible">
+<meta content="!" name="fragment">
+<!-- Facebook display -->
+<meta content="http://centerforopenscience.org/static/img/cos_center_logo_small.png" name="og:image">
+<meta content="Routine Experiment" name="og:title">
+<meta content="3" name="og:ttl">
+<meta content="
+
+        Empra class SS 2016. | 
+    Hosted on the Open Science Framework
+
+
+" name="og:description">
+<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+<!--[if lt IE 9]>
+      
+      
+      
+      
+    <![endif]-->
+<link href="/static/vendor/bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="/static/vendor/bower_components/select2/select2.css" rel="stylesheet">
+<link href="/static/vendor/bower_components/osf-style/css/base.css" rel="stylesheet">
+<link href="/static/css/style.css" rel="stylesheet">
+<!-- JQuery 3 for IE Patching -->
+
+<link href="/static/css/pages/project-page.css" rel="stylesheet">
+
+<link href="//fonts.googleapis.com/css?family=Carrois+Gothic|Inika|Patua+One" rel="stylesheet" type="text/css">
+<link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,300,700" rel="stylesheet" type="text/css">
+</link></link></link></link></link></link></link></meta></meta></meta></meta></meta></meta></meta></meta></meta></meta></head>
+<body data-spy="scroll" data-target=".scrollspy"><div id="MathJax_Message" style="display: none;"></div>
+<link href="/static/css/nav.css" rel="stylesheet">
+<div class="osf-nav-wrapper">
+<nav class="navbar navbar-inverse navbar-fixed-top" id="navbarScope" role="navigation">
+<div class="container">
+<div class="navbar-header">
+<button aria-controls="navbar" aria-expanded="false" class="navbar-toggle collapsed" data-target="#navbar" data-toggle="collapse" type="button">
+<span class="sr-only">Toggle navigation</span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+</button>
+<!-- ko ifnot: onSearchPage -->
+<span class="visible-xs" data-bind="click : toggleSearch, css: searchCSS">
+<a class="osf-xs-search pull-right" style="padding-top: 12px">
+<span class="fa fa-search fa-lg fa-inverse" data-placement="bottom" rel="tooltip" title="Search OSF"></span>
+</a>
+</span>
+<!-- /ko -->
+<a class="navbar-brand hidden-sm hidden-xs" href="/"><img alt="COS logo" class="osf-navbar-logo" src="/static/img/cos-white2.png" width="27"> Open Science Framework</img></a>
+<a class="navbar-brand visible-sm visible-xs" href="/"><img alt="COS logo" class="osf-navbar-logo" src="/static/img/cos-white2.png" width="27"> OSF</img></a>
+</div>
+<div class="navbar-collapse collapse navbar-right" id="navbar">
+<ul class="nav navbar-nav">
+<li class="dropdown">
+<a aria-expanded="false" class="dropdown-toggle" data-toggle="dropdown" href="#" role="button">Browse <span class="caret"></span></a>
+<ul class="dropdown-menu" role="menu">
+<li><a href="https://osf.io/explore/activity/">New Projects</a></li>
+<li><a href="https://osf.io/search/?q=*&amp;filter=registration">Registry</a></li>
+<li><a href="https://osf.io/meetings/">Meetings</a></li>
+</ul>
+</li>
+<li class="dropdown">
+<a href="https://osf.io/support/">Support</a>
+</li>
+<!-- ko ifnot: onSearchPage -->
+<li class="hidden-xs" data-bind="click : toggleSearch, css: searchCSS">
+<a class="">
+<span class="fa fa-search fa-lg" data-placement="bottom" rel="tooltip" title="Search OSF"></span>
+</a>
+</li>
+<!-- /ko -->
+<li class="dropdown sign-in">
+<div class="col-sm-12">
+<a class="btn btn-success btn-top-signup m-r-xs" href="/register/">Sign Up</a>
+<a class="btn btn-info btn-top-login p-sm" href="https://accounts.osf.io/login?service=https://osf.io/project/mst3k/">Sign In</a>
+</div>
+</li>
+</ul>
+</div><!--/.navbar-collapse -->
+</div>
+</nav>
+<!-- ko ifnot: onSearchPage -->
+<div class="osf-search" data-bind="fadeVisible: showSearch" style="display: none;">
+<div class="container">
+<div class="row">
+<div class="col-md-12">
+<form class="input-group" data-bind="submit: submit">
+<input class="osf-search-input form-control" data-bind="value: query, hasFocus: true" id="searchPageFullBar" name="search-placeholder" placeholder="Search" type="text">
+<label class="search-label-placeholder" for="search-placeholder" id="searchBarLabel">Search</label>
+<span class="input-group-btn">
+<button class="btn osf-search-btn" data-bind="click: submit" type="button"><i class="fa fa-circle-arrow-right fa-lg"></i></button>
+<button class="btn osf-search-btn" data-target="#search-help-modal" data-toggle="modal" type="button"><i class="fa fa-question fa-lg"></i></button>
+<button class="btn osf-search-btn" data-bind="visible: showClose, click : toggleSearch" type="button"><i class="fa fa-times fa-lg"></i></button>
+</span>
+</input></form>
+</div>
+</div>
+</div>
+</div>
+<div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="search-help-modal" role="dialog" tabindex="-1">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-header">
+<button aria-label="Close" class="close" data-dismiss="modal" type="button"><span aria-hidden="true"></span>×</button>
+<h3 class="modal-title">Search help</h3>
+</div>
+<div class="modal-body">
+<h4>Queries</h4>
+<p>Search uses the <a href="http://extensions.xwiki.org/xwiki/bin/view/Extension/Search+Application+Query+Syntax">Lucene search syntax</a>.This gives you many options, but can be very simple as well. Examples of valid searches include:</p>
+<ul>
+<li><a href="/search/?q=repro*">repro*</a></li>
+<li><a href="/search/?q=brian+AND+title%3Amany">brian AND title:many</a></li>
+<li><a href="/search/?q=tags%3A%28psychology%29">tags:(psychology)</a></li>
+</ul>
+</div>
+<div class="modal-footer">
+<button class="btn btn-default" data-dismiss="modal" type="button">Close</button>
+</div>
+</div>
+</div>
+</div>
+<!-- /ko -->
+</div>
+<div class="watermarked">
+<div class="container ">
+<div id="projectBanner">
+<header class="subhead" id="overview">
+<nav class="navbar osf-project-navbar" id="projectSubnav" role="navigation">
+<div class="container">
+<div class="navbar-header">
+<button class="navbar-toggle collapsed" data-target=".project-nav" data-toggle="collapse" type="button">
+<span class="sr-only">Toggle navigation</span>
+<span class="fa fa-bars fa-lg"></span>
+</button>
+<a class="navbar-brand visible-xs" href="/project/mst3k/">
+                        Project Navigation
+                    </a>
+</div>
+<div class="collapse navbar-collapse project-nav">
+<ul class="nav navbar-nav">
+<li class="active">
+<a class="project-title" href="/project/mst3k/">
+                                Routine Experiment
+                            </a>
+</li>
+<li id="projectNavFiles">
+<a href="/project/mst3k/files/">
+                                Files
+                            </a>
+</li>
+<!-- Add-on tabs -->
+<li>
+<a href="/project/mst3k/wiki">
+
+                                        Wiki
+                                    </a>
+</li>
+<li><a href="/project/mst3k/analytics/">Analytics</a></li>
+<li><a href="/project/mst3k/registrations/">Registrations</a></li>
+<li><a href="/project/mst3k/forks/">Forks</a></li>
+</ul>
+</div>
+</div>
+</nav>
+</header>
+
+</div>
+<div class="modal fade" id="showLinks">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-header">
+<h3>Links to this project</h3>
+</div>
+<div class="modal-body">
+<table class="table table-striped">
+<thead>
+<tr><th>Title</th>
+<th>Authors</th>
+</tr></thead>
+<tbody data-bind="foreach: links"></tbody>
+</table>
+</div><!-- end modal-body -->
+<div class="modal-footer">
+<a class="btn btn-default" data-dismiss="modal" href="#">Close</a>
+</div><!-- end modal-footer -->
+</div><!-- end modal-content -->
+</div><!-- end modal-dialog -->
+</div><!-- end modal -->
+<div class="modal fade" id="nodesPrivacy">
+<div class="modal-dialog modal-md">
+<div data-bind="visible: true" style="display: none;">
+<div class="modal-content">
+<div class="modal-header">
+<button aria-label="Close" class="close" data-bind="click: clear" data-dismiss="modal" type="button"><span aria-hidden="true">×</span></button>
+<h3 class="modal-title" data-bind="text:pageTitle"></h3>
+</div>
+<div class="modal-body">
+<!-- warning page -->
+<div data-bind="if: page() == WARNING">
+<span data-bind="html:message"></span>
+</div>
+<!-- end warning page -->
+<!-- select projects page -->
+<div data-bind="visible:page() === SELECT">
+<div class="row">
+<div class="col-md-10">
+<div class="m-b-md box p-sm">
+<span data-bind="html:message"></span>
+</div>
+</div>
+</div>
+<div>
+                            Select: 
+                            <a class="text-bigger" data-bind="click:selectAll">Make all public</a>
+                             | 
+                            <a class="text-bigger" data-bind="click:selectNone">Make all private</a>
+</div>
+<div class="tb-row-titles">
+<div class="tb-th" data-tb-th-col="0" style="width: 100%">
+<span class="m-r-sm"></span>
+</div>
+</div>
+<div class="osf-treebeard">
+<div id="nodesPrivacyTreebeard">
+<div class="spinner-loading-wrapper">
+<div class="logo-spin logo-md"></div>
+<p class="m-t-sm fg-load-message"> Loading projects and components...  </p>
+</div>
+</div>
+<div class="help-block" style="padding-left: 15px">
+<p id="configureNotificationsMessage"></p>
+</div>
+</div>
+</div>
+<!-- end select projects page -->
+<!-- projects changed warning page -->
+<div data-bind="if: page() === CONFIRM">
+<div data-bind="if: nodesChangedPublic().length + nodesChangedPrivate().length &lt;= 100">
+<div data-bind="if: nodesChanged()">
+<div data-bind="visible: nodesChangedPublic().length &gt; 0">
+<div class="panel panel-default">
+<div class="panel-heading clearfix">
+<h3 class="panel-title" data-bind="html:message()['nodesPublic']"></h3>
+</div>
+<div class="panel-body">
+<ul data-bind="foreach: { data: nodesChangedPublic, as: 'item' }">
+<li>
+<h4 class="f-w-lg" data-bind="text: item"></h4>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div data-bind="visible: nodesChangedPrivate().length &gt; 0">
+<div class="panel panel-default">
+<div class="panel-heading clearfix">
+<h3 class="panel-title" data-bind="html:message()['nodesPrivate']"></h3>
+</div>
+<div class="panel-body">
+<ul data-bind="foreach: { data: nodesChangedPrivate, as: 'item' }">
+<li>
+<h4 class="f-w-lg" data-bind="text: item"></h4>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div data-bind="ifnot: nodesChanged()">
+<span data-bind="html:message()['nodesNotChangedWarning']"></span>
+</div>
+<div data-bind="if: nodesChangedPublic().length + nodesChangedPrivate().length &gt; 100">
+<span data-bind="html:message()['tooManyNodesWarning']"></span>
+</div>
+</div><!-- end projects changed warning page -->
+</div><!-- end modal-body -->
+<div class="modal-footer">
+<!--ordering puts back button before cancel -->
+<span data-bind="if: page() == CONFIRM">
+<a class="btn btn-default" data-bind="click: back" data-dismiss="modal" href="#">Back</a>
+</span>
+<a class="btn btn-default" data-bind="click: clear" data-dismiss="modal" href="#">Cancel</a>
+<span data-bind="if: page() == WARNING">
+<span data-bind="if: parentIsEmbargoed">
+<a class="btn btn-primary" data-bind="click: makeEmbargoPublic">Confirm</a>
+</span>
+<span data-bind="ifnot: parentIsEmbargoed">
+<a class="btn btn-primary" data-bind="visible: hasChildren(), click:selectProjects">Continue</a>
+<a class="btn btn-primary" data-bind="visible: !hasChildren(), click:confirmChanges">Confirm</a>
+</span>
+</span>
+<span data-bind="if: page() == SELECT">
+<a class="btn btn-primary" data-bind="click:confirmWarning">Continue</a>
+</span>
+<span data-bind="if: page() == CONFIRM &amp;&amp; (nodesChangedPublic().length + nodesChangedPrivate().length &lt;= 100)">
+<a class="btn btn-primary" data-bind="click: confirmChanges, visible: nodesChanged()" data-dismiss="modal" href="#">Confirm</a>
+</span>
+</div><!-- end modal-footer -->
+</div><!-- end modal-content -->
+</div>
+</div><!-- end modal-dialog -->
+</div><!-- end modal -->
+<link href="/static/css/nodes-privacy.css" rel="stylesheet">
+<div id="projectScope">
+<header class="subhead" id="overview">
+<div class="row">
+<div class="col-sm-5 col-md-7 cite-container">
+<h2 class="node-title" style="float: left;">
+<span class="overflow" id="nodeTitleEditable">Routine Experiment</span>
+</h2>
+</div>
+<div class="col-sm-7 col-md-5">
+<div class="btn-toolbar node-control pull-right">
+<div class="btn-group">
+<button class="btn btn-default disabled">Public</button>
+</div>
+<!-- ko if: canBeOrganized --><!-- /ko -->
+<div class="btn-group" data-bind="tooltip: {title: 'Log in or create an account to duplicate this project', placement: 'top'}" data-original-title="" title="">
+<a class="btn btn-default disabled" href="#">
+<span class="glyphicon glyphicon-share"></span>  0
+                            </a>
+</div>
+</div>
+</div>
+</div>
+<div class="row" id="contributors" style="line-height:25px">
+<div class="col-sm-12">
+<div id="contributorsList" style="height: auto; overflow: hidden;">
+                    Contributors:
+
+                    <ol>
+<li class="contributor contributor-registered " data-pk="2qj6a">
+<a class="user-profile" href="/profile/2qj6a/" rel="" title="Nadine Nett">Nadine Nett</a></li>
+</ol>
+<div class="toggle-height-gradient" style="display: none;"></div></div><div class="toggle-height-toggle text-center" style="display: none;"></div>
+<p>
+                    Date created:
+                    <span class="date node-date-created" data-bind="text: dateCreated.local, tooltip: {title: dateCreated.utc}" data-original-title="" title="">2016-04-19 10:47 AM</span>
+                        | Last Updated:
+                        <span class="date node-last-modified-date" data-bind="text: dateModified.local, tooltip: {title: dateModified.utc}" data-original-title="" title="">2016-08-01 08:37 AM</span>
+</p>
+<span class="scripted" data-bind="if: hasIdentifiers()" style="display: inline;"></span>
+<span class="scripted" data-bind="if: canCreateIdentifiers()" style="display: inline;"></span>
+<p>
+                    Category: <span id="nodeCategoryEditable">Project</span>
+<span class="fa fa-cube" data-bind="css: icon"></span>
+</p>
+<p>
+<span id="description">Description:</span> <span class="node-description overflow" data-type="textarea" id="nodeDescriptionEditable">
+                        Empra class SS 2016.</span>
+</p>
+</div>
+</div>
+</header>
+</div>
+<div class="modal fade" id="addPointer">
+<div class="modal-dialog modal-lg">
+<div class="modal-content">
+<div class="modal-header">
+<h3>Add Links</h3>
+</div>
+<div class="modal-body">
+<form role="form">
+<div class="form-group">
+<input class="form-control" data-bind="value:query" placeholder="Search projects" style="margin-bottom: 8px;">
+<div class="help-block">
+<span class="text-danger" data-bind="html: searchWarningMsg"></span>
+</div>
+</input></div>
+<div>
+<button class="btn btn-default" data-bind="click:searchAllProjects,
+                          text: searchAllProjectsSubmitText(),
+                          attr: {disabled: loadingResults()}">Search all projects</button>
+<button class="btn btn-default" data-bind="
+                        click: searchMyProjects,
+                        text: searchMyProjectsSubmitText(),
+                        attr: {disabled: loadingResults()}">Search my projects</button>
+</div>
+</form>
+<hr>
+<!-- Choose which to add -->
+<div class="row">
+<div class="col-md-6">
+<div>
+<span class="modal-subheader">Results</span>
+<a data-bind="click:addAll">Add all</a>
+</div>
+<div class="error" data-bind="text:errorMsg"></div>
+<table class="table table-striped">
+<tbody data-bind="foreach:{data:results, afterRender:addTips}"></tbody>
+</table>
+<div class="help-block">
+<div data-bind="if: loadingResults"></div>
+<div data-bind="if: foundResults"></div>
+</div>
+</div>
+<div class="col-md-6">
+<div>
+<span class="modal-subheader">Adding</span>
+<a data-bind="click:removeAll">Remove all</a>
+</div>
+<table class="table table-striped">
+<tbody data-bind="foreach:{data:selection, afterRender:addTips}"></tbody>
+</table>
+</div>
+</div>
+</hr></div><!-- end modal-body -->
+<div class="modal-footer">
+<a class="btn btn-default" data-dismiss="modal">Cancel</a>
+<span data-bind="if:selection().length"></span>
+<div class="help-block">
+<span class="text-danger" data-bind="html: submitWarningMsg"></span>
+</div>
+</div><!-- end modal-footer -->
+</div><!-- end modal-content -->
+</div><!-- end modal-dialog -->
+</div><!-- end modal -->
+<div class="row">
+<div class="col-sm-6 osf-dash-col">
+<!-- Files -->
+<div class="panel panel-default">
+<div class="panel-heading clearfix">
+<h3 class="panel-title">Files</h3>
+<div class="pull-right">
+<a href="/project/mst3k/files/"> <i class="fa fa-external-link"></i> </a>
+</div>
+</div>
+<div class="panel-body">
+<div class="dz-clickable" id="treeGrid"><div class="gridWrapper" style="overflow-x: auto"><div class="tb-table" style="width:auto;"><div class="row tb-header-row"><div id="folderRow"><div class="col-xs-12"><div class="pull-right"><span><div class="fangorn-toolbar-icon text-primary" data-original-title="" title=""><i class="fa fa-search"></i><span>Filter</span></div><div class="fangorn-toolbar-icon text-info" data-original-title="" title=""><i class="fa fa-info"></i></div></span></div></div></div></div><div class="tb-row-titles"><div class="tb-th tb-resizable ui-resizable" data-tb-th-col="0" style="width: 70%"><span class="m-r-sm">Name</span><i class="fa fa-chevron-up tb-sort-inactive asc-btn m-r-xs" data-direction="asc" data-sorttype="text"></i><i class="fa fa-chevron-down tb-sort-inactive desc-btn" data-direction="desc" data-sorttype="text"></i><div class="ui-resizable-handle ui-resizable-e" style="z-index: 90; cursor: col-resize;"></div></div><div class="tb-th" data-tb-th-col="1" style="width: 30%"><span class="m-r-sm">Modified</span><i class="fa fa-chevron-up tb-sort-inactive asc-btn m-r-xs" data-direction="asc" data-sorttype="text"></i><i class="fa fa-chevron-down tb-sort-inactive desc-btn" data-direction="desc" data-sorttype="text"></i></div></div><div id="tb-tbody"><div class="tb-tbody-inner" style="height: 329.25714285714287px;"><div style="margin-top:0px;"><div class="tb-row tb-even ui-droppable" data-id="1" data-index="0" data-level="1" data-rindex="0" style="height: 35px;"><div class="tb-td td-title tb-col-0 ui-draggable" data-id="1" style="padding-left: 0px; width:70%"><span class="tb-td-first"><span class="tb-toggle-icon"></span><span class="tb-expand-icon-holder"><span class="fa fa-cube po-icon"></span></span></span><span class="title-text"><a class="fg-file-links" href="/project/mst3k/">Routine Experiment</a></span></div><div class="tb-td tb-col-1" style="width:30%"><span></span></div></div><div class="tb-row tb-odd ui-droppable" data-id="2" data-index="1" data-level="2" data-rindex="1" style="height: 35px;"><div class="tb-td td-title tb-col-0 ui-draggable" data-id="2" style="padding-left: 20px; width:70%"><span class="tb-td-first"><span class="tb-toggle-icon"><i class="fa fa-minus"> </i></span><span class="tb-expand-icon-holder"><div style="width: 16px; height: 16px; background-image: url(https://osf.io/static/addons/osfstorage/comicon.png); display: inline-block; background-position: initial initial; background-repeat: initial initial;"></div></span></span><span class="title-text"><span>OSF Storage</span></span></div><div class="tb-td tb-col-1" style="width:30%"><span></span></div></div><div class="tb-row tb-even ui-droppable" data-id="3" data-index="2" data-level="2" data-rindex="2" style="height: 35px;"><div class="tb-td td-title tb-col-0 ui-draggable" data-id="3" style="padding-left: 20px; width:70%"><span class="tb-td-first"><span class="tb-toggle-icon"><i class="fa fa-minus"> </i></span><span class="tb-expand-icon-holder"><span class="fa fa-lightbulb-o po-icon"></span></span></span><span class="title-text"><a class="fg-file-links" href="/gvcbj/">Hypothesis Routine Experiment</a></span></div><div class="tb-td tb-col-1" style="width:30%"><span></span></div></div><div class="tb-row tb-odd ui-droppable" data-id="4" data-index="3" data-level="3" data-rindex="3" style="height: 35px;"><div class="tb-td td-title tb-col-0 ui-draggable" data-id="4" style="padding-left: 40px; width:70%"><span class="tb-td-first"><span class="tb-toggle-icon"><i class="fa fa-minus"> </i></span><span class="tb-expand-icon-holder"><div style="width: 16px; height: 16px; background-image: url(https://osf.io/static/addons/osfstorage/comicon.png); display: inline-block; background-position: initial initial; background-repeat: initial initial;"></div></span></span><span class="title-text"><span>OSF Storage</span></span></div><div class="tb-td tb-col-1" style="width:30%"><span></span></div></div><div class="tb-row tb-even ui-droppable" data-id="8" data-index="4" data-level="4" data-rindex="4" style="height: 35px;"><div class="tb-td td-title tb-col-0 ui-draggable" data-id="8" style="padding-left: 60px; width:70%"><span class="tb-td-first"><span class="tb-toggle-icon"></span><span class="tb-expand-icon-holder"><div class="file-extension _pdf"></div></span></span><span class="title-text"><span class="fg-file-links">Hypothesis_Routine Experiment.pdf</span></span></div><div class="tb-td tb-col-1" style="width:30%"><span>2016-06-16 11:21 PM</span></div></div><div class="tb-row tb-odd" data-id="5" data-index="5" data-level="2" data-rindex="5" style="height: 35px;"><div class="tb-td td-title tb-col-0 ui-draggable" data-id="5" style="padding-left: 20px; width:70%"><span class="tb-td-first"><span class="tb-toggle-icon"><i class="fa fa-minus"> </i></span><span class="tb-expand-icon-holder"><span class="fa fa-pencil po-icon"></span></span></span><span class="title-text"><a class="fg-file-links" href="/dahp4/">Experimental program</a></span></div><div class="tb-td tb-col-1" style="width:30%"><span></span></div></div><div class="tb-row tb-even" data-id="6" data-index="6" data-level="3" data-rindex="6" style="height: 35px;"><div class="tb-td td-title tb-col-0 ui-draggable" data-id="6" style="padding-left: 40px; width:70%"><span class="tb-td-first"><span class="tb-toggle-icon"><i class="fa fa-minus"> </i></span><span class="tb-expand-icon-holder"><div style="width: 16px; height: 16px; background-image: url(https://osf.io/static/addons/osfstorage/comicon.png); display: inline-block; background-position: initial initial; background-repeat: initial initial;"></div></span></span><span class="title-text"><span>OSF Storage</span></span></div><div class="tb-td tb-col-1" style="width:30%"><span></span></div></div><div class="tb-row tb-odd" data-id="7" data-index="7" data-level="4" data-rindex="7" style="height: 35px;"><div class="tb-td td-title tb-col-0 ui-draggable" data-id="7" style="padding-left: 60px; width:70%"><span class="tb-td-first"><span class="tb-toggle-icon"></span><span class="tb-expand-icon-holder"><div class="file-extension _rar"></div></span></span><span class="title-text"><span class="fg-file-links">Routine_Empra_SS2016.rar</span></span></div><div class="tb-td tb-col-1" style="width:30%"><span>2016-06-16 11:22 PM</span></div></div></div></div></div></div></div></div>
+</div><!-- end .panel-body -->
+</div>
+<!-- Show widgets in left column if present -->
+</div>
+<div class="col-sm-6 osf-dash-col">
+<!-- Citations -->
+<div class="citations panel panel-default">
+<div class="panel-heading clearfix">
+<h3 class="panel-title" style="padding-top: 3px">Citation</h3>
+<div class="pull-right">
+<span class="permalink">osf.io/project/mst3k</span><button class="btn btn-link project-toggle"><i class="fa fa-angle-down"></i></button>
+</div>
+</div>
+<div class="panel-body" style="display:none">
+<div class="m-b-md" id="citationList">
+<div class="citation-list">
+<div class="f-w-xl">APA</div>
+<span data-bind="text: apa">Nett, N. (2016, August 1). Routine Experiment. Retrieved from osf.io/project/mst3k
+</span>
+<div class="f-w-xl m-t-md">MLA</div>
+<span data-bind="text: mla">Nett, Nadine. “Routine Experiment.” Open Science Framework, 1 Aug. 2016. Web.
+</span>
+<div class="f-w-xl m-t-md">Chicago</div>
+<span data-bind="text: chicago">Nett, Nadine. 2016. “Routine Experiment.” Open Science Framework. August 1. osf.io/project/mst3k.
+</span>
+<div data-bind="validationOptions: {insertMessages: false, messagesOnModified: false}, foreach: citations"></div>
+</div>
+</div>
+<p><strong>Get more citations</strong></p>
+<div class="citation-picker" id="citationStylePanel">
+<div class="select2-container" id="s2id_citationStyleInput"><a class="select2-choice select2-default" href="javascript:void(0)" tabindex="-1"> <span class="select2-chosen" id="select2-chosen-1">Enter citation style (e.g. "APA")</span><abbr class="select2-search-choice-close"></abbr> <span class="select2-arrow" role="presentation"><b role="presentation"></b></span></a><label class="select2-offscreen" for="s2id_autogen1"></label><input aria-haspopup="true" aria-labelledby="select2-chosen-1" class="select2-focusser select2-offscreen" id="s2id_autogen1" role="button" type="text"><div class="select2-drop select2-display-none select2-with-searchbox"> <div class="select2-search"> <label class="select2-offscreen" for="s2id_autogen1_search"></label> <input aria-autocomplete="list" aria-expanded="true" aria-owns="select2-results-1" autocapitalize="off" autocomplete="off" autocorrect="off" class="select2-input" id="s2id_autogen1_search" placeholder="" role="combobox" spellcheck="false" type="text"> </input></div> <ul class="select2-results" id="select2-results-1" role="listbox"> </ul></div></input></div><input class="select2-offscreen" id="citationStyleInput" tabindex="-1" title="" type="hidden">
+</input></div>
+<pre class="formatted-citation" id="citationText"></pre>
+</div>
+</div>
+<!-- Show child on right if widgets -->
+<div class="components panel panel-default">
+<div class="panel-heading clearfix">
+<h3 class="panel-title" style="padding-bottom: 5px; padding-top: 5px;">Components </h3>
+<div class="pull-right">
+</div>
+</div><!-- end addon-widget-header -->
+<div class="panel-body">
+<div id="containment">
+<ul class="list-group m-md " data-bind="stopBinding: true">
+<span class="render-nodes-list scripted" id="components" style="display: inline;">
+<div id="render-node">
+<li class=" project list-group-item list-group-item-node cite-container " node_id="gvcbj" node_reference="gvcbj:node">
+<h4 class="list-group-item-heading">
+<span class="component-overflow f-w-lg" style="line-height: 1.5;">
+<span class="project-statuses-lg">
+</span>
+<span class="fa fa-lightbulb-o" data-bind='getIcon: "hypothesis"'></span>
+<a href="/gvcbj/">Hypothesis Routine Experiment</a>
+</span>
+<!-- Show/Hide recent activity log -->
+<div class="pull-right">
+<i class="pointer fa fa-angle-down" id="icon-gvcbj" onclick="NodeActions.openCloseNode('gvcbj');" style="font-weight:bold;"></i>
+</div>
+</h4>
+<div class="list-group-item-text"></div>
+<!-- Show abbreviated contributors list -->
+<div class="project-authors">
+<a class="overflow" data-original-title="Nadine Nett" href="/2qj6a/" rel="tooltip">Nett</a><span></span>
+</div>
+<span class="text-muted">4 contributions</span>
+<div class="body hide" id="body-gvcbj" style="overflow:hidden;">
+<hr>
+<!-- Recent Activity (Logs) -->
+                Recent Activity
+                <div id="logFeed-gvcbj"><div class="db-activity-list m-t-md"><div class="db-activity-item"><div><div class="db-log-avatar m-r-xs"><img src="https://secure.gravatar.com/avatar/99da4d38dd5e56a9a28777b867b18574?d=identicon&amp;s=16"/></div><span class="osf-log-item"><span></span><a href="https://osf.io/2qj6a/">Nadine Nett</a> made <a href="https://osf.io/gvcbj/">Hypothesis Routine Experiment</a> public</span></div><div class="text-right"><span class="text-muted m-r-xs">2016-08-01 08:37 AM</span></div></div><div class="db-activity-item"><div><div class="db-log-avatar m-r-xs"><img src="https://secure.gravatar.com/avatar/99da4d38dd5e56a9a28777b867b18574?d=identicon&amp;s=16"/></div><span class="osf-log-item"><span></span><a href="https://osf.io/2qj6a/">Nadine Nett</a> added file <a href="/project/gvcbj/files/osfstorage/57633460b83f6901fdb94bbd/">Hypothesis_Routine Experiment.pdf</a> to OSF Storage in <a href="https://osf.io/gvcbj/">Hypothesis Routine Experiment</a><span></span></span></div><div class="text-right"><span class="text-muted m-r-xs">2016-06-16 11:21 PM</span></div></div><div class="db-activity-item"><div><div class="db-log-avatar m-r-xs"><img src="https://secure.gravatar.com/avatar/99da4d38dd5e56a9a28777b867b18574?d=identicon&amp;s=16"/></div><span class="osf-log-item"><span></span><a href="https://osf.io/2qj6a/">Nadine Nett</a> updated wiki page <a href="/uk6ne">home</a> to version <span>1</span> of <a href="https://osf.io/gvcbj/">Hypothesis Routine Experiment</a><span></span></span></div><div class="text-right"><span class="text-muted m-r-xs">2016-06-16 11:17 PM</span></div></div><div class="db-activity-nav text-center"></div></div></div>
+</hr></div>
+</li>
+</div>
+<div id="render-node">
+<li class=" project list-group-item list-group-item-node cite-container " node_id="dahp4" node_reference="dahp4:node">
+<h4 class="list-group-item-heading">
+<span class="component-overflow f-w-lg" style="line-height: 1.5;">
+<span class="project-statuses-lg">
+</span>
+<span class="fa fa-pencil" data-bind='getIcon: "methods and measures"'></span>
+<a href="/dahp4/">Experimental program</a>
+</span>
+<!-- Show/Hide recent activity log -->
+<div class="pull-right">
+<i class="pointer fa fa-angle-down" id="icon-dahp4" onclick="NodeActions.openCloseNode('dahp4');" style="font-weight:bold;"></i>
+</div>
+</h4>
+<div class="list-group-item-text"></div>
+<!-- Show abbreviated contributors list -->
+<div class="project-authors">
+<a class="overflow" data-original-title="Nadine Nett" href="/2qj6a/" rel="tooltip">Nett</a><span></span>
+</div>
+<span class="text-muted">3 contributions</span>
+<div class="body hide" id="body-dahp4" style="overflow:hidden;">
+<hr>
+<!-- Recent Activity (Logs) -->
+                Recent Activity
+                <div id="logFeed-dahp4"><div class="db-activity-list m-t-md"><div class="db-activity-item"><div><div class="db-log-avatar m-r-xs"><img src="https://secure.gravatar.com/avatar/99da4d38dd5e56a9a28777b867b18574?d=identicon&amp;s=16"/></div><span class="osf-log-item"><span></span><a href="https://osf.io/2qj6a/">Nadine Nett</a> made <a href="https://osf.io/dahp4/">Experimental program</a> public</span></div><div class="text-right"><span class="text-muted m-r-xs">2016-08-01 08:37 AM</span></div></div><div class="db-activity-item"><div><div class="db-log-avatar m-r-xs"><img src="https://secure.gravatar.com/avatar/99da4d38dd5e56a9a28777b867b18574?d=identicon&amp;s=16"/></div><span class="osf-log-item"><span></span><a href="https://osf.io/2qj6a/">Nadine Nett</a> added file <a href="/project/dahp4/files/osfstorage/5763349d6c613b020945ced9/">Routine_Empra_SS2016.rar</a> to OSF Storage in <a href="https://osf.io/dahp4/">Experimental program</a><span></span></span></div><div class="text-right"><span class="text-muted m-r-xs">2016-06-16 11:22 PM</span></div></div><div class="db-activity-item"><div><div class="db-log-avatar m-r-xs"><img src="https://secure.gravatar.com/avatar/99da4d38dd5e56a9a28777b867b18574?d=identicon&amp;s=16"/></div><span class="osf-log-item"><span></span><a href="https://osf.io/2qj6a/">Nadine Nett</a> created <a href="https://osf.io/dahp4/">Experimental program</a><span></span></span></div><div class="text-right"><span class="text-muted m-r-xs">2016-06-14 02:16 PM</span></div></div><div class="db-activity-nav text-center"></div></div></div>
+</hr></div>
+</li>
+</div>
+</span>
+</ul>
+</div><!-- end containment -->
+</div><!-- end addon-widget-body -->
+</div><!-- end components -->
+<!-- Recent Activity (Logs) -->
+<div class="panel panel-default">
+<div class="panel-heading clearfix">
+<h3 class="panel-title">Recent Activity</h3>
+</div>
+<div class="panel-body">
+<div id="logFeed"><div class="db-activity-list m-t-md"><div class="db-activity-item"><div><div class="db-log-avatar m-r-xs"><img src="https://secure.gravatar.com/avatar/99da4d38dd5e56a9a28777b867b18574?d=identicon&amp;s=16"/></div><span class="osf-log-item"><span></span><a href="https://osf.io/2qj6a/">Nadine Nett</a> made <a href="https://osf.io/dahp4/">Experimental program</a> public</span></div><div class="text-right"><span class="text-muted m-r-xs">2016-08-01 08:37 AM</span></div></div><div class="db-activity-item"><div><div class="db-log-avatar m-r-xs"><img src="https://secure.gravatar.com/avatar/99da4d38dd5e56a9a28777b867b18574?d=identicon&amp;s=16"/></div><span class="osf-log-item"><span></span><a href="https://osf.io/2qj6a/">Nadine Nett</a> made <a href="https://osf.io/project/mst3k/">Routine Experiment</a> public</span></div><div class="text-right"><span class="text-muted m-r-xs">2016-08-01 08:37 AM</span></div></div><div class="db-activity-item"><div><div class="db-log-avatar m-r-xs"><img src="https://secure.gravatar.com/avatar/99da4d38dd5e56a9a28777b867b18574?d=identicon&amp;s=16"/></div><span class="osf-log-item"><span></span><a href="https://osf.io/2qj6a/">Nadine Nett</a> made <a href="https://osf.io/gvcbj/">Hypothesis Routine Experiment</a> public</span></div><div class="text-right"><span class="text-muted m-r-xs">2016-08-01 08:37 AM</span></div></div><div class="db-activity-item"><div><div class="db-log-avatar m-r-xs"><i class="fa fa-desktop"></i></div><span class="osf-log-item">Embargo of registration of <a href="https://osf.io/project/mst3k/">Routine Experiment</a> approved</span></div><div class="text-right"><span class="text-muted m-r-xs">2016-06-19 12:01 AM</span></div></div><div class="db-activity-item"><div><div class="db-log-avatar m-r-xs"><img src="https://secure.gravatar.com/avatar/99da4d38dd5e56a9a28777b867b18574?d=identicon&amp;s=16"/></div><span class="osf-log-item"><span></span><a href="https://osf.io/2qj6a/">Nadine Nett</a> initiated an embargoed registration of <a href="https://osf.io/project/mst3k/">Routine Experiment</a><span></span></span></div><div class="text-right"><span class="text-muted m-r-xs">2016-06-16 11:27 PM</span></div></div><div class="db-activity-item"><div><div class="db-log-avatar m-r-xs"><img src="https://secure.gravatar.com/avatar/99da4d38dd5e56a9a28777b867b18574?d=identicon&amp;s=16"/></div><span class="osf-log-item"><span></span><a href="https://osf.io/2qj6a/">Nadine Nett</a> added file <a href="/project/dahp4/files/osfstorage/5763349d6c613b020945ced9/">Routine_Empra_SS2016.rar</a> to OSF Storage in <a href="https://osf.io/dahp4/">Experimental program</a><span></span></span></div><div class="text-right"><span class="text-muted m-r-xs">2016-06-16 11:22 PM</span></div></div><div class="db-activity-nav text-center"><div class="btn btn-sm btn-link disabled" style="color: black">&lt;</div><div class="btn btn-sm btn-link disabled" style="color: black">1</div><div class="btn btn-sm btn-link">2</div><div class="btn btn-sm btn-link">&gt;</div></div></div></div>
+</div>
+</div>
+</div>
+</div>
+<div class="modal fade" id="duplicateModal">
+<div class="modal-dialog modal-lg">
+<div class="modal-content">
+<div class="modal-body">
+<div class="row">
+<div class="col-md-4">
+<h4 class="f-w-lg">Links To This Project
+                                 <span class="btn btn-default disabled pull-right">
+                                    0
+                                </span>
+</h4>
+<p>Linking to this project will reference it in another project, without
+creating a copy. The link will always point to the most up-to-date version.</p>
+</div>
+<div class="col-md-4">
+<h4 class="f-w-lg">Templated From
+                            <span class="btn btn-default disabled pull-right">
+                                0
+                            </span>
+</h4>
+<p>This option will create a new project, using this project as a template.
+The new project will be structured in the same way, but contain no data.</p>
+<a class="btn btn-primary form-control disabled" data-dismiss="modal" onclick="NodeActions.useAsTemplate();">
+                            Copy Project Structure
+                        </a>
+</div>
+<div class="col-md-4">
+<h4 class="f-w-lg">Forks
+                            <button class="btn btn-default disabled pull-right">
+                                0
+                            </button>
+</h4>
+<p>Fork this project if you plan to build upon it in your own work.
+The new project will be an exact duplicate of this project's current state,
+with you as the only contributor.</p>
+<a class="btn btn-primary form-control disabled" data-dismiss="modal" onclick="NodeActions.forkNode();">
+                                Fork this Project
+                            </a>
+<a class="btn btn-info btn-block m-t-xs" href="/project/mst3k/forks/">View Forks</a>
+</div>
+</div>
+</div>
+<div class="modal-footer">
+<button class="btn btn-default" data-dismiss="modal" type="button">Close</button>
+</div>
+</div><!-- /.modal-content -->
+</div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+</link></div><!-- end container -->
+</div><!-- end watermarked -->
+<div id="footerSlideIn">
+<div class="container">
+<div class="row">
+<div class="col-sm-2 hidden-xs">
+<img class="logo" src="/static/img/circle_logo.png">
+</img></div>
+<div class="col-sm-10 col-xs-12">
+<a class="close" data-bind="click: dismiss" href="#">×</a>
+<h1>Start managing your projects on the OSF today.</h1>
+<p>Free and easy to use, the Open Science Framework supports the entire research lifecycle: planning, execution, reporting, archiving, and discovery.</p>
+<div>
+<a class="btn btn-primary" data-bind="click: trackClick.bind($data, 'Create Account')" href="/#signUp">Create an Account</a>
+<a class="btn btn-primary" data-bind="click: trackClick.bind($data, 'Learn More')" href="http://help.osf.io" rel="noreferrer" target="_blank">Learn More</a>
+<a data-bind="click: dismiss">Hide this message</a>
+</div>
+</div>
+</div>
+</div>
+</div>
+<footer class="footer m-t-lg m-b-lg p-lg bg-color-light">
+<div class="container">
+<div class="row">
+<div class="col-sm-2 col-md-3 col-md-offset-1">
+<h4>OSF</h4>
+<ul>
+<li><a href="https://osf.io/explore/activity/">Explore</a></li>
+<li><a href="mailto:contact@osf.io" rel="nofollow">Contact</a><noscript>Contact OSF: &lt;span class="obfuscated-email-noscript"&gt;&lt;strong&gt;&lt;u&gt;cont&lt;span style="display:none;"&gt;null&lt;/span&gt;act@&lt;span style="display:none;"&gt;null&lt;/span&gt;osf.&lt;span style="display:none;"&gt;null&lt;/span&gt;io&lt;/u&gt;&lt;/strong&gt;&lt;/span&gt;</noscript></li>
+<li><a href="https://osf.io/support">Help/Support</a></li>
+<li><a href="http://help.osf.io" rel="noreferrer" target="_blank">Guides</a></li><a href="http://help.osf.io" rel="noreferrer" target="_blank">
+</a><li><a href="http://help.osf.io" rel="noreferrer" target="_blank"></a><a href="https://osf.io/faq">FAQ</a></li>
+</ul>
+</div>
+<div class="col-sm-5 col-md-4">
+<h4>Center for Open Science</h4>
+<ul>
+<li><a href="http://cos.io">Home</a></li>
+<li><a href="https://osf.io/ezcuj/wiki/home/">Reproducibility Project: Psychology</a></li>
+<li><a href="https://osf.io/e81xl/wiki/home/">Reproducibility Project: Cancer Biology</a></li>
+<li><a href="http://cos.io/top/">TOP Guidelines</a></li>
+<li><a href="https://www.givinglibrary.org/organizations/center-for-open-science">Donate</a></li>
+</ul>
+</div>
+<div class="col-sm-4 col-md-3">
+<h4>Socialize</h4>
+<a aria-label="Twitter" href="http://twitter.com/OSFramework"><i class="fa fa-twitter fa-2x"></i></a>
+<a aria-label="Facebook" href="https://www.facebook.com/OpenScienceFramework"><i class="fa fa-facebook fa-2x"></i></a>
+<a aria-label="Google Group" href="https://groups.google.com/forum/#!forum/openscienceframework"><i class="fa fa-group fa-2x"></i></a>
+<a aria-label="GitHub" href="https://www.github.com/centerforopenscience"><i class="fa fa-github fa-2x"></i></a>
+<a aria-label="Google Plus" href="https://plus.google.com/103557785986281627994" rel="publisher"><i class="fa fa-google-plus fa-2x"></i></a>
+</div> <!-- column -->
+</div>
+</div>
+</footer><!-- end footer -->
+<div class="container copyright">
+<div class="row">
+<div class="col-md-12">
+<p>Copyright © 2011-2016 <a href="http://centerforopenscience.org">Center for Open Science</a> |
+                <a href="https://github.com/CenterForOpenScience/centerforopenscience.org/blob/master/TERMS_OF_USE.md">Terms of Use</a> |
+                <a href="https://github.com/CenterForOpenScience/centerforopenscience.org/blob/master/PRIVACY_POLICY.md">Privacy Policy</a>
+</p>
+</div>
+</div>
+</div><!-- end container copyright -->
+<span aria-live="polite" class="select2-hidden-accessible" role="status"></span><input class="dz-hidden-input" multiple="multiple" style="visibility: hidden; position: absolute; top: 0px; left: 0px; height: 0px; width: 0px;" type="file"/></link></body></html>
+<div style="position:fixed;    bottom:0;left:0;    border-top-right-radius: 8px;    color:  white;
+        background-color: red;  padding: .5em;">
+            This page is a read-only mirror of the OSF saved on August 02, 2016 at 11:55 AM. Some features may not be available.
+        </div>
