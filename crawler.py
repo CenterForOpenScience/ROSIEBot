@@ -58,9 +58,9 @@ class Crawler:
         self.registration_urls = []
         # Stores all the urls for user profile pages
         self.user_urls = []  # User profile page ("osf.io/profile/mst3k/")
-        # Stores all the urls for institutions
+        #  Stores all the urls for institutions
         self.institution_urls = [self.http_base]  # Institution page ("osf.io/institution/cos")
-        # General pages
+        #  General pages
         self.general_urls = [self.http_base, self.http_base + 'support/']
         # List of 504s:
         self.error_list = []
@@ -123,8 +123,10 @@ class Crawler:
         according to self.date_modified_marker.
         :param page_limit: Number of pages of API to crawl. If page_limit=0, then crawl all pages.
         """
-        self.debug_logger.info("Start crawling nodes API pages")
         sem = asyncio.BoundedSemaphore(value=10)
+
+        self.debug_logger.info("\nStart crawling nodes API pages")
+
         # Request number of pages in nodes API
         with requests.Session() as s:
             response = s.get(self.api_base + 'nodes/' + '?filter[date_modified][gte]=' + self.date_modified_marker.isoformat(sep='T'))
@@ -156,6 +158,8 @@ class Crawler:
         # Setting a semaphore for rate limiting
         sem = asyncio.BoundedSemaphore(value=10)
 
+        self.debug_logger.info("\nStart crawling registrations API pages")
+
         # Request number of pages in nodes API
         with requests.Session() as s:
             response = s.get(self.api_base + 'registrations/')
@@ -186,6 +190,8 @@ class Crawler:
         # Setting a semaphore for rate limiting
         sem = asyncio.BoundedSemaphore(value=10)
 
+        self.debug_logger.info("\nStart crawling users API pages")
+
         # Request number of pages in nodes API
         with requests.Session() as s:
             response = s.get(self.api_base + 'users/')
@@ -200,6 +206,7 @@ class Crawler:
                 sem
             )))
         loop = asyncio.get_event_loop()
+
         loop.run_until_complete(self._wait_with_progress_bar(tasks))
         self.debug_logger.info("Finished crawling user API pages")
 
@@ -211,6 +218,8 @@ class Crawler:
         self.debug_logger.info("Start crawling institution API pages")
         # Setting a semaphore for rate limiting
         sem = asyncio.BoundedSemaphore(value=10)
+
+        self.debug_logger.info('\nStart crawling institution API pages')
 
         # Request number of pages in nodes API
         with requests.Session() as s:
@@ -435,6 +444,9 @@ class Crawler:
         self.debug_logger.info("Start crawling node wiki API pages")
         tasks = []
         sem = asyncio.BoundedSemaphore(value=5)
+
+        self.debug_logger.info("\nCrawling node wiki API pages")
+
         for node_url in [x[0] for x in self.node_url_tuples]:
             tasks.append(asyncio.ensure_future(self.get_node_wiki_names(node_url.strip('/').split('/')[-1], sem)))
         loop = asyncio.get_event_loop()
@@ -472,6 +484,10 @@ class Crawler:
         self.debug_logger.info("Start crawling registration wiki API pages")
         tasks = []
         sem = asyncio.BoundedSemaphore(value=5)
+
+        self.debug_logger.info("\nCrawling registration wiki API pages")
+
+
         for node_url in [x[0] for x in self.registration_url_tuples]:
             tasks.append(asyncio.ensure_future(self.get_registration_wiki_names(node_url.strip('/').split('/')[-1], sem)))
         loop = asyncio.get_event_loop()
@@ -570,6 +586,7 @@ class Crawler:
 
         loop = asyncio.get_event_loop()
         if len(tasks) > 0:
+            self.debug_logger.info("\nScraping pages")
             loop.run_until_complete(self._wait_with_progress_bar(tasks))
         else:
             self.debug_logger.info("No pages to scrape")
@@ -631,7 +648,13 @@ def save_html(html, page):
 
     page = page.split('//', 1)[1]
     page = page.split('/', 1)[1]
-    page = 'archive/' + page
+
+    # Add /registration/ to URL
+    if 'institution' not in page and 'profile' not in page and 'project' not in page:
+        page = 'archive/registration/' + page
+    else:
+        page = 'archive/' + page
+
     if page[-1] != '/':
         page += '/'
     make_dirs(page)
