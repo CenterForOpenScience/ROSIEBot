@@ -58,7 +58,7 @@ def cli_entry_point(scrape, resume, verify, resume_verify, compile_active, delet
             dm = datetime.datetime.strptime('1970-01-01T00:00:00', "%Y-%m-%dT%H:%M:%S")
         click.echo('Starting normal scrape with date marker set to : ' + dm)
         now = datetime.datetime.now()
-        filename = now.strftime('%Y%m%d%H%M' + '.json')
+        filename = 'demo_taskfile.json'
         click.echo('Creating a task file named : ' + filename)
         with open(filename, 'w') as db:
             normal_scrape(dm, registrations, users, institutions, nodes, d, f, w, a, r, k, db)
