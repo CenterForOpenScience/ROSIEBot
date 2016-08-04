@@ -248,7 +248,7 @@ class Crawler:
         Asynchronous scraping method that scrapes the V2 Nodes API for list of public facing nodes
         (excluding registrations). Called by crawl_nodes_api(), which is the runner method for crawling the nodes API.
         Compiles a list of self.node_url_tuples that stores tuples as list elements in the format of (url, datetime)
-        e.g. ('http://osf.io/project/mst3k', datetime.datetime(2016, 6, 24, 9, 13, 59, 254173))
+        e.g. ('http://osf.io/mst3k', datetime.datetime(2016, 6, 24, 9, 13, 59, 254173))
         self.node_url_tuples will be sorted in ascending order according to the datetime object in the tuple.
         (The tuple that contains earliest datetime object comes first)
         :param api_url: list of V2 Nodes API endpoints to scrape
@@ -268,7 +268,7 @@ class Crawler:
                         date = datetime.datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S.%f")
                     else:
                         date = datetime.datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S")
-                    self.node_url_tuples.append((self.http_base + 'project/' + element['id'] + '/', date))
+                    self.node_url_tuples.append((self.http_base + element['id'] + '/', date))
                     self.node_url_tuples.sort(key=lambda x: x[1])
 
     async def parse_registrations_api(self, api_url, sem):
@@ -276,7 +276,7 @@ class Crawler:
         Asynchronous scraping method that scrapes the V2 Registrations API for list of registrations
         Called by crawl_registrations_api(), which is the runner method for crawling the Registrations API.
         Compiles a list of self.registration_url_tuples that stores tuples as list elements in the format of
-        (url, datetime) e.g. ('http://osf.io/project/mst3k', datetime.datetime(2016, 6, 24, 9, 13, 59, 254173))
+        (url, datetime) e.g. ('http://osf.io/mst3k', datetime.datetime(2016, 6, 24, 9, 13, 59, 254173))
         self.registration_url_tuples will be sorted in ascending order according to the datetime object in the tuple.
         (The tuple that contains earliest datetime object comes first)
         :param api_url: list of V2 Registrations API endpoints to scrape
@@ -320,7 +320,7 @@ class Crawler:
                 json_body = json.loads(body.decode('utf-8'))
                 data = json_body['data']
                 for element in data:
-                    self.user_urls.append(self.http_base + 'profile/' + element['id'] + '/')
+                    self.user_urls.append(self.http_base + element['id'] + '/')
 
     async def parse_institutions_api(self, api_url, sem):
         """
@@ -340,7 +340,7 @@ class Crawler:
                 json_body = json.loads(body.decode('utf-8'))
                 data = json_body['data']
                 for element in data:
-                    self.institution_urls.append(self.http_base + 'institutions/' + element['id'] + '/')
+                    self.institution_urls.append(self.http_base + element['id'] + '/')
 
 # Generating URLs for Nodes and Registrations
 
@@ -487,7 +487,6 @@ class Crawler:
 
         self.debug_logger.info("\nCrawling registration wiki API pages")
 
-
         for node_url in [x[0] for x in self.registration_url_tuples]:
             tasks.append(asyncio.ensure_future(self.get_registration_wiki_names(node_url.strip('/').split('/')[-1], sem)))
         loop = asyncio.get_event_loop()
@@ -523,14 +522,14 @@ class Crawler:
         """
         self.debug_logger.info("Scraping nodes, async = " + str(async))
         if async:
-            self._scrape_pages(self.node_urls)
+            self._scrape_pages('project', self.node_urls)
         else:
             for elem in self.node_url_tuples:
                 lst = []
                 while len(self.node_urls) > 0 and elem[0] in self.node_urls[0]:
                     lst.append(self.node_urls.pop(0))
                 if len(lst) > 0:
-                    self._scrape_pages(lst)
+                    self._scrape_pages('project', lst)
         self.debug_logger.info("Finished scraping nodes, async = " + str(async))
 
     def scrape_registrations(self, async=True):
@@ -540,13 +539,13 @@ class Crawler:
         """
         self.debug_logger.info("Scraping registrations, async = " + str(async))
         if async:
-            self._scrape_pages(self.registration_urls)
+            self._scrape_pages('registration', self.registration_urls)
         else:
             for elem in self.registration_url_tuples:
                 lst = []
                 while len(self.registration_urls) > 0 and elem[0] in self.registration_urls:
                     lst.append(self.registration_urls.pop(0))
-                self._scrape_pages(lst)
+                self._scrape_pages('registration', lst)
         self.debug_logger.info("Finished scraping registrations, async = " + str(async))
 
     def scrape_users(self):
@@ -554,7 +553,7 @@ class Crawler:
         Wrapper method that scrape all urls in self.user_urls. Calls _scrape_pages().
         """
         self.debug_logger.info("Scraping users")
-        self._scrape_pages(self.user_urls)
+        self._scrape_pages('profile', self.user_urls)
         self.debug_logger.info("Finished scraping users")
 
     def scrape_institutions(self):
@@ -562,7 +561,7 @@ class Crawler:
         Wrapper method that scrape all institution_urls. Calls _scrape_pages().
         """
         self.debug_logger.info("Scraping institutions")
-        self._scrape_pages(self.institution_urls)
+        self._scrape_pages('institution', self.institution_urls)
         self.debug_logger.info("Finished scraping institutions")
 
     def scrape_general(self):
@@ -570,19 +569,18 @@ class Crawler:
         Wrapper method that scrape all general_urls. Calls _scrape_pages().
         """
         self.debug_logger.info("Scraping general pages")
-        self._scrape_pages(self.general_urls)
+        self._scrape_pages('', self.general_urls)
         self.debug_logger.info("Finished scraping general pages")
 
-    # TODO Make semaphore value a parameter
-    def _scrape_pages(self, aspect_list):
+    def _scrape_pages(self, osf_type, aspect_list, sem_value=5):
         """
         Runner method that runs scrape_url()
         :param aspect_list: list of url of pages to scrape
         """
-        sem = asyncio.BoundedSemaphore(value=5)
+        sem = asyncio.BoundedSemaphore(value=sem_value)
         tasks = []
         for url in aspect_list:
-            tasks.append(asyncio.ensure_future(self.scrape_url(url, sem)))
+            tasks.append(asyncio.ensure_future(self.scrape_url(osf_type, url, sem)))
 
         loop = asyncio.get_event_loop()
         if len(tasks) > 0:
@@ -591,10 +589,11 @@ class Crawler:
         else:
             self.debug_logger.info("No pages to scrape")
 
-    async def scrape_url(self, url, sem):
+    async def scrape_url(self, osf_type, url, sem):
         """
         Asynchronous method that scrape page. Calls save_html() to save scraped page to file.
         Calls record_milestone() to save progress
+        :param osf_type: registration, profile, project, institution, or blank for general
         :param url: url to scrape
         :param sem: rate limitin semaaphore.
         :return:
@@ -607,7 +606,7 @@ class Crawler:
                 if response.status == 200:
                     self.debug_logger.debug("Finished : " + url)
                     self.record_milestone(url)
-                    save_html(body, url)
+                    save_html(body, osf_type, url)
                 else:
                     self.debug_logger.debug(str(response.status) + " on : " + url)
                     if self.database is not None:
@@ -631,8 +630,8 @@ class Crawler:
             json.dump(self.dictionary, self.database, indent=4)
             self.database.flush()
 
-# TODO add timestamp to pages scraped
-def save_html(html, page):
+
+def save_html(html, osf_type, page):
     # Mirror warning
     today = datetime.datetime.today().strftime("%B %d, %Y at %I:%M %p")
     mirror_warning = """
@@ -642,21 +641,16 @@ def save_html(html, page):
         </div>
         """.format(today)
 
-    # Remove the footer
+    # Footer we have vs. footer we want
     old_footer = """<div id="footerSlideIn" style="display: block;">"""
     new_footer = """<div id="footerSlideIn" style="display: none;">"""
 
+    # Remove URL head from the page (https://osf.io/project/mst3k/files/ --> project/mst3k/files/)
     page = page.split('//', 1)[1]
     page = page.split('/', 1)[1]
 
-    # Add /registration/ to URL
-    if 'institution' not in page and 'profile' not in page and 'project' not in page:
-        page = 'archive/registration/' + page
-    else:
-        page = 'archive/' + page
+    page = '/'.join(['archive', osf_type, page, ''])
 
-    if page[-1] != '/':
-        page += '/'
     make_dirs(page)
 
     html = html.replace(old_footer, new_footer) + mirror_warning
