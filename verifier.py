@@ -4,7 +4,6 @@ from pages import ProjectDashboardPage, ProjectFilesPage, ProjectAnalyticsPage, 
     ProjectForksPage, ProjectRegistrationsPage, ProjectWikiPage, RegistrationDashboardPage, RegistrationFilesPage, \
     RegistrationAnalyticsPage, RegistrationForksPage, RegistrationWikiPage, UserProfilePage, InstitutionDashboardPage
 from crawler import Crawler
-import bs4
 
 
 # Verifier superclass
@@ -19,14 +18,6 @@ class Verifier:
         self.page_type = pg_type
         self.url_end = end
 
-        # Certain elements will be absent if there's no content for them to display, so we check if there is a loading
-        # bar in its place. This means the element should exist, but it doesn't.
-        self.loading_elements = {}
-
-        # Other elements will be replaced by a message if there's no content for them (e.g. "This user has no projects")
-        # We check for the elements and their alternates if the original isn't found.
-        self.alternate_elements = {}
-
         self.pages = []  # All the page objects
         self.failed_pages = []
 
@@ -37,19 +28,20 @@ class Verifier:
         :param json_list: The list in the json file of found URLs
         :return: Null, but self.pages is populated.
         """
-        for url in json_list[:]:
-            if self.url_end in url:
-                print('rel: ', url)
-                if url in json_dictionary['error_list']:
-                    self.failed_pages.append(url)
-                    print('error: ', url)
-                else:
-                    try:
-                        obj = self.page_type(url)
-                        self.pages.append(obj)
-                    except FileNotFoundError:
+        if json_dictionary['error_list'] is not None:
+            for url in json_list[:]:
+                if self.url_end in url:
+                    print('rel: ', url)
+                    if url in json_dictionary['error_list']:
                         self.failed_pages.append(url)
-                json_list.remove(url)
+                        print('error: ', url)
+                    else:
+                        try:
+                            obj = self.page_type(url)
+                            self.pages.append(obj)
+                        except FileNotFoundError:
+                            self.failed_pages.append(url)
+                    json_list.remove(url)
 
     # Compare page size to page-specific minimum that any fully-scraped page should have
     def size_comparison(self):
