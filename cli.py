@@ -14,7 +14,8 @@ import deleter
 @click.option('--verify', is_flag=True, help="Verify the existing OSF static mirror, need to import task file")
 @click.option('--resume_verify', is_flag=True, help="Resume verification of the existing OSF static mirror, need to "
                                                     "import task file")
-@click.option('--delete', is_flag=True, help="Delete nodes from the mirror that have been deleted by users")
+@click.option('--delete', is_flag=True, help="Delete nodes from the mirror that have been deleted by users. Requires "
+                                            "compile_active-produced active-node taskfile")
 # Specify parameters for other needed values
 @click.option('--dm', default=None, type=click.STRING, help="Date marker needed for normal scrape")
 @click.option('--tf', default=None, type=click.STRING, help="filename of the task file")
@@ -331,11 +332,8 @@ def resume_verify_mirror(tf, rn):
 
 
 def delete_nodes(ctf):
-    with codecs.open(ctf, mode='r', encoding='utf-8') as current_tf:
-        current_task_file = json.load(current_tf)
-    deleter.run_deleter(current_task_file['list_of_active_registrations'], 'registration/')
-    deleter.run_deleter(current_task_file['list_of_active_users'], 'profile/')
-    deleter.run_deleter(current_task_file['list_of_active_nodes'], 'project/')
+    macc = deleter.Deleter(ctf)
+    macc.run()
 
 if __name__ == '__main__':
     cli_entry_point()
