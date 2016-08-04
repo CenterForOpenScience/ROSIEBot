@@ -33,7 +33,7 @@ import deleter
 @click.option('-a', is_flag=True, help="Add this flag if you want to include analytics page for nodes")
 @click.option('-r', is_flag=True, help="Add this flag if you want to include registrations page for nodes")
 @click.option('-k', is_flag=True, help="Add this flag if you want to include forks page for nodes")
-def cli_entry_point(scrape, resume, verify, resume_verify, compile_active, delete, dm, tf, rn, ptf, ctf, registrations, users,
+def cli_entry_point(scrape, resume, verify, resume_verify, compile_active, delete, dm, tf, rn, ctf, registrations, users,
                     institutions, nodes, d, f, w, a, r, k):
     if scrape and resume and verify and compile_active:
         click.echo('Invalid parameters.')
