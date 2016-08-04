@@ -61,7 +61,7 @@ class Crawler:
         #  Stores all the urls for institutions
         self.institution_urls = []  # Institution page ("osf.io/institution/cos")
         #  General pages
-        self.general_urls = [self.http_base, self.http_base + 'support/']
+        self.general_urls = [self.http_base, self.http_base + 'support/', self.http_base + 'explore/activity/']
         # List of 504s:
         self.error_list = []
         # For sorting
