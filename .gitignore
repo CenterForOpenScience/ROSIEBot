@@ -10,6 +10,7 @@ staging.osf.io/
 127.0.0.1/
 osf.io/
 archive/
+!archive/search.html
 
 # Logs and Taskfiles
 *.txt
