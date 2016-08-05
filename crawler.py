@@ -522,14 +522,14 @@ class Crawler:
         """
         self.debug_logger.info("Scraping nodes, async = " + str(async))
         if async:
-            self._scrape_pages('project', self.node_urls)
+            self._scrape_pages(self.node_urls, osf_type='project')
         else:
             for elem in self.node_url_tuples:
                 lst = []
                 while len(self.node_urls) > 0 and elem[0] in self.node_urls[0]:
                     lst.append(self.node_urls.pop(0))
                 if len(lst) > 0:
-                    self._scrape_pages('project', lst)
+                    self._scrape_pages(lst, osf_type='project')
         self.debug_logger.info("Finished scraping nodes, async = " + str(async))
 
     def scrape_registrations(self, async=True):
@@ -539,13 +539,13 @@ class Crawler:
         """
         self.debug_logger.info("Scraping registrations, async = " + str(async))
         if async:
-            self._scrape_pages('registration', self.registration_urls)
+            self._scrape_pages(self.registration_urls, osf_type='registration')
         else:
             for elem in self.registration_url_tuples:
                 lst = []
                 while len(self.registration_urls) > 0 and elem[0] in self.registration_urls:
                     lst.append(self.registration_urls.pop(0))
-                self._scrape_pages('registration', lst)
+                self._scrape_pages(lst, osf_type='registration')
         self.debug_logger.info("Finished scraping registrations, async = " + str(async))
 
     def scrape_users(self):
@@ -553,7 +553,7 @@ class Crawler:
         Wrapper method that scrape all urls in self.user_urls. Calls _scrape_pages().
         """
         self.debug_logger.info("Scraping users")
-        self._scrape_pages('profile', self.user_urls)
+        self._scrape_pages(self.user_urls, osf_type="profile")
         self.debug_logger.info("Finished scraping users")
 
     def scrape_institutions(self):
@@ -561,7 +561,7 @@ class Crawler:
         Wrapper method that scrape all institution_urls. Calls _scrape_pages().
         """
         self.debug_logger.info("Scraping institutions")
-        self._scrape_pages('institution', self.institution_urls)
+        self._scrape_pages(self.institution_urls, osf_type='institution')
         self.debug_logger.info("Finished scraping institutions")
 
     def scrape_general(self):
@@ -569,10 +569,10 @@ class Crawler:
         Wrapper method that scrape all general_urls. Calls _scrape_pages().
         """
         self.debug_logger.info("Scraping general pages")
-        self._scrape_pages('', self.general_urls)
+        self._scrape_pages(self.general_urls)
         self.debug_logger.info("Finished scraping general pages")
 
-    def _scrape_pages(self, osf_type, aspect_list, sem_value=5):
+    def _scrape_pages(self, aspect_list, sem_value=5, osf_type=""):
         """
         Runner method that runs scrape_url()
         :param aspect_list: list of url of pages to scrape
@@ -580,7 +580,7 @@ class Crawler:
         sem = asyncio.BoundedSemaphore(value=sem_value)
         tasks = []
         for url in aspect_list:
-            tasks.append(asyncio.ensure_future(self.scrape_url(osf_type, url, sem)))
+            tasks.append(asyncio.ensure_future(self.scrape_url(url, sem, osf_type=osf_type)))
 
         loop = asyncio.get_event_loop()
         if len(tasks) > 0:
@@ -589,7 +589,7 @@ class Crawler:
         else:
             self.debug_logger.info("No pages to scrape")
 
-    async def scrape_url(self, osf_type, url, sem):
+    async def scrape_url(self, url, sem, osf_type=""):
         """
         Asynchronous method that scrape page. Calls save_html() to save scraped page to file.
         Calls record_milestone() to save progress
