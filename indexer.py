@@ -3,6 +3,7 @@ import json
 from tqdm import tqdm
 from bs4 import BeautifulSoup
 
+
 class Indexer:
 
     def __init__(self):
