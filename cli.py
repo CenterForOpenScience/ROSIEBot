@@ -6,6 +6,8 @@ import codecs
 import verifier
 import deleter
 
+# Endpoint for using the ROSIEBot module via command line.
+
 @click.command()
 # Specify parameters that choose between different modes
 @click.option('--compile_active', is_flag=True, help="Compile a list of active nodes")
@@ -41,7 +43,7 @@ def cli_entry_point(scrape, resume, verify, resume_verify, compile_active, delet
         return
 
     if not scrape and not resume and not verify and not resume_verify and not compile_active and not delete:
-        click.echo('You have to choose a mode to run')
+        click.echo('You have to choose a mode to run. Try --help')
 
     if compile_active:
         now = datetime.datetime.now()
