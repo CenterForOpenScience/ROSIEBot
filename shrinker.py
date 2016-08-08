@@ -4,10 +4,17 @@ import tqdm
 
 
 class Shrinker:
+    """
+    Shrinker visits every file in the JSON taskfile and removes any <style> tag
+    and inserts one link to static/css/consolidated.css
+
+    update_css.py generates this consolidated file.
+    """
     def __init__(self, tf):
         with codecs.open(tf, mode='r', encoding='utf-8') as file:
             self.run_info = json.load(file)
 
+    #  Go through each section of the taskfile, generate file paths, and replace the CSS in each file
     def run(self):
         if self.run_info['scrape_nodes']:
             print("Downsizing nodes")
@@ -30,6 +37,7 @@ class Shrinker:
             for institution in tqdm.tqdm(self.institutions):
                 self._replace_css(institution)
 
+    # Create a BS4 object of a file, remove any <style> results, and insert <link rel=stylesheet>
     def _replace_css(self, path):
         try:
             file = open(path, "r+")
