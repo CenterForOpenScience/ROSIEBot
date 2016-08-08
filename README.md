@@ -144,13 +144,6 @@ Verify the completeness of the mirror. See below for steps. This process also re
 
 -----------
 
-### Acknowledgements:
-
-Chris Seto ( @chrisseto ) , Nan Chen ( @chennan47 ), Matt Frazier ( @mfraezz ), 
-
-and the COS Product Team.
-
------------
 
 
 ![logo alt](https://cloud.githubusercontent.com/assets/15851093/16454893/79287ad8-3de0-11e6-9080-b90ac6ea16d4.png "'Beep boop', says Rosie.")
