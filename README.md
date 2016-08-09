@@ -7,8 +7,8 @@ Crawling, enduring, facing,
 Despite childish fears!"  - Unknown')
 
 
-##### Static mirroring utility for the [Open Science Framework](osf.io), maintained by     the [Center for Open Science](cos.io).
-  Visit the [COS Github](https://github.com/CenterForOpenScience/) for more innovations in   the *openness*, *integrity*, and *reproducibility* of scientific research.
+##### Static mirroring utility for the [Open Science Framework](osf.io), maintained by the [Center for Open Science](cos.io).
+  Visit the [COS Github](https://github.com/CenterForOpenScience/) for more innovations in the *openness*, *integrity*, and *reproducibility* of scientific research.
 
 ## Installation
 
@@ -17,14 +17,14 @@ This software requires Python 3.5 for the aiohttp library. If desired, create a 
 ##### From scratch:
 
 `pip install virtualenv`
+
 `pip install virtualenvwrapper`
 
 ##### Create virtualenv 'rosie':
 
 `mkvirtualenv rosie --python=python3.5`
 
-##### Switch into the rosie environment for the first time:
-
+##### Switch into the rosie environment for the first time: 
 `workon rosie`
 
 ##### Clone the repository into your development folder:
@@ -32,7 +32,7 @@ This software requires Python 3.5 for the aiohttp library. If desired, create a 
 
 Navigate into the new folder ( `cd ROSIEBot` )
 
-`pip install -r requirements.txt` to install dependency libraries.
+`pip install -r requirements.txt` to install dependency libraries in the virtualenv.
 
 ##### Enter/exit the virtual environment:
 
@@ -41,78 +41,62 @@ Navigate into the new folder ( `cd ROSIEBot` )
 
 ## ROSIEisms
 
-##### Site Hierarchy
-|                   |                                                                   |
-|-------------------|-------------------------------------------------------------------|
-| Category          | An type of content hosted on the OSF, with its own GUID.          |
-| Page              | One of the pages associated with a type (see below)               |
-| File              | A page instance / specific URL                                    |
-
-
-##### OSF Content Categories
-
-- Projects
-- Registrations
-- Users
-- Institutions
-
-##### Pages for each type
+##### OSF Pages by Category
 
 | Project       | Registration | User    | Institution |
 |---------------|--------------|---------|-------------|
-|Dashboard      | Dashboard    | Profile | Profile     |
+|Dashboard      | Dashboard    | Profile | Dashboard   |
 | Files         | Files        |
 | Wiki          | Wiki         |
 | Analytics     | Analytics    |
 | Registrations |              |
 | Forks         | Forks        |
 
-For projects and registration categories, the catchy acronym `DFWARF` (Dashboard, files, wiki, analytics, registrations, forks) lists the correct page order.
+
 
 ##### Our Process
 - Crawling: getting lists of all the URLs to visit
-
-
 - Scraping: visiting all those URLs and saving their content to the mirror
-
-
 - Resuming: continuing the crawl/scrape process if it stops in the middle
-
-
 - Verifying: making sure all the files are present and in acceptable condition
+- Compiling active: getting a list from the API about existing pages
 
 
 ## Using the Command Line Interface
 
-There are various options for what areas of the OSF are preserved in a mirror. All or any content types can be included in the mirror, and all or any project pages can be included. Specifying pages of registrations is not available.
-
 ### Running cli.py
 
-The python file cli.py needs to be run in the command line in the rosie virtualenv. This project was developed on Mac, so Terminal on OS X is preferred. 
+The python file cli.py needs to be run in the command line in the rosie virtualenv. This project is optimized for Mac. 
 
-How to start a command:
+Every command consists of the following and the flag for one mode:
 
-```bash
+```
 python cli.py
 ```
 
-See `python cli.py --help` for some usage assistance.
+See `python cli.py --help` for some further usage assistance.
 
-### Flags:
+### Mode flags:
 
-**`--compile_active`**
+#### `--compile_active`
 
 Make a taskfile of all the currently active pages on the OSF. This is useful primarily for --delete, which requires such a file to remove no-longer-existant pages from the mirror.
 
-`python cli.py --compile_active`
 
-**`--scrape`**
+####`--scrape`
 
-Crawl and scrape the site. Must include date marker `--dm=<DATE>`, where `<DATE>` is the date of last scrape in the form **YYYY-MM-DDTHH:MM:SS.000**, ex. 1970-06-15T00:00:00.000
+Crawl and scrape the site. Must include date marker `--dm=<DATE>`, where `<DATE>` is the date of last scrape in the form **YYYY-MM-DDTHH:MM:SS.000**, eg. 1970-06-15T00:00:00.000
 
-This is where specifying `--nodes` (projects), `--registrations`, `--users`, `--institutions` is necessary.
+One must specify which categories to scrape:
 
-When projects are included, the following flags may be used to include project pages:
+- `--nodes` (projects)
+- `--registrations`
+- `--users`
+- `--institutions` 
+
+ Any or all can be added.
+
+If the nodes flag is used, one must specify which project pages to include:
 
 - `-d` : dashboard
 - `-f` : files page
@@ -121,21 +105,15 @@ When projects are included, the following flags may be used to include project p
 - `-r` : list of registrations of the project
 - `-k`: list of forks of the project
 
-**`--resume`**
+#### `--resume`
 
 Pick up where a normal process left off in case of an unfortunate halt. The normal process creates and updates a .json task file with its status, and this must be included with the flag `--tf=<FILENAME>`. The filename will be of the form **YYYYMMDDHHMM.json** and should be visible in the ROSIEBot directory. 
 
-**`--verify`**
+#### `--verify`
 
 Verify the completeness of the mirror. See below for steps. This process also requires a .json file in the form described in the resume step, and `--rn=<INT>`, where `<INT>` is the desired number of retries. 
 
-** `--delete`**
-
-Remove anything inside a category folder that isn't listed on the API. Requires a compile_active-produced taskfile.
-
-`python cli.py --delete --ctf=<TASKFILE>`
-
-## Verification Steps
+##### Verification Steps
 
 1. Verify that each URL found by the crawler has a corresponding file on the mirror.
 
@@ -143,23 +121,44 @@ Remove anything inside a category folder that isn't listed on the API. Requires 
 2. Compare the size of each file to the minimum possible size for a complete page.
 
 
-3. Check that certain spots in each file that contain important information are present.
+3. Rescrape failed pages and try again.
+
+####  `--delete`
+
+Remove anything inside a category folder that isn't listed on the API. Requires a compile_active-produced taskfile.
+
+`python cli.py --delete --ctf=<TASKFILE>`
+
+#### `--index`
+
+Creates a search engine index. 
+
+**Note**: Do not run until the static folder is in place in the archive.
 
 
-4. Rescrape failed pages and try again.
+## Hosting a Mirror
 
-## Hosting a Mirror (Future)
-- Mirror search tools
-- Nginx configurations
+Scraped pages require a static folder inside the mirror. Please get a fresh copy from the OSF repo and place directly inside archive/.
+
+Once static is in place, run `cp search/lunr.js archive/static/js/lunr.js` and `cp search/search.html archive/search.html` to set up search. Run the indexer at this point.
+
+
+### Simple local server setup
+Run ``php -S localhost:8888 -t `pwd`/archive `` from the ROSIEBot root. [Here is your mirror.](http://localhost:8888)
+
+### Packaging the archive
+
+`zip -r archive.zip archive/` 
+
 
 ## Authenticating your mirror
-- The mirror warns users that they are on a static copy of the OSF.
-- Sign up with the Center for Open Science to be an official mirror (Future)
+
+(Future)
 
 
 -----------
 
-[How to set up prerender](prerender.md)
+# [How to set up prerender](prerender.md) for a local OSF
 
 -----------
 
