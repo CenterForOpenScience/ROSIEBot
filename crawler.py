@@ -112,6 +112,13 @@ class Crawler:
                                    str(self.date_modified_marker))
 
     async def _wait_with_progress_bar(self, tasks):
+        """
+        Wrapper method for running a list of async tasks and know the progress from progressbar.
+        To use this method, simply pass a list of Task object and run_until_complete(_wait_with_progress_bar(list)).
+        Task objects could be obtained by calling asyncio.ensure_future() or other asyncio method that returns
+        a Task object.
+        :param tasks: List of async task
+        """
         for task in tqdm.tqdm(tasks, total=len(tasks)):
             await task
 
@@ -348,7 +355,7 @@ class Crawler:
                            wiki=False, analytics=False, registrations=False, forks=False):
         """
         Called by the CLI explicitly to generate a list of self.node_urls form self.node_url_tuples.
-        If wiki=True or all_pages=True, invoke crawl_node_wiki() to find all the wiki pages of the nodes and add urls
+        If wiki=True , invoke crawl_node_wiki() to find all the wiki pages of the nodes and add urls
         to self.node_urls
 
         :param dashboard: whether to scrape node dashboard page
@@ -573,7 +580,7 @@ class Crawler:
     # TODO Make semaphore value a parameter
     def _scrape_pages(self, aspect_list):
         """
-        Runner method that runs scrape_url()
+        Runner method that runs scrape_url() through _wait_with_progress_bar() wrapper
         :param aspect_list: list of url of pages to scrape
         """
         sem = asyncio.BoundedSemaphore(value=5)
@@ -591,9 +598,9 @@ class Crawler:
     async def scrape_url(self, url, sem):
         """
         Asynchronous method that scrape page. Calls save_html() to save scraped page to file.
-        Calls record_milestone() to save progress
+        Calls record_milestone() to save current progress to JSON task file specified through the CLI.
         :param url: url to scrape
-        :param sem: rate limitin semaaphore.
+        :param sem: rate limiting semaphore.
         :return:
         """
         async with sem:
