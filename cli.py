@@ -8,6 +8,7 @@ import deleter
 
 # Endpoint for using the ROSIEBot module via command line.
 
+
 @click.command()
 # Specify parameters that choose between different modes
 @click.option('--compile_active', is_flag=True, help="Compile a list of active nodes")

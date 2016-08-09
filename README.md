@@ -88,13 +88,23 @@ There are various options for what areas of the OSF are preserved in a mirror. A
 
 ### Running cli.py
 
-The python file cli.py needs to be run in the command line. This project was developed on Mac, so Terminal on OS X is preferred. 
+The python file cli.py needs to be run in the command line in the rosie virtualenv. This project was developed on Mac, so Terminal on OS X is preferred. 
+
+How to start a command:
 
 ```bash
 python cli.py
 ```
 
-Flags:
+See `python cli.py --help` for some usage assistance.
+
+### Flags:
+
+**`--compile_active`**
+
+Make a taskfile of all the currently active pages on the OSF. This is useful primarily for --delete, which requires such a file to remove no-longer-existant pages from the mirror.
+
+`python cli.py --compile_active`
 
 **`--scrape`**
 
@@ -119,6 +129,11 @@ Pick up where a normal process left off in case of an unfortunate halt. The norm
 
 Verify the completeness of the mirror. See below for steps. This process also requires a .json file in the form described in the resume step, and `--rn=<INT>`, where `<INT>` is the desired number of retries. 
 
+** `--delete`**
+
+Remove anything inside a category folder that isn't listed on the API. Requires a compile_active-produced taskfile.
+
+`python cli.py --delete --ctf=<TASKFILE>`
 
 ## Verification Steps
 
@@ -144,6 +159,9 @@ Verify the completeness of the mirror. See below for steps. This process also re
 
 -----------
 
+[How to set up prerender](prerender.md)
+
+-----------
 
 
 ![logo alt](https://cloud.githubusercontent.com/assets/15851093/16454893/79287ad8-3de0-11e6-9080-b90ac6ea16d4.png "'Beep boop', says Rosie.")
