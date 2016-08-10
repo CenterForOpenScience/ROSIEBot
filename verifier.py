@@ -4,7 +4,6 @@ from pages import ProjectDashboardPage, ProjectFilesPage, ProjectAnalyticsPage, 
     ProjectForksPage, ProjectRegistrationsPage, ProjectWikiPage, RegistrationDashboardPage, RegistrationFilesPage, \
     RegistrationAnalyticsPage, RegistrationForksPage, RegistrationWikiPage, UserProfilePage, InstitutionDashboardPage
 from crawler import Crawler
-import bs4
 
 
 # Verifier superclass
