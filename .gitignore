@@ -1,7 +1,8 @@
 # General business
 .idea/
 __pycache__/
-.env
+.env/
+.venv/
 
 # Mirror folders
 localhost:70/
