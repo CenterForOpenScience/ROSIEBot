@@ -1,6 +1,5 @@
 import unittest
 from crawler import Crawler
-import urllib
 import datetime
 
 d = datetime.datetime.fromtimestamp(0)
@@ -23,7 +22,7 @@ class test_crawler(unittest.TestCase):
         self.assertEqual(len(l1), 0)
         self.assertGreater(len(l2), len(l1))
         self.assertNotEqual(l1, l2)
-        for x in range(0,len(l2)-1):
+        for x in range(0, len(l2)-1):
             self.assertLess(c.node_url_tuples[x][1], c.node_url_tuples[x+1][1])
         for t in c.node_url_tuples:
             self.assertTrue(is_valid_url(t[0]))

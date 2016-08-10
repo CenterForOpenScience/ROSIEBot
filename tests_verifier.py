@@ -3,13 +3,15 @@ from verifier import Verifier
 import verifier
 import unittest
 # Verification tests
-import json, codecs
+import json
+import codecs
 
 TASK_FILE = '201606231548.json'
 with codecs.open(TASK_FILE, mode='r', encoding='utf-8') as file:
     run_info = json.load(file)
 
 v = Verifier()
+
 
 class TestVerifer(unittest.TestCase):
     def test_handle_errors(self):
@@ -26,8 +28,6 @@ class TestVerifer(unittest.TestCase):
     def test_generate_page_dictionary(self):
         d1 = v.generate_page_dictionary('wiki/')
         self.assertGreater(len(d1), 0)
-
-
 
 
 if __name__ == '__main__':

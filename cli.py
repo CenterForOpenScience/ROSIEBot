@@ -6,6 +6,9 @@ import codecs
 import verifier
 import deleter
 
+# Endpoint for using the ROSIEBot module via command line.
+
+
 @click.command()
 # Specify parameters that choose between different modes
 @click.option('--compile_active', is_flag=True, help="Compile a list of active nodes")
@@ -41,7 +44,7 @@ def cli_entry_point(scrape, resume, verify, resume_verify, compile_active, delet
         return
 
     if not scrape and not resume and not verify and not resume_verify and not compile_active and not delete:
-        click.echo('You have to choose a mode to run')
+        click.echo('You have to choose a mode to run. Try --help')
 
     if compile_active:
         now = datetime.datetime.now()
@@ -50,6 +53,8 @@ def cli_entry_point(scrape, resume, verify, resume_verify, compile_active, delet
         click.echo('Creating a active node list file named : ' + filename)
         with open(filename, 'w') as file:
             compile_active_list(file)
+        click.echo("Finished compilation. Taskfile is: " + filename)
+        click.echo("Use `python cli.py --delete --ctf={}` to remove former pages on the OSF.".format(filename))
         return
 
     if scrape:
@@ -60,8 +65,9 @@ def cli_entry_point(scrape, resume, verify, resume_verify, compile_active, delet
         filename = now.strftime('%Y%m%d%H%M' + '.json')
         click.echo('Creating a task file named : ' + filename)
         with open(filename, 'w') as db:
-            normal_scrape(dm, registrations, users, institutions, nodes, d, f, w, a, r, k, db)
+            begin_scrape(dm, registrations, users, institutions, nodes, d, f, w, a, r, k, db)
         click.echo("Finished scrape. Taskfile is: " + filename)
+        click.echo("Use `python cli.py --verify --tf={}` to fix any missing or incomplete pages".format(filename))
         return
 
     if resume and tf is None:
@@ -105,6 +111,7 @@ def cli_entry_point(scrape, resume, verify, resume_verify, compile_active, delet
     return
 
 
+# Crawl the API for all the currently-existing pages and produce a JSON taskfile
 def compile_active_list(file):
     dict = {}
     rosie = crawler.Crawler()
@@ -120,10 +127,10 @@ def compile_active_list(file):
     json.dump(dict, file, indent=4)
 
 
-def normal_scrape(dm,
-                  scrape_registrations, scrape_users, scrape_institutions, scrape_nodes,
-                  include_dashboard, include_files, include_wiki, include_analytics, include_registrations,
-                  include_forks, db):
+def begin_scrape(dm,
+                 scrape_registrations, scrape_users, scrape_institutions, scrape_nodes,
+                 include_dashboard, include_files, include_wiki, include_analytics, include_registrations,
+                 include_forks, db):
 
     date_marker = None
     if '.' in dm:
