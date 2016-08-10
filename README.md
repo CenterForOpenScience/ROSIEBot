@@ -62,6 +62,7 @@ Navigate into the new folder ( `cd ROSIEBot` )
 - Resuming: continuing the crawl/scrape process if it stops in the middle
 - Verifying: making sure all the files are present and in acceptable condition
 - Compiling active: getting a list from the API about existing pages
+- Shrinking: reducing size of the mirror by removing redundant CSS
 
 
 ## Using the Command Line Interface
@@ -130,6 +131,12 @@ Verify the completeness of the mirror. See below for steps. This process also re
 Remove anything inside a category folder that isn't listed on the API. Requires a compile_active-produced taskfile.
 
 `python cli.py --delete --ctf=<TASKFILE>`
+
+#### `--shrink`
+
+Remove redundant CSS from the files and replace it with a link to a consolidated file in the static folder. Requires the `--tf=` flag.
+
+To create the consolidated CSS file, run `python -m scripts.update_css`. This is required!
 
 #### `--index`
 
