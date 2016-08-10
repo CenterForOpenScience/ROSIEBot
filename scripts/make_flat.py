@@ -1,8 +1,9 @@
+#!/bin/python
 """
 Make the organization of the mirror flat so that relative URLs cooperate
 archive/project/mst3k -> archive/mst3k
 
-:param in CLI: folder to flatten
+:param 1 in CLI: folder to flatten
 """
 import os
 import shutil

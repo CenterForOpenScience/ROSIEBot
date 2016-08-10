@@ -1,4 +1,5 @@
 #!/bin/bash
+# Create a flat archive (so relative links work) and host it with a php server
 # Params: <port> default 8888
 
 port=${1-8888}
