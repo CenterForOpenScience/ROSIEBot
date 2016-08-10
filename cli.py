@@ -8,6 +8,9 @@ import deleter
 import shrinker
 import os
 
+# Endpoint for using the ROSIEBot module via command line.
+
+
 @click.command()
 # Specify parameters that choose between different modes
 @click.option('--compile_active', is_flag=True, help="Compile a list of active nodes")
@@ -16,14 +19,13 @@ import os
 @click.option('--verify', is_flag=True, help="Verify the existing OSF static mirror, need to import task file")
 @click.option('--resume_verify', is_flag=True, help="Resume verification of the existing OSF static mirror, need to "
                                                     "import task file")
-@click.option('--delete', is_flag=True, help="Delete nodes from the mirror that have been deleted by users")
+@click.option('--delete', is_flag=True, help="Delete nodes from the mirror that have been deleted by users. Requires "
+                                             "compile_active-produced active-node taskfile")
 @click.option('--shrink', is_flag=True, help="Reduce the mirror size by eliminating redundant CSS, need to import task file")
 # Specify parameters for other needed values
 @click.option('--dm', default=None, type=click.STRING, help="Date marker needed for normal scrape")
 @click.option('--tf', default=None, type=click.STRING, help="filename of the task file")
 @click.option('--rn', default=3, type=click.INT, help="Number of times to retry")
-@click.option('--ptf', default=None, type=click.STRING, help="json file generated from compile_active of previously "
-                                                             "active nodes")
 @click.option('--ctf', default=None, type=click.STRING, help="json file generated from compile_active of currently "
                                                              "active nodes")
 # Specify areas of scraping
@@ -40,13 +42,9 @@ import os
 @click.option('-k', is_flag=True, help="Add this flag if you want to include forks page for nodes")
 def cli_entry_point(scrape, resume, verify, resume_verify, compile_active, delete, shrink, dm, tf, rn, ptf, ctf, registrations, users,
                     institutions, nodes, d, f, w, a, r, k):
-    if scrape and resume and verify and compile_active:
-        click.echo('Invalid parameters.')
-        return
-
-    if not scrape and not resume and not verify and not resume_verify and not compile_active and not delete and not shrink:
-        click.echo('You have to choose a mode to run')
-        return
+    # Check to see if more than one option is chosen.
+    if sum(map(bool, [scrape, resume, verify, resume_verify, compile_active, delete])) != 1:
+        click.echo("Invalid options. Please select only one mode.")
 
     if (resume or verify or resume_verify or shrink) and tf is None:
         click.echo("This mode requires a task file in the form: --tf=<FILENAME>")
@@ -59,18 +57,21 @@ def cli_entry_point(scrape, resume, verify, resume_verify, compile_active, delet
         click.echo('Creating a active node list file named : ' + filename)
         with open(filename, 'w') as file:
             compile_active_list(file)
+        click.echo("Finished compilation. Taskfile is: " + filename)
+        click.echo("Use `python cli.py --delete --ctf={}` to remove former pages on the OSF.".format(filename))
         return
 
     if scrape:
         if dm is None:
-            dm = datetime.datetime.strptime('1970-01-01T00:00:00', "%Y-%m-%dT%H:%M:%S")
+            dm = '1970-01-01T00:00:00'
         click.echo('Starting normal scrape with date marker set to : ' + dm)
         now = datetime.datetime.now()
         filename = now.strftime('%Y%m%d%H%M' + '.json')
         click.echo('Creating a task file named : ' + filename)
         with open(filename, 'w') as db:
-            normal_scrape(dm, registrations, users, institutions, nodes, d, f, w, a, r, k, db)
+            begin_scrape(dm, registrations, users, institutions, nodes, d, f, w, a, r, k, db)
         click.echo("Finished scrape. Taskfile is: " + filename)
+        click.echo("Use `python cli.py --verify --tf={}` to fix any missing or incomplete pages".format(filename))
         return
 
     if resume:
@@ -96,9 +97,9 @@ def cli_entry_point(scrape, resume, verify, resume_verify, compile_active, delet
             click.echo('File Not Found for the task.')
         return
 
-    if delete and ptf is not None and ctf is not None:
+    if delete and ctf is not None:
         try:
-            delete_nodes(ptf, ctf)
+            delete_nodes(ctf)
         except FileNotFoundError:
             click.echo("Either the json file of previously active nodes was not found or the json file of currently "
                        "active nodes was not found.")
@@ -111,7 +112,12 @@ def cli_entry_point(scrape, resume, verify, resume_verify, compile_active, delet
     return
 
 
+# Crawl the API for all the currently-existing pages and produce a JSON taskfile
 def compile_active_list(file):
+    """
+    Compiles an list of active nodes, users and registrations for the purpose of deletion.
+    :param file: The file descriptor to which the list is stored
+    """
     dict = {}
     rosie = crawler.Crawler()
     rosie.crawl_nodes_api()
@@ -126,10 +132,25 @@ def compile_active_list(file):
     json.dump(dict, file, indent=4)
 
 
-def normal_scrape(dm,
+def begin_scrape(dm,
                   scrape_registrations, scrape_users, scrape_institutions, scrape_nodes,
                   include_dashboard, include_files, include_wiki, include_analytics, include_registrations,
                   include_forks, db):
+    """
+    Do a normal scrape with specified parameters.
+    :param dm: Date modified marker of the scrape. Only nodes that are modified after this marker would be scraped
+    :param scrape_registrations: Whether to scrape registrations
+    :param scrape_users: Whether to scrape users
+    :param scrape_institutions: Whether to scrape institutions
+    :param scrape_nodes: Whether to scrape nodes (projects)
+    :param include_dashboard: Whether to include dashboard for nodes
+    :param include_files: Whether to include files page for nodes
+    :param include_wiki: Whether to include wiki page for nodes
+    :param include_analytics: Whether to include analytics page for nodes
+    :param include_registrations: Whether to include registrations page for nodes
+    :param include_forks: Whether to include forks page for nodes
+    :param db: The dictionary object to which the task information is stored
+    """
 
     date_marker = None
     if '.' in dm:
@@ -166,17 +187,12 @@ def normal_scrape(dm,
     # Crawling the respective API for this scrape
     if scrape_nodes:
         rosie.crawl_nodes_api()
-        if include_dashboard and include_files and include_analytics and \
-                include_forks and include_registrations and include_wiki:
-            rosie.generate_node_urls(all_pages=True)
-        else:
-            rosie.generate_node_urls(all_pages=False,
-                                     dashboard=include_dashboard,
-                                     files=include_files,
-                                     wiki=include_wiki,
-                                     analytics=include_analytics,
-                                     registrations=include_registrations,
-                                     forks=include_forks)
+        rosie.generate_node_urls(dashboard=include_dashboard,
+                                 files=include_files,
+                                 wiki=include_wiki,
+                                 analytics=include_analytics,
+                                 registrations=include_registrations,
+                                 forks=include_forks)
         store['node_urls'] = rosie.node_urls
 
     if scrape_registrations:
@@ -238,6 +254,11 @@ def normal_scrape(dm,
 
 
 def resume_scrape(db, tf):
+    """
+    Resume a unfinished scrape. Need to import a task file
+    :param db: Dictionary object to which the task information is stored
+    :param tf: File descriptor for the task file
+    """
     store = json.load(db)
     db.close()
 
@@ -318,11 +339,21 @@ def resume_scrape(db, tf):
 
 
 def verify_mirror(tf, rn):
+    """
+    To verify a scraped mirror. Need to import task file.
+    :param tf: File descriptor of the task file
+    :param rn: Number of retry times
+    """
     for i in range(rn):
         verifier.main(tf, i)
 
 
 def resume_verify_mirror(tf, rn):
+    """
+    Resume the verifying and rescraping process, neeed to import task file
+    :param tf: File descriptor of the task file
+    :param rn: Number of times of rretry
+    """
     with codecs.open(tf, mode='r', encoding='utf-8') as failure_file:
         run_info = json.load(failure_file)
     if run_info['1st_verification_finished']:
@@ -333,17 +364,13 @@ def resume_verify_mirror(tf, rn):
             verifier.main(tf, i)
 
 
-def delete_nodes(ptf, ctf):
-    with codecs.open(ptf, mode='r', encoding='utf-8') as previous_tf:
-        previous_task_file = json.load(previous_tf)
-    with codecs.open(ctf, mode='r', encoding='utf-8') as current_tf:
-        current_task_file = json.load(current_tf)
-    deleter.run_deleter(previous_task_file['list_of_active_registrations'],
-                        current_task_file['list_of_active_registrations'])
-    deleter.run_deleter(previous_task_file['list_of_active_users'],
-                        current_task_file['list_of_active_users'])
-    deleter.run_deleter(previous_task_file['list_of_active_nodes'],
-                        current_task_file['list_of_active_nodes'])
+def delete_nodes(ctf):
+    """
+    Delete nodes according to trask file
+    :param ctf: File descriptor of the task ifle
+    """
+    macc = deleter.Deleter(ctf)
+    macc.run()
 
 
 def get_folder_size(folder):
