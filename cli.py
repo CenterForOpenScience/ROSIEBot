@@ -4,6 +4,7 @@ import crawler
 import json
 import codecs
 import verifier
+import deleter
 
 @click.command()
 # Specify parameters that choose between different modes
@@ -13,10 +14,14 @@ import verifier
 @click.option('--verify', is_flag=True, help="Verify the existing OSF static mirror, need to import task file")
 @click.option('--resume_verify', is_flag=True, help="Resume verification of the existing OSF static mirror, need to "
                                                     "import task file")
+@click.option('--delete', is_flag=True, help="Delete nodes from the mirror that have been deleted by users. Requires "
+                                             "'compile_active-produced active-node taskfile' ")
 # Specify parameters for other needed values
 @click.option('--dm', default=None, type=click.STRING, help="Date marker needed for normal scrape")
 @click.option('--tf', default=None, type=click.STRING, help="filename of the task file")
 @click.option('--rn', default=3, type=click.INT, help="Number of times to retry")
+@click.option('--ctf', default=None, type=click.STRING, help="json file generated from compile_active of currently "
+                                                             "active nodes")
 # Specify areas of scraping
 @click.option('--registrations', is_flag=True, help="Add this flag if you want to scrape for registrations")
 @click.option('--users', is_flag=True, help="Add this flag if you want to scrape for users")
@@ -29,14 +34,13 @@ import verifier
 @click.option('-a', is_flag=True, help="Add this flag if you want to include analytics page for nodes")
 @click.option('-r', is_flag=True, help="Add this flag if you want to include registrations page for nodes")
 @click.option('-k', is_flag=True, help="Add this flag if you want to include forks page for nodes")
-def cli_entry_point(scrape, resume, verify, resume_verify, compile_active, dm, tf, rn, registrations, users,
-                    institutions, nodes, d, f, w, a, r, k):
-    if scrape and resume and verify and compile_active:
-        click.echo('Invalid parameters.')
-        return
+def cli_entry_point(scrape, resume, verify, resume_verify, compile_active, delete, dm, tf, rn, ctf, registrations,
+                    users, institutions, nodes, d, f, w, a, r, k):
 
-    if not scrape and not resume and not verify and not resume_verify and not compile_active:
-        click.echo('You have to choose a mode to run')
+    # Check to see if more than one option is chosen.
+    if sum(map(bool, [scrape, resume, verify, resume_verify, compile_active, delete])) != 1:
+        click.echo("Invalid options. Please select only one mode.")
+        return
 
     if compile_active:
         now = datetime.datetime.now()
@@ -47,10 +51,9 @@ def cli_entry_point(scrape, resume, verify, resume_verify, compile_active, dm, t
             compile_active_list(file)
         return
 
-    if scrape and dm is None:
-        click.echo("Date marker needed for normal scrape")
-
-    if scrape and dm is not None:
+    if scrape:
+        if dm is None:
+            dm = '1970-01-01T00:00:00'
         click.echo('Starting normal scrape with date marker set to : ' + dm)
         now = datetime.datetime.now()
         filename = now.strftime('%Y%m%d%H%M' + '.json')
@@ -92,19 +95,29 @@ def cli_entry_point(scrape, resume, verify, resume_verify, compile_active, dm, t
             click.echo('File Not Found for the task.')
         return
 
+    if delete and ctf is not None:
+        try:
+            delete_nodes(ctf)
+        except FileNotFoundError:
+            click.echo("The json file of currently active nodes was not found.")
+
     return
 
 
 def compile_active_list(file):
+    """
+    Compiles an list of active nodes, users and registrations for the purpose of deletion.
+    :param file: The file descriptor to which the list is stored
+    """
     dict = {}
     rosie = crawler.Crawler()
-    rosie.crawl_nodes_api(page_limit=10)
+    rosie.crawl_nodes_api()
     list_of_active_nodes = [x[0].split('/')[4] for x in rosie.node_url_tuples]
     dict['list_of_active_nodes'] = list_of_active_nodes
-    rosie.crawl_users_api(page_limit=10)
+    rosie.crawl_users_api()
     list_of_active_users = [x.split('/')[4] for x in rosie.user_urls]
     dict['list_of_active_users'] = list_of_active_users
-    rosie.crawl_registrations_api(page_limit=10)
+    rosie.crawl_registrations_api()
     list_of_active_registrations = [x[0].split('/')[3] for x in rosie.registration_url_tuples]
     dict['list_of_active_registrations'] = list_of_active_registrations
     json.dump(dict, file, indent=4)
@@ -114,6 +127,21 @@ def normal_scrape(dm,
                   scrape_registrations, scrape_users, scrape_institutions, scrape_nodes,
                   include_dashboard, include_files, include_wiki, include_analytics, include_registrations,
                   include_forks, db):
+    """
+    Do a normal scrape with specified parameters.
+    :param dm: Date modified marker of the scrape. Only nodes that are modified after this marker would be scraped
+    :param scrape_registrations: Whether to scrape registrations
+    :param scrape_users: Whether to scrape users
+    :param scrape_institutions: Whether to scrape institutions
+    :param scrape_nodes: Whether to scrape nodes (projects)
+    :param include_dashboard: Whether to include dashboard for nodes
+    :param include_files: Whether to include files page for nodes
+    :param include_wiki: Whether to include wiki page for nodes
+    :param include_analytics: Whether to include analytics page for nodes
+    :param include_registrations: Whether to include registrations page for nodes
+    :param include_forks: Whether to include forks page for nodes
+    :param db: The dictionary object to which the task information is stored
+    """
 
     date_marker = None
     if '.' in dm:
@@ -121,49 +149,41 @@ def normal_scrape(dm,
     else:
         date_marker = datetime.datetime.strptime(dm, "%Y-%m-%dT%H:%M:%S")
 
-    if date_marker is None:
-        click.echo("Date marker is not specified or specified date marker cannot be parsed")
-        return
-
-    store = {}
-    store['scrape_registrations'] = scrape_registrations
-    store['scrape_users'] = scrape_users
-    store['scrape_institutions'] = scrape_institutions
-    store['scrape_nodes'] = scrape_nodes
-    store['include_dashboard'] = include_dashboard
-    store['include_files'] = include_files
-    store['include_wiki'] = include_wiki
-    store['include_analytics'] = include_analytics
-    store['include_registrations'] = include_registrations
-    store['include_forks'] = include_forks
-    store['nodes_finished'] = False
-    store['registrations_finished'] = False
-    store['users_finished'] = False
-    store['institutions_finished'] = False
-    store['scrape_finished'] = False
-    store['node_urls'] = None
-    store['registration_urls'] = None
-    store['user_urls'] = None
-    store['institution_urls'] = None
-    store['error_list'] = None
-    store['milestone'] = None
+    store = {
+        'scrape_registrations': scrape_registrations,
+        'scrape_users': scrape_users,
+        'scrape_institutions': scrape_institutions,
+        'scrape_nodes': scrape_nodes,
+        'include_dashboard': include_dashboard,
+        'include_files': include_files,
+        'include_wiki': include_wiki,
+        'include_analytics': include_analytics,
+        'include_registrations': include_registrations,
+        'include_forks': include_forks,
+        'nodes_finished': False,
+        'registrations_finished': False,
+        'users_finished': False,
+        'institutions_finished': False,
+        'scrape_finished': False,
+        'node_urls': None,
+        'registration_urls': None,
+        'user_urls': None,
+        'institution_urls': None,
+        'error_list': None,
+        'milestone': None
+    }
 
     rosie = crawler.Crawler(date_modified=date_marker, db=db, dictionary=store)
 
     # Crawling the respective API for this scrape
     if scrape_nodes:
         rosie.crawl_nodes_api()
-        if include_dashboard and include_files and include_analytics and \
-                include_forks and include_registrations and include_wiki:
-            rosie.generate_node_urls(all_pages=True)
-        else:
-            rosie.generate_node_urls(all_pages=False,
-                                     dashboard=include_dashboard,
-                                     files=include_files,
-                                     wiki=include_wiki,
-                                     analytics=include_analytics,
-                                     registrations=include_registrations,
-                                     forks=include_forks)
+        rosie.generate_node_urls(dashboard=include_dashboard,
+                                 files=include_files,
+                                 wiki=include_wiki,
+                                 analytics=include_analytics,
+                                 registrations=include_registrations,
+                                 forks=include_forks)
         store['node_urls'] = rosie.node_urls
 
     if scrape_registrations:
@@ -225,6 +245,11 @@ def normal_scrape(dm,
 
 
 def resume_scrape(db, tf):
+    """
+    Resume a unfinished scrape. Need to import a task file
+    :param db: Dictionary object to which the task information is stored
+    :param tf: File descriptor for the task file
+    """
     store = json.load(db)
     db.close()
 
@@ -305,11 +330,38 @@ def resume_scrape(db, tf):
 
 
 def verify_mirror(tf, rn):
-    verifier.main(tf, rn)
+    """
+    To verify a scraped mirror. Need to import task file.
+    :param tf: File descriptor of the task file
+    :param rn: Number of retry times
+    """
+    for i in range(rn):
+        verifier.main(tf, i)
 
 
 def resume_verify_mirror(tf, rn):
-    verifier.resume_verification(tf, rn)
+    """
+    Resume the verifying and rescraping process, neeed to import task file
+    :param tf: File descriptor of the task file
+    :param rn: Number of times of rretry
+    """
+    with codecs.open(tf, mode='r', encoding='utf-8') as failure_file:
+        run_info = json.load(failure_file)
+    if run_info['1st_verification_finished']:
+        for i in range(rn):
+            verifier.resume_verification(tf)
+    else:
+        for i in range(rn):
+            verifier.main(tf, i)
+
+
+def delete_nodes(ctf):
+    """
+    Delete nodes according to trask file
+    :param ctf: File descriptor of the task ifle
+    """
+    macc = deleter.Deleter(ctf)
+    macc.run()
 
 if __name__ == '__main__':
     cli_entry_point()

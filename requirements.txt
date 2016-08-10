@@ -5,3 +5,4 @@ bs4==0.0.1
 chardet==2.3.0
 click==6.6
 requests==2.10.0
+tqdm==4.8.1

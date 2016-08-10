@@ -58,9 +58,9 @@ class Crawler:
         self.registration_urls = []
         # Stores all the urls for user profile pages
         self.user_urls = []  # User profile page ("osf.io/profile/mst3k/")
-        # Stores all the urls for institutions
+        #  Stores all the urls for institutions
         self.institution_urls = [self.http_base]  # Institution page ("osf.io/institution/cos")
-        # General pages
+        #  General pages
         self.general_urls = [self.http_base, self.http_base + 'support/']
         # List of 504s:
         self.error_list = []
@@ -112,6 +112,13 @@ class Crawler:
                                    str(self.date_modified_marker))
 
     async def _wait_with_progress_bar(self, tasks):
+        """
+        Wrapper method for running a list of async tasks and know the progress from progressbar.
+        To use this method, simply pass a list of Task object and run_until_complete(_wait_with_progress_bar(list)).
+        Task objects could be obtained by calling asyncio.ensure_future() or other asyncio method that returns
+        a Task object.
+        :param tasks: List of async task
+        """
         for task in tqdm.tqdm(tasks, total=len(tasks)):
             await task
 
@@ -123,8 +130,10 @@ class Crawler:
         according to self.date_modified_marker.
         :param page_limit: Number of pages of API to crawl. If page_limit=0, then crawl all pages.
         """
-        self.debug_logger.info("Start crawling nodes API pages")
         sem = asyncio.BoundedSemaphore(value=10)
+
+        self.debug_logger.info("\nStart crawling nodes API pages")
+
         # Request number of pages in nodes API
         with requests.Session() as s:
             response = s.get(self.api_base + 'nodes/' + '?filter[date_modified][gte]=' + self.date_modified_marker.isoformat(sep='T'))
@@ -156,6 +165,8 @@ class Crawler:
         # Setting a semaphore for rate limiting
         sem = asyncio.BoundedSemaphore(value=10)
 
+        self.debug_logger.info("\nStart crawling registrations API pages")
+
         # Request number of pages in nodes API
         with requests.Session() as s:
             response = s.get(self.api_base + 'registrations/')
@@ -186,6 +197,8 @@ class Crawler:
         # Setting a semaphore for rate limiting
         sem = asyncio.BoundedSemaphore(value=10)
 
+        self.debug_logger.info("\nStart crawling users API pages")
+
         # Request number of pages in nodes API
         with requests.Session() as s:
             response = s.get(self.api_base + 'users/')
@@ -200,6 +213,7 @@ class Crawler:
                 sem
             )))
         loop = asyncio.get_event_loop()
+
         loop.run_until_complete(self._wait_with_progress_bar(tasks))
         self.debug_logger.info("Finished crawling user API pages")
 
@@ -211,6 +225,8 @@ class Crawler:
         self.debug_logger.info("Start crawling institution API pages")
         # Setting a semaphore for rate limiting
         sem = asyncio.BoundedSemaphore(value=10)
+
+        self.debug_logger.info('\nStart crawling institution API pages')
 
         # Request number of pages in nodes API
         with requests.Session() as s:
@@ -335,14 +351,13 @@ class Crawler:
 
 # Generating URLs for Nodes and Registrations
 
-    def generate_node_urls(self, all_pages=True, dashboard=False, files=False,
+    def generate_node_urls(self, dashboard=False, files=False,
                            wiki=False, analytics=False, registrations=False, forks=False):
         """
         Called by the CLI explicitly to generate a list of self.node_urls form self.node_url_tuples.
-        If wiki=True or all_pages=True, invoke crawl_node_wiki() to find all the wiki pages of the nodes and add urls
+        If wiki=True , invoke crawl_node_wiki() to find all the wiki pages of the nodes and add urls
         to self.node_urls
 
-        :param all_pages: whether to scrape all pages of a node
         :param dashboard: whether to scrape node dashboard page
         :param files: whether to scrape node files page
         :param wiki: whether to scrape node wiki page
@@ -351,37 +366,35 @@ class Crawler:
         :param forks: whether to scrape node forks page
         """
 
-        if all_pages or wiki:
+        if wiki:
             self.crawl_node_wiki()
 
         self.debug_logger.info("Generating node urls")
-        self.debug_logger.info(" all_pages = " + str(all_pages) +
-                               " dashboard = " + str(dashboard) +
+        self.debug_logger.info(" dashboard = " + str(dashboard) +
                                " files = " + str(files) +
                                " wiki = " + str(wiki) +
                                " analytics = " + str(analytics) +
                                " registrations = " + str(registrations) +
-                               " forks = " + str(forks)
-                               )
+                               " forks = " + str(forks))
 
         url_list = [x[0] for x in self.node_url_tuples]
 
         for base_url in url_list:
-            if all_pages or dashboard:
+            if dashboard:
                 self.node_urls.append(base_url)
-            if all_pages or files:
+            if files:
                 self.node_urls.append(base_url + 'files/')
-            if all_pages or wiki:
+            if wiki:
                 wiki_name_list = self._node_wikis_by_parent_guid[base_url.strip("/").split("/")[-1]]
                 wiki_url_list = [base_url + 'wiki/' + x + '/' for x in wiki_name_list]
                 self.node_urls += wiki_url_list
 
                 # the strip split -1 bit returns the last section of the base_url, which is the GUId
-            if all_pages or analytics:
+            if analytics:
                 self.node_urls.append(base_url + 'analytics/')
-            if all_pages or registrations:
+            if registrations:
                 self.node_urls.append(base_url + 'registrations/')
-            if all_pages or forks:
+            if forks:
                 self.node_urls.append(base_url + 'forks/')
 
     def generate_registration_urls(self, all_pages=True, dashboard=False, files=False,
@@ -435,6 +448,9 @@ class Crawler:
         self.debug_logger.info("Start crawling node wiki API pages")
         tasks = []
         sem = asyncio.BoundedSemaphore(value=5)
+
+        self.debug_logger.info("\nCrawling node wiki API pages")
+
         for node_url in [x[0] for x in self.node_url_tuples]:
             tasks.append(asyncio.ensure_future(self.get_node_wiki_names(node_url.strip('/').split('/')[-1], sem)))
         loop = asyncio.get_event_loop()
@@ -472,6 +488,10 @@ class Crawler:
         self.debug_logger.info("Start crawling registration wiki API pages")
         tasks = []
         sem = asyncio.BoundedSemaphore(value=5)
+
+        self.debug_logger.info("\nCrawling registration wiki API pages")
+
+
         for node_url in [x[0] for x in self.registration_url_tuples]:
             tasks.append(asyncio.ensure_future(self.get_registration_wiki_names(node_url.strip('/').split('/')[-1], sem)))
         loop = asyncio.get_event_loop()
@@ -560,7 +580,7 @@ class Crawler:
     # TODO Make semaphore value a parameter
     def _scrape_pages(self, aspect_list):
         """
-        Runner method that runs scrape_url()
+        Runner method that runs scrape_url() through _wait_with_progress_bar() wrapper
         :param aspect_list: list of url of pages to scrape
         """
         sem = asyncio.BoundedSemaphore(value=5)
@@ -570,6 +590,7 @@ class Crawler:
 
         loop = asyncio.get_event_loop()
         if len(tasks) > 0:
+            self.debug_logger.info("\nScraping pages")
             loop.run_until_complete(self._wait_with_progress_bar(tasks))
         else:
             self.debug_logger.info("No pages to scrape")
@@ -577,9 +598,9 @@ class Crawler:
     async def scrape_url(self, url, sem):
         """
         Asynchronous method that scrape page. Calls save_html() to save scraped page to file.
-        Calls record_milestone() to save progress
+        Calls record_milestone() to save current progress to JSON task file specified through the CLI.
         :param url: url to scrape
-        :param sem: rate limitin semaaphore.
+        :param sem: rate limiting semaphore.
         :return:
         """
         async with sem:
@@ -617,12 +638,13 @@ class Crawler:
 # TODO add timestamp to pages scraped
 def save_html(html, page):
     # Mirror warning
+    today = datetime.datetime.today().strftime("%B %d, %Y at %I:%M %p")
     mirror_warning = """
         <div style="position:fixed;    bottom:0;left:0;    border-top-right-radius: 8px;    color:  white;
         background-color: red;  padding: .5em;">
-            This is a read-only mirror of the OSF. Some features may not be available.
+            This page is a read-only mirror of the OSF saved on {}. Some features may not be available.
         </div>
-        """
+        """.format(today)
 
     # Remove the footer
     old_footer = """<div id="footerSlideIn" style="display: block;">"""
@@ -630,7 +652,13 @@ def save_html(html, page):
 
     page = page.split('//', 1)[1]
     page = page.split('/', 1)[1]
-    page = 'archive/' + page
+
+    # Add /registration/ to URL
+    if 'institution' not in page and 'profile' not in page and 'project' not in page:
+        page = 'archive/registration/' + page
+    else:
+        page = 'archive/' + page
+
     if page[-1] != '/':
         page += '/'
     make_dirs(page)
