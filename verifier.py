@@ -4,6 +4,7 @@ from crawler import Crawler
 from bs4 import BeautifulSoup
 from settings import base_urls
 import os
+import pdb
 
 MIRROR = 'archive/'
 
@@ -26,7 +27,6 @@ class Page:
     def get_path_from_url(self, url):
         # Remove http://domain
         tail = url.replace(base_urls[0], '') + 'index.html'
-        print(tail)
         path = MIRROR + tail
         return path
 
@@ -44,9 +44,6 @@ class Verifier:
         :param end: Indentifier in the URL, e.g. 'files/', 'end' is a misnomer ('wiki/' in the middle of a URL)
         """
         self.minimum_size = 8
-        # self.page_type = pg_type
-        # self.url_end = end
-
         self.pages = []  # All the page objects
         self.failed_pages = []
 
@@ -59,7 +56,6 @@ class Verifier:
         """
         if json_dictionary['error_list'] is not None:
             for url in json_list[:]:
-                # if self.url_end in url:
                 print('rel: ', url)
                 if url in json_dictionary['error_list'] and first_run:
                     self.failed_pages.append(url)
@@ -68,7 +64,6 @@ class Verifier:
                     try:
                         obj = Page(url)
                         self.pages.append(obj)
-                        print(obj.path)
                     except FileNotFoundError:
                         print("Failed harvest_pages ", url)
                         self.failed_pages.append(url)
@@ -77,8 +72,6 @@ class Verifier:
     # Compare page size to page-specific minimum that any fully-scraped page should have
     def size_comparison(self):
         for page in self.pages[:]:
-            print("Size comparison on ", page)
-            print(page.file_size)
             if not page.file_size > self.minimum_size:
                 print('Failed: size_comparison(): ', page, ' has size: ', page.file_size)
                 self.failed_pages.append(page.url)
@@ -178,6 +171,7 @@ def verify_institutions(verification_dictionary, list_name, first_run):
 def call_rescrape(verification_json_dictionary):
     print("Called rescrape.")
     second_chance = Crawler()
+    pdb.set_trace()
     second_chance.scrape_pages(verification_json_dictionary['error_list'])
 
 
@@ -247,7 +241,4 @@ def resume_verification(json_filename):
 
 
 def main(json_filename, num_retries):
-    # For testing:
-    # num_retries = 2
-    # call two verification/scraping methods depending on num retries
     run_verification(json_filename, num_retries)
