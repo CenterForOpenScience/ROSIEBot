@@ -146,7 +146,7 @@ Once static is in place, run `cp search/lunr.min.js archive/static/js/lunr.min.j
 
 
 ### Simple local server setup
-Run ``php -S localhost:8888 -t `pwd`/archive `` from the ROSIEBot root. [Here is your mirror.](http://localhost:8888)
+Run ``bash scripts/host_locally.sh`` from the ROSIEBot root. [Here is your mirror.](http://localhost:8888)
 
 ### Packaging the archive
 

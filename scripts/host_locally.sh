@@ -12,5 +12,4 @@ else
     python -m scripts.make_flat flat-archive
 fi
 
-echo Running on port $port
 php -S localhost:$port -t flat-archive
