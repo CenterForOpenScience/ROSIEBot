@@ -523,14 +523,14 @@ class Crawler:
         """
         self.debug_logger.info("Scraping nodes, async = " + str(async))
         if async:
-            self._scrape_pages(self.node_urls)
+            self.scrape_pages(self.node_urls)
         else:
             for elem in self.node_url_tuples:
                 lst = []
                 while len(self.node_urls) > 0 and elem[0] in self.node_urls[0]:
                     lst.append(self.node_urls.pop(0))
                 if len(lst) > 0:
-                    self._scrape_pages(lst)
+                    self.scrape_pages(lst)
         self.debug_logger.info("Finished scraping nodes, async = " + str(async))
 
     def scrape_registrations(self, async=True):
@@ -540,13 +540,13 @@ class Crawler:
         """
         self.debug_logger.info("Scraping registrations, async = " + str(async))
         if async:
-            self._scrape_pages(self.registration_urls)
+            self.scrape_pages(self.registration_urls)
         else:
             for elem in self.registration_url_tuples:
                 lst = []
                 while len(self.registration_urls) > 0 and elem[0] in self.registration_urls:
                     lst.append(self.registration_urls.pop(0))
-                self._scrape_pages(lst)
+                self.scrape_pages(lst)
         self.debug_logger.info("Finished scraping registrations, async = " + str(async))
 
     def scrape_users(self):
@@ -554,7 +554,7 @@ class Crawler:
         Wrapper method that scrape all urls in self.user_urls. Calls _scrape_pages().
         """
         self.debug_logger.info("Scraping users")
-        self._scrape_pages(self.user_urls)
+        self.scrape_pages(self.user_urls)
         self.debug_logger.info("Finished scraping users")
 
     def scrape_institutions(self):
@@ -562,7 +562,7 @@ class Crawler:
         Wrapper method that scrape all institution_urls. Calls _scrape_pages().
         """
         self.debug_logger.info("Scraping institutions")
-        self._scrape_pages(self.institution_urls)
+        self.scrape_pages(self.institution_urls)
         self.debug_logger.info("Finished scraping institutions")
 
     def scrape_general(self):
@@ -570,11 +570,12 @@ class Crawler:
         Wrapper method that scrape all general_urls. Calls _scrape_pages().
         """
         self.debug_logger.info("Scraping general pages")
-        self._scrape_pages(self.general_urls)
+        self.scrape_pages(self.general_urls)
         self.debug_logger.info("Finished scraping general pages")
 
+
     # TODO Make semaphore value a parameter
-    def _scrape_pages(self, aspect_list):
+    def scrape_pages(self, aspect_list):
         """
         Runner method that runs scrape_url()
         :param aspect_list: list of url of pages to scrape
