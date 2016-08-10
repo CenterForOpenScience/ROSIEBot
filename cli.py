@@ -45,6 +45,15 @@ def cli_entry_point(scrape, resume, verify, resume_verify, compile_active, delet
         click.echo("Invalid options. Please select only one mode.")
         return
 
+    if (resume or verify or resume_verify) and tf is None:
+        click.echo("This mode requires a task file in the form: --tf=<FILENAME>")
+        return
+
+    if delete and ctf is None:
+        click.echo("This mode requires a current-project file in the form: --ctf=<FILENAME>")
+        click.echo("Run --compile_active to generate this file.")
+        return
+
     if compile_active:
         now = datetime.datetime.now()
         click.echo('Starting to compile a list of active nodes as of ' + str(now))
@@ -69,10 +78,7 @@ def cli_entry_point(scrape, resume, verify, resume_verify, compile_active, delet
         click.echo("Use `python cli.py --verify --tf={}` to fix any missing or incomplete pages".format(filename))
         return
 
-    if resume and tf is None:
-        click.echo("Need a task file to resume a scrape")
-
-    if resume and tf is not None:
+    if resume:
         click.echo('Resuming scrape with the task file : ' + tf)
         try:
             with codecs.open(tf, 'r', encoding='utf-8') as db:
@@ -81,27 +87,21 @@ def cli_entry_point(scrape, resume, verify, resume_verify, compile_active, delet
             click.echo('File Not Found for the task.')
         return
 
-    if verify and tf is None:
-        click.echo("Need a task file to verify a mirror")
-
-    if verify and tf is not None:
+    if verify:
         try:
             verify_mirror(tf, rn)
         except FileNotFoundError:
             click.echo('File Not Found for the task.')
         return
 
-    if resume_verify and tf is None:
-        click.echo("Need a task file to resume verification")
-
-    if resume_verify and tf is not None:
+    if resume_verify:
         try:
             resume_verify_mirror(tf, rn)
         except FileNotFoundError:
             click.echo('File Not Found for the task.')
         return
 
-    if delete and ctf is not None:
+    if delete:
         try:
             delete_nodes(ctf)
         except FileNotFoundError:
