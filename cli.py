@@ -15,7 +15,7 @@ import deleter
 @click.option('--resume_verify', is_flag=True, help="Resume verification of the existing OSF static mirror, need to "
                                                     "import task file")
 @click.option('--delete', is_flag=True, help="Delete nodes from the mirror that have been deleted by users. Requires "
-                                             "'compile_active-produced active-node taskfile' ")
+                                             "compile_active-produced active-node taskfile ")
 # Specify parameters for other needed values
 @click.option('--dm', default=None, type=click.STRING, help="Date marker needed for normal scrape")
 @click.option('--tf', default=None, type=click.STRING, help="filename of the task file")
