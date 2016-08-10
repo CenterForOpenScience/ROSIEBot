@@ -39,7 +39,7 @@ def cli_entry_point(scrape, resume, verify, resume_verify, compile_active, delet
 
     # Check to see if more than one option is chosen.
     if sum(map(bool, [scrape, resume, verify, resume_verify, compile_active, delete])) != 1:
-        click.echo("Invalid options")
+        click.echo("Invalid options. Please select only one mode.")
         return
 
     if compile_active:
