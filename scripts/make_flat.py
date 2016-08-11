@@ -6,7 +6,7 @@ archive/project/mst3k -> archive/mst3k
 
 WARNING: Utilities will not work with a flattened archive 
 
-:param 1 in CLI: folder to flatten
+:param for CLI use: directory to flatten
 """
 import os
 import shutil
