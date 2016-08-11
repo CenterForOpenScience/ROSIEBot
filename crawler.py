@@ -112,6 +112,13 @@ class Crawler:
                                    str(self.date_modified_marker))
 
     async def _wait_with_progress_bar(self, tasks):
+        """
+        Wrapper method for running a list of async tasks and know the progress from progressbar.
+        To use this method, simply pass a list of Task object and run_until_complete(_wait_with_progress_bar(list)).
+        Task objects could be obtained by calling asyncio.ensure_future() or other asyncio method that returns
+        a Task object.
+        :param tasks: List of async task
+        """
         for task in tqdm.tqdm(tasks, total=len(tasks)):
             await task
 
@@ -344,14 +351,13 @@ class Crawler:
 
 # Generating URLs for Nodes and Registrations
 
-    def generate_node_urls(self, all_pages=True, dashboard=False, files=False,
+    def generate_node_urls(self, dashboard=False, files=False,
                            wiki=False, analytics=False, registrations=False, forks=False):
         """
         Called by the CLI explicitly to generate a list of self.node_urls form self.node_url_tuples.
-        If wiki=True or all_pages=True, invoke crawl_node_wiki() to find all the wiki pages of the nodes and add urls
+        If wiki=True , invoke crawl_node_wiki() to find all the wiki pages of the nodes and add urls
         to self.node_urls
 
-        :param all_pages: whether to scrape all pages of a node
         :param dashboard: whether to scrape node dashboard page
         :param files: whether to scrape node files page
         :param wiki: whether to scrape node wiki page
@@ -360,37 +366,35 @@ class Crawler:
         :param forks: whether to scrape node forks page
         """
 
-        if all_pages or wiki:
+        if wiki:
             self.crawl_node_wiki()
 
         self.debug_logger.info("Generating node urls")
-        self.debug_logger.info(" all_pages = " + str(all_pages) +
-                               " dashboard = " + str(dashboard) +
+        self.debug_logger.info(" dashboard = " + str(dashboard) +
                                " files = " + str(files) +
                                " wiki = " + str(wiki) +
                                " analytics = " + str(analytics) +
                                " registrations = " + str(registrations) +
-                               " forks = " + str(forks)
-                               )
+                               " forks = " + str(forks))
 
         url_list = [x[0] for x in self.node_url_tuples]
 
         for base_url in url_list:
-            if all_pages or dashboard:
+            if dashboard:
                 self.node_urls.append(base_url)
-            if all_pages or files:
+            if files:
                 self.node_urls.append(base_url + 'files/')
-            if all_pages or wiki:
+            if wiki:
                 wiki_name_list = self._node_wikis_by_parent_guid[base_url.strip("/").split("/")[-1]]
                 wiki_url_list = [base_url + 'wiki/' + x + '/' for x in wiki_name_list]
                 self.node_urls += wiki_url_list
 
                 # the strip split -1 bit returns the last section of the base_url, which is the GUId
-            if all_pages or analytics:
+            if analytics:
                 self.node_urls.append(base_url + 'analytics/')
-            if all_pages or registrations:
+            if registrations:
                 self.node_urls.append(base_url + 'registrations/')
-            if all_pages or forks:
+            if forks:
                 self.node_urls.append(base_url + 'forks/')
 
     def generate_registration_urls(self, all_pages=True, dashboard=False, files=False,
@@ -574,7 +578,7 @@ class Crawler:
 
     def _scrape_pages(self, aspect_list, sem_value=5, osf_type=""):
         """
-        Runner method that runs scrape_url()
+        Runner method that runs scrape_url() through _wait_with_progress_bar() wrapper
         :param aspect_list: list of url of pages to scrape
         """
         sem = asyncio.BoundedSemaphore(value=sem_value)
@@ -595,7 +599,7 @@ class Crawler:
         Calls record_milestone() to save progress
         :param osf_type: registration, profile, project, institution, or blank for general
         :param url: url to scrape
-        :param sem: rate limitin semaaphore.
+        :param sem: rate limiting semaphore.
         :return:
         """
         async with sem:
