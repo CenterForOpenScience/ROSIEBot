@@ -66,8 +66,20 @@ def cli_entry_point(scrape, resume, verify, resume_verify, compile_active, delet
         return
 
     if scrape:
-        if dm is None:
+        if not dm:
             dm = '1970-01-01T00:00:00'
+        if not any([nodes, registrations, users, registrations]):
+            nodes = True
+            registrations = True
+            users = True
+            institutions = True
+        if nodes and not any([d, f, w, a, r, k]):
+            d = True
+            f = True
+            w = True
+            a = True
+            k = True
+
         click.echo('Starting normal scrape with date marker set to : ' + dm)
         now = datetime.datetime.now()
         filename = now.strftime('%Y%m%d%H%M' + '.json')
