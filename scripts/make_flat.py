@@ -14,21 +14,35 @@ import sys
 
 mirror = 'archive/' if len(sys.argv) < 2 else sys.argv[1] + '/'
 
-inflated_directories = ['project/', 'registration/', 'profile/']
 
-print("Flattening:", mirror)
+def make_wiki_flat(subdir):
+    wiki_home = subdir + '/wiki/home/index.html'
+    if os.path.exists(wiki_home):
+        shutil.copy(wiki_home, subdir + '/wiki/index.html')
 
-for directory in inflated_directories:
 
-    path = 'archive/' + directory
+def remove_organization():
+    """
+    Removes category folders and calls make_wiki_flat
+    :return:
+    """
+    inflated_categories = ['project/', 'registration/', 'profile/']
+    for category in inflated_categories:
+        category_path = 'archive/' + category
 
-    if not os.path.exists(path):
-        continue
+        if not os.path.exists(category_path):
+            continue
 
-    if os.path.exists(path + '/.DS_Store'):
-        os.remove(path + '/.DS_Store')
+        if os.path.exists(category_path + '/.DS_Store'):
+            os.remove(category_path + '/.DS_Store')
 
-    subdirs = os.listdir(path)
-    for dir in subdirs:
-        shutil.move(path + dir, 'archive/' + dir)
-    os.rmdir(path)
+        subdirs = os.listdir(category_path)
+        for dir in subdirs:
+            make_wiki_flat(dir)
+            shutil.move(category_path + dir, 'archive/' + dir)
+        os.rmdir(category_path)
+
+if __name__ == "__main__":
+    print("Flattening:", mirror)
+
+    remove_organization()
