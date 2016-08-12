@@ -15,7 +15,18 @@ MIRROR = 'archive'
 
 
 class Deleter:
+    """
+        A Deleter class for deleting folders in the archive of pages that have been deleted on the OSF.
+        A CLI is designed to work with this deleter.
+        Basic Workflow:
+            Init -> compare archive to mirror -> delete folders in archive
+    """
+
     def __init__(self, json_filename):
+        """
+            Constructor for Deleter class
+            
+        """
         with codecs.open(json_filename, mode='r', encoding='utf-8') as file:
             active_lists = json.load(file)
             self.active_node_guids = active_lists["list_of_active_nodes"]
