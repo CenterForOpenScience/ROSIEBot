@@ -66,7 +66,7 @@ def cli_entry_point(scrape, resume, verify, resume_verify, compile_active, delet
         return
 
     if scrape:
-        if not dm:
+        if dm is not None:
             dm = '1970-01-01T00:00:00'
         if not any([nodes, registrations, users, registrations]):
             nodes = True
