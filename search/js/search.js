@@ -7,7 +7,7 @@ jQuery(function() {
   });
 
   // Get the generated search_data.json file so lunr.js can search it locally.
-  window.data = $.getJSON('/js/search_data.json').fail(function(){
+  window.data = $.getJSON('/static/js/search-index.json').fail(function(){
     $('#search_results').html('<li> <a class="alert"> Sorry, search is unavailable. Please contact the webmaster. </a> </li>' +
                               '<li> <a style="color:#555;" class="alert" href="//github.com/zamattiac/ROSIEBOT"> Webmaster: indexing documentation </a> </li>');
   });

@@ -5,6 +5,8 @@ import json
 import codecs
 import verifier
 import deleter
+import indexer
+import shutil
 
 # Endpoint for using the ROSIEBot module via command line.
 
@@ -19,6 +21,7 @@ import deleter
                                                     "import task file")
 @click.option('--delete', is_flag=True, help="Delete nodes from the mirror that have been deleted by users. Requires "
                                              "compile_active-produced active-node taskfile")
+@click.option('--index', is_flag=True, help="Make an index file and set up search engine")
 # Specify parameters for other needed values
 @click.option('--dm', default=None, type=click.STRING, help="Date marker needed for normal scrape")
 @click.option('--tf', default=None, type=click.STRING, help="filename of the task file")
@@ -37,12 +40,12 @@ import deleter
 @click.option('-a', is_flag=True, help="Add this flag if you want to include analytics page for nodes")
 @click.option('-r', is_flag=True, help="Add this flag if you want to include registrations page for nodes")
 @click.option('-k', is_flag=True, help="Add this flag if you want to include forks page for nodes")
-def cli_entry_point(scrape, resume, verify, resume_verify, compile_active, delete, dm, tf, rn, ctf, registrations,
+def cli_entry_point(scrape, resume, verify, resume_verify, compile_active, delete, index, dm, tf, rn, ctf, registrations,
                     users, institutions, nodes, d, f, w, a, r, k):
 
     # Check to see if more than one option is chosen.
-    if sum(map(bool, [scrape, resume, verify, resume_verify, compile_active, delete])) != 1:
-        click.echo("Invalid options. Please select only one mode.")
+    if sum(map(bool, [scrape, resume, verify, resume_verify, compile_active, delete, index])) != 1:
+        click.echo("Invalid options. Please select one mode.")
         return
 
     if (resume or verify or resume_verify) and tf is None:
@@ -107,6 +110,16 @@ def cli_entry_point(scrape, resume, verify, resume_verify, compile_active, delet
         except FileNotFoundError:
             click.echo("The json file of currently active nodes was not found.")
 
+    if index:
+        robocop = indexer.Indexer() # Who else?
+        robocop.index_projects()
+        robocop.index_registrations()
+        robocop.index_profiles()
+        json.dump(robocop.index, open('archive/static/js/search-index.json', 'w+'), indent=4)
+        shutil.copy('search/js/search.js', 'archive/static/js/search.js')
+        shutil.copy('search/js/lunr.min.js', 'archive/static/js/lunr.min.js')
+        shutil.copy('search/search.html', 'archive/search.html')
+        click.echo("Search is set up.")
     return
 
 
