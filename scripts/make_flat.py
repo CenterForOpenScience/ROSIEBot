@@ -9,15 +9,15 @@ import os
 import shutil
 import sys
 
-mirror = 'archive/' if len(sys.argv) < 2 else sys.argv[1] + '/'
+mirror = 'flat-archive/' if len(sys.argv) < 2 else sys.argv[1] + '/'
 
-inflated_directories = ['project/', 'registration/']
+inflated_directories = ['project/', 'registration/', 'profile/']
 
 print("Flattening:", mirror)
 
 for directory in inflated_directories:
 
-    path = 'archive/' + directory
+    path = mirror + directory
 
     if not os.path.exists(path):
         continue
@@ -27,5 +27,5 @@ for directory in inflated_directories:
 
     subdirs = os.listdir(path)
     for dir in subdirs:
-        shutil.move(path + dir, 'archive/' + dir)
+        shutil.move(path + dir, mirror + dir)
     os.rmdir(path)

@@ -137,21 +137,25 @@ Creates a search engine index.
 
 **Note**: Do not run until the static folder is in place in the archive.
 
+Using search: the search button on each page should be replaced with a link to /search.html
 
 ## Hosting a Mirror
 
 Scraped pages require a static folder inside the mirror. Please get a fresh copy from the OSF repo and place directly inside archive/.
 
-Once static is in place, run `cp search/lunr.min.js archive/static/js/lunr.min.js`, `cp search/search.js archive/static/js/search.js` and `cp search/search.html archive/search.html` to set up search. Run the indexer at this point.
-
+Once static is in place, run `python cli.py --index` to set up search utility. 
 
 ### Simple local server setup
+This option creates a flat copy of the archive without categorical folders. Nginx configuration is required otherwise. 
+
+Make sure whatever utilities you desire (e.g. verify, index) have been run before the copy is made.
+
 Run ``bash scripts/host_locally.sh`` from the ROSIEBot root. [Here is your mirror.](http://localhost:8888)
 
 ### Packaging the archive
 
 `zip -r archive.zip archive/` 
-
+`zip -r flat-archive.zip flat-archive/`
 
 ## Authenticating your mirror
 

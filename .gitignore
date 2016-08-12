@@ -3,6 +3,7 @@
 __pycache__/
 .env/
 .venv/
+.DS_Store
 
 # Mirror folders
 localhost:70/
@@ -11,7 +12,6 @@ staging.osf.io/
 127.0.0.1/
 osf.io/
 archive/
-!archive/search.html
 
 # Logs and Taskfiles
 *.txt
