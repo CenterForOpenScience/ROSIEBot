@@ -174,7 +174,7 @@ server {
         location / {
                 # First attempt to serve request as file, then
                 # as directory, then fall back to displaying a 404.
-                try_files $uri $uri/ /registration/$uri/ /profile/$uri/ /project/$uri/ =404;
+                try_files $uri $uri/ /registration/$uri/ /profile/$uri/ /project/$uri/ /project/$uri/home /registration/$uri/home =404;
                 # index index.html index.htm;
                 # Uncomment to enable naxsi on this location
                 # include /etc/nginx/naxsi.rules
