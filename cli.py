@@ -315,7 +315,7 @@ def resume_scrape(db, tf):
 
 def verify_mirror(tf, rn):
     for i in range(rn):
-        verifier.main(tf, i)
+        verifier.run_verification(tf, i)
 
 
 def resume_verify_mirror(tf, rn):
@@ -326,7 +326,7 @@ def resume_verify_mirror(tf, rn):
             verifier.resume_verification(tf)
     else:
         for i in range(rn):
-            verifier.main(tf, i)
+            verifier.run_verification(tf, i)
 
 
 def delete_nodes(ptf, ctf):
