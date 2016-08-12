@@ -78,6 +78,7 @@ def cli_entry_point(scrape, resume, verify, resume_verify, compile_active, delet
             f = True
             w = True
             a = True
+            r = True
             k = True
 
         click.echo('Starting normal scrape with date marker set to : ' + dm)
