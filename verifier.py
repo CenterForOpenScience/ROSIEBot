@@ -4,7 +4,6 @@ from crawler import Crawler
 from bs4 import BeautifulSoup
 from settings import base_urls
 import os
-import pdb
 
 MIRROR = 'archive/'
 
@@ -94,16 +93,16 @@ class Verifier:
         """
         if json_dictionary['error_list'] is not None:
             for url in json_list[:]:
-                print('rel: ', url)
+                # print('rel: ', url)
                 if url in json_dictionary['error_list'] and first_run:
                     self.failed_pages.append(url)
-                    print('error: ', url)
+                    # print('error: ', url)
                 else:
                     try:
                         obj = Page(url)
                         self.pages.append(obj)
                     except FileNotFoundError:
-                        print("Failed harvest_pages ", url)
+                        # print("Failed harvest_pages ", url)
                         self.failed_pages.append(url)
                 json_list.remove(url)
 
@@ -115,7 +114,7 @@ class Verifier:
         """
         for page in self.pages[:]:
             if not page.file_size > self.minimum_size:
-                print('Failed: size_comparison(): ', page, ' has size: ', page.file_size)
+                # print('Failed: size_comparison(): ', page, ' has size: ', page.file_size)
                 self.failed_pages.append(page.url)
                 self.pages.remove(page)
         return
@@ -210,7 +209,6 @@ def call_rescrape(verification_dictionary):
      """
     print("Called rescrape.")
     second_chance = Crawler()
-    pdb.set_trace()
     second_chance.scrape_pages(verification_dictionary['error_list'])
 
 
