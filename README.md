@@ -145,7 +145,7 @@ Scraped pages require a static folder inside the mirror. Please get a fresh copy
 
 Once static is in place, run `python cli.py --index` to set up search utility. 
 
-### Simple local server setup
+### Simple local server setup (does not preserve original archive organization, but does use OSF organization)
 This option creates a flat copy of the archive without categorical folders. Nginx configuration is required otherwise. 
 
 Make sure whatever utilities you desire (e.g. verify, index) have been run before the copy is made.
@@ -156,6 +156,35 @@ Run ``bash scripts/host_locally.sh`` from the ROSIEBot root. [Here is your mirro
 
 `zip -r archive.zip archive/` 
 `zip -r flat-archive.zip flat-archive/`
+
+### Using Nginx to host (preserving structure)
+
+Including the following location lines provides necessary routing for a non-flat mirror. 
+
+See [How to set up prerender](prerender.md) step 2 for Nginx information, bearing in mind that some parts do not apply
+
+```
+server {
+        listen 80 default_server;
+        listen [::]:80 default_server ipv6only=on;
+
+        root /path/to/archive;
+        # index index.html index.htm;
+
+        location / {
+                # First attempt to serve request as file, then
+                # as directory, then fall back to displaying a 404.
+                try_files $uri $uri/ /registration/$uri/ /profile/$uri/ /project/$uri/ =404;
+                # index index.html index.htm;
+                # Uncomment to enable naxsi on this location
+                # include /etc/nginx/naxsi.rules
+        }
+
+        location /static/ {
+                alias /path/to/archive/static/;
+        }
+}
+```
 
 ## Authenticating your mirror
 
