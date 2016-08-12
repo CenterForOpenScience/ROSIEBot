@@ -649,6 +649,19 @@ def save_html(html, osf_type, page):
     old_footer = """<div id="footerSlideIn" style="display: block;">"""
     new_footer = """<div id="footerSlideIn" style="display: none;">"""
 
+    old_search_button = """<!-- ko ifnot: onSearchPage -->
+        <li class="hidden-xs" data-bind="click : toggleSearch, css: searchCSS">
+            <a class="">
+                <span rel="tooltip" data-placement="bottom" title="Search OSF" class="fa fa-search fa-lg"></span>
+            </a>
+        </li>
+        <!-- /ko -->"""
+    new_search_button = """
+        <li>
+            <a href="/search.html" class="fa fa-search fa-lg" ></a>
+        </li>
+        """
+
     # Remove URL head from the page (https://osf.io/project/mst3k/files/ --> project/mst3k/files/)
     page = page.split('//', 1)[1]
     page = page.split('/', 1)[1]
@@ -657,7 +670,7 @@ def save_html(html, osf_type, page):
 
     make_dirs(page)
 
-    html = html.replace(old_footer, new_footer) + mirror_warning
+    html = html.replace(old_footer, new_footer).replace(old_search_button, new_search_button) + mirror_warning
 
     f = open(page + 'index.html', 'w')
     f.write(html)
