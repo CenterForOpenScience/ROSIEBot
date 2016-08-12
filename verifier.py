@@ -65,7 +65,6 @@ class Verifier:
             3. Remaining urls run through size_comparison. Failed pages get sent to rescrape.
             4. Rescrape failed urls.
             5. Verify the pages that were just rescraped.
-
         """
 
     def __init__(self):
@@ -157,7 +156,7 @@ def verify_registrations(verification_dictionary, list_name, first_run):
         :param list_name: The list in the json file of found URLs.
         :param first_run: True if the first_run of verification has been completed. False, otherwise.
         :return: registrations_list_failed_verification: List of all the registration urls that need to be rescraped.
-     """
+    """
     # Must run all page types automatically
     registrations_verifier = Verifier()
     registrations_verifier.run_verifier(verification_dictionary, verification_dictionary[list_name], first_run)
@@ -176,7 +175,7 @@ def verify_users(verification_dictionary, list_name, first_run):
         :param list_name: The list in the json file of found URLs.
         :param first_run: True if the first_run of verification has been completed. False, otherwise.
         :return: user_profiles_failed_verification: List of all the user urls that need to be rescraped.
-     """
+    """
     user_profiles_verifier = Verifier()
     user_profiles_verifier.run_verifier(verification_dictionary, verification_dictionary[list_name], first_run)
     user_profiles_failed_verification = user_profiles_verifier.failed_pages
@@ -193,7 +192,7 @@ def verify_institutions(verification_dictionary, list_name, first_run):
         :param list_name: The list in the json file of found URLs.
         :param first_run: True if the first_run of verification has been completed. False, otherwise.
         :return: institutions_dashboards_failed_verification: List of all the institution urls that need to be rescraped.
-     """
+    """
     institution_dashboards_verifier = Verifier()
     institution_dashboards_verifier.run_verifier(verification_dictionary, verification_dictionary[list_name], first_run)
     institution_dashboards_failed_verification = institution_dashboards_verifier.failed_pages
@@ -206,7 +205,7 @@ def call_rescrape(verification_dictionary):
         Creates an instance of the crawler and calls scrape_pages on all urls dumped into 'error_list' in the json file
 
         :param verification_dictionary: The dictionary created from the json file.
-     """
+    """
     print("Called rescrape.")
     second_chance = Crawler()
     second_chance.scrape_pages(verification_dictionary['error_list'])
@@ -221,7 +220,7 @@ def setup_verification(json_dictionary, first_run):
         :param first_run: True if the first_run of verification has been completed. False, otherwise.
         :return: failed_verification_list: List of all the urls that need to be rescraped.
 
-     """
+    """
     failed_verification_list = []
     print("Check verification")
     if json_dictionary['scrape_nodes']:
@@ -265,7 +264,7 @@ def run_verification(json_file, retry_number):
 
         :param json_file: Name of the json task file.
         :param retry_number: Number of what iteration of verification is being run.
-     """
+    """
     with codecs.open(json_file, mode='r', encoding='utf-8') as failure_file:
         run_info = json.load(failure_file)
     with codecs.open(json_file, mode='r', encoding='utf-8') as failure_file:
@@ -294,11 +293,11 @@ def resume_verification(json_file):
 
         :param json_file: The dictionary created from the json file.
      """
-        with codecs.open(json_file, mode='r', encoding='utf-8') as failure_file:
-            run_copy = json.load(failure_file)
-        print("Resumed verification.")
-        run_copy['error_list'] = setup_verification(run_copy, False)
-        # truncates json and dumps new lists
-        with codecs.open(json_file, mode='w', encoding='utf-8') as file:
-            json.dump(run_copy, file, indent=4)
-        call_rescrape(run_copy)
+    with codecs.open(json_file, mode='r', encoding='utf-8') as failure_file:
+        run_copy = json.load(failure_file)
+    print("Resumed verification.")
+    run_copy['error_list'] = setup_verification(run_copy, False)
+    # truncates json and dumps new lists
+    with codecs.open(json_file, mode='w', encoding='utf-8') as file:
+        json.dump(run_copy, file, indent=4)
+    call_rescrape(run_copy)
