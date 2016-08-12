@@ -25,7 +25,12 @@ class Deleter:
     def __init__(self, json_filename):
         """
             Constructor for Deleter class
-            
+            Generates three attributes to the deleter
+                1. A list of all active projects
+                2. A list of all active registrations
+                3. A list of all active users
+
+            :param json_filename: Name of the json file generated from compile_active
         """
         with codecs.open(json_filename, mode='r', encoding='utf-8') as file:
             active_lists = json.load(file)
@@ -34,6 +39,13 @@ class Deleter:
             self.active_user_guids = active_lists["list_of_active_users"]
 
     def compare_to_mirror(self, osf_type, active_list):
+        """
+            Compares the archive to the active nodes from the OSF and deletes the folders of guids that are
+            present in the archive but no longer active on the OSF.
+
+            :param osf_type: Whether the list is of registrations, projects, or user profiles
+            :param active_list: The list of active guids
+        """
         mirror_list = os.listdir(MIRROR + '/' + osf_type)
         print("OSF type: " + osf_type)
 
@@ -45,12 +57,22 @@ class Deleter:
                 self.delete_directory(subdir_path)
 
     def delete_directory(self, directory_path):
+        """
+            Deletes a given directory
+
+            :param directory_path: The path to the directory to be deleted
+        """
         print(directory_path)
         if os.path.isdir(directory_path):
             shutil.rmtree(directory_path)
             print("Deleted", directory_path)
 
     def run(self):
+        """
+            CLI Endpoint for deleter
+            Controls workflow
+            runs deleter on projects, registrations, and user profiles
+        """
         self.compare_to_mirror('project', self.active_node_guids)
         self.compare_to_mirror('registration', self.active_registration_guids)
         self.compare_to_mirror('profile', self.active_user_guids)
